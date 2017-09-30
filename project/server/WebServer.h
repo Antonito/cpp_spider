@@ -23,12 +23,6 @@ public:
   virtual void sendResponse(server::Event const &ev);
   virtual void sendEvent(server::Event &ev);
   virtual void run();
-
-private:
-  virtual void processEvent();
-  virtual bool acceptClient();
-  virtual void multiplex();
-  // TODO: Boost asio types
 };
 }
 }
