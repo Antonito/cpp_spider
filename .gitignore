@@ -336,16 +336,8 @@ __pycache__/
 .ycm_extra_conf.py
 
 # Current project
-build/client_test
-build/connect_manager
-build/game_server
-build/lib*
-build/.license
-build/.license_keys
+build/
 
 #confiug file
 *.ini
 cmake-build-debug/*
-
-zappy_ai
-zappy_server
