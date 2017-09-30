@@ -37,7 +37,7 @@ CommandCenter::CommandCenter(std::string const &pluginDirectory) : m_infos(), m_
 
 std::vector<CommandInfo> const &CommandCenter::getCommand() const
 {
-    return std::vector<CommandInfo>();
+    return m_infos;
 }
 
 void CommandCenter::execCommand(Client const &client, Event const &ev) const

