@@ -31,16 +31,5 @@ void WebServer::run()
     }
     nope::log::Log(Info) << "Stopping WebServer";
 }
-
-void WebServer::processEvent()
-{
-}
-
-bool WebServer::acceptClient()
-{
-    return false;
-}
-
-void WebServer::multiplex() {}
 }
 }

