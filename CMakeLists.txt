@@ -15,11 +15,18 @@ include_directories(${Boost_INCLUDE_DIRS})
 file(GLOB SERVER_SOURCES project/server/*.cpp)
 
 # Create server executable
-add_executable(spider_server ${SERVER_SOURCES})
-target_include_directories(spider_server PUBLIC "${ROOT_SOURCE_DIR}/project/server/")
-target_link_libraries(spider_server PUBLIC ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+set(SPIDER_SERVER spider_server)
+add_executable(${SPIDER_SERVER} ${SERVER_SOURCES})
+target_include_directories(${SPIDER_SERVER} PUBLIC "./project/server/")
+target_link_libraries(${SPIDER_SERVER} PUBLIC ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 
 # Get servers plugin's sources
-file(GLOB SERVER_SOURCES project/server_plugin/example)
+file(GLOB PLUGIN_SOURCE_EXAMPLE project/server_plugin/example/*.cpp)
 
-install(TARGETS spider_server DESTINATION bin)
+# Create plugin library
+set(PLUGIN_EXAMPLE plugin_example)
+add_library(${PLUGIN_EXAMPLE} SHARED ${PLUGIN_SOURCE_EXAMPLE})
+target_include_directories(${PLUGIN_EXAMPLE} PUBLIC "./project/server_plugin/")
+
+install(TARGETS ${SPIDER_SERVER} DESTINATION bin)
+install(TARGETS ${PLUGIN_EXAMPLE} DESTINATION bin/plugins)
