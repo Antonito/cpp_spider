@@ -62,6 +62,7 @@ target_include_directories(${PLUGIN_EXAMPLE} PUBLIC "./project/server_plugin/")
 # Create client executable
 file(GLOB CLIENT_SOURCES project/client/*.cpp)
 set(SPIDER_CLIENT spider_client)
+add_executable(${SPIDER_CLIENT} ${CLIENT_SOURCES})
 target_include_directories(${SPIDER_CLIENT} PUBLIC "./project/client/")
 target_link_libraries(${SPIDER_CLIENT} PUBLIC ${LIBLOADER})
 

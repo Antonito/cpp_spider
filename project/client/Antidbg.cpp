@@ -53,7 +53,7 @@ class Debugger
             bExceptionHit = false;
         }
         return bExceptionHit;
-#else
+#elif __linux__
         static bool isCheckedAlready = false;
         if (!isCheckedAlready)
         {
@@ -68,6 +68,8 @@ class Debugger
             isCheckedAlready = true;
         }
         return underDebugger == 1;
+#else
+        return false;
 #endif
     }
-}
+};
