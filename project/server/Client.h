@@ -1,33 +1,39 @@
 #pragma once
 
-#include <boost/asio.hpp>
-#include <boost/bind.hpp>
 #include <array>
 #include <iostream>
+#include <queue>
 #include "IClient.h"
 #include "IEventable.h"
+#include "CommandCenter.h"
 #include "Logger.hpp"
+#include "TCPSocket.hpp"
+#include "IClient.hpp"
 
 namespace spider
 {
 namespace server
 {
-class Client final : public IClient, public IEventable
+class Client final : public spider::server::IClient, public IEventable
 {
 public:
-  Client(boost::asio::io_service &);
-  virtual size_t send();
+  explicit Client(sock_t const sock, CommandCenter const &cmdCenter, std::size_t const ndx);
+  virtual ~Client();
+
+  void execute();
+
+  virtual size_t send(std::string const &buffer);
   virtual size_t receive();
   virtual void sendEvent(Event &ev);
+
+  // TODO: omg Lucas merde !
   virtual std::string const &getOS();
   virtual std::string const &getIP();
   virtual std::string const &getGeo();
   virtual std::string const &getName();
 
-  boost::asio::ip::tcp::socket &getSocket();
+  sock_t getSocket() const;
   void start();
-  void handleRead(const boost::system::error_code& error, size_t bytesTransferred);
-  void handleWrite(const boost::system::error_code& error);
   void setOS(std::string);
   void setIP(std::string);
   void setGeo(std::string);
@@ -36,19 +42,24 @@ public:
   void eventManager();
   static constexpr std::size_t maxLength = 1024;
 
+  void disconnect();
+
+  bool canWrite() const;
+  network::IClient::ClientAction treatIncomingData();
+  network::IClient::ClientAction treatOutgoingData();
+  bool operator==(Client const &other) const;
+  std::uint16_t getId() const;
+
 private:
-  boost::asio::ip::tcp::socket m_socket;
-  std::array<char, 1024> m_buffer;
   std::string m_os;
   std::string m_ip;
   std::string m_geo;
   std::string m_pcName;
-// TODO: rm
-#if 0
-  boostAsioTCPSocket m_commandSocket;
-  boostAsioTCPSocket m_shellSocket;
-  boostAsioUDPSocket m_dataSocket;
-#endif
+  std::queue<Event> m_commandQueue;
+  CommandCenter const &m_cmdCenter;
+  network::TCPSocket m_socket;
+  std::uint16_t m_id;
+  bool m_canWrite;
 };
 }
 }

@@ -14,7 +14,7 @@ class AControl : public IControl, public IEventable
 {
 public:
   explicit AControl(CommandCenter const &, volatile bool const &running);
-  virtual ~AControl() = default;
+  virtual ~AControl() = 0;
 
   AControl(AControl const &) = delete;
   AControl(AControl &&) = delete;
@@ -22,10 +22,12 @@ public:
   AControl &operator=(AControl &&) = delete;
 
   // Pull an event from the command queue
-  virtual bool pollEvent(Event &ev) = 0;
+  virtual bool pollEvent(Event &ev);
+  // Push an event into the command queue
+  virtual void sendEvent(Event &ev);
 
   // Push a Event into the response queue
-  virtual void sendResponse(Event const &ev) = 0;
+  virtual void sendResponse(Event const &ev);
 
 protected:
   CommandCenter const &m_cmdCenter;

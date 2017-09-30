@@ -10,7 +10,7 @@ public:
 
   virtual std::string const &getName() const;
   virtual std::string const &getDescription() const;
-  virtual void command(spider::server::IClient const *, void const *);
+  virtual void command(spider::server::IClient *, void const *);
 
 private:
   std::string const m_name;

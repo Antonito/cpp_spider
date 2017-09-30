@@ -13,10 +13,10 @@ class IEventable;
 struct Event final
 {
     union {
-        IEventable const *dest;
+        IEventable *dest;
         std::uint32_t destId;
     };
-    IEventable const *emitter;
+    IEventable *emitter;
     std::string commandName;
 };
 }

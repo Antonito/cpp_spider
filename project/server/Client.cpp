@@ -1,90 +1,88 @@
-/**
- * Project Untitled
- */
-
 #include "Client.h"
 
-/**
- * Client implementation
- */
-
-/**
- * @return size_t
- */
 namespace spider
 {
 namespace server
 {
 
-  constexpr std::size_t Client::maxLength;
+constexpr std::size_t Client::maxLength;
 
-  Client::Client(boost::asio::io_service &io_service) : m_socket(io_service)
-  {
-  }
-
-  boost::asio::ip::tcp::socket& Client::getSocket()
-  {
-    return m_socket;
-  }
-
-  void Client::start()
-  {
-    m_socket.async_read_some(boost::asio::buffer(m_buffer, maxLength),
-        boost::bind(&Client::handleRead, this,
-          boost::asio::placeholders::error,
-          boost::asio::placeholders::bytes_transferred));
-  }
-
-  void Client::handleRead(const boost::system::error_code& error,
-      size_t len)
-  {
-    m_buffer[len] = 0;
-    nope::log::Log(Info) << "received: " << m_buffer.data();
-    if (!error)
-    {
-#if 0
-      boost::asio::async_write(m_socket,
-          boost::asio::buffer(m_buffer, bytes_transferred),
-          boost::bind(&Client::handleWrite, this,
-            boost::asio::placeholders::error));
-#endif
-    }
-    else
-    {
-      delete this;
-    }
-  }
-
-  void Client::handleWrite(const boost::system::error_code& error)
-  {
-    nope::log::Log(Info) << "write something...";
-    if (!error)
-    {
-      m_socket.async_read_some(boost::asio::buffer(m_buffer, maxLength),
-          boost::bind(&Client::handleRead, this,
-            boost::asio::placeholders::error,
-            boost::asio::placeholders::bytes_transferred));
-    }
-    else
-    {
-      delete this;
-    }
-  }
-size_t Client::send()
+Client::Client(sock_t const sock, CommandCenter const &cmdCenter, std::size_t const ndx) : m_os(""), m_ip(""), m_geo(""), m_pcName(""), m_commandQueue(), m_cmdCenter(cmdCenter), m_socket(sock), m_id(static_cast<std::uint16_t>(ndx)), m_canWrite(false)
 {
-    return 0;
 }
 
-/**
- * @return size_t
- */
+bool Client::canWrite() const
+{
+  return m_canWrite;
+}
+
+network::IClient::ClientAction Client::treatIncomingData()
+{
+  return network::IClient::ClientAction::FAILURE;
+}
+
+network::IClient::ClientAction Client::treatOutgoingData()
+{
+  return network::IClient::ClientAction::FAILURE;
+}
+
+bool Client::operator==(Client const &other) const
+{
+  if (this != &other)
+  {
+    return (m_socket == other.m_socket);
+  }
+  return (true);
+}
+
+std::uint16_t Client::getId() const
+{
+  return m_id;
+}
+
+void Client::disconnect()
+{
+  nope::log::Log(Debug) << "Client disconnected #" << getSocket();
+  m_socket.closeConnection();
+}
+
+Client::~Client()
+{
+  nope::log::Log(Warning) << "Disconnecting client";
+}
+
+sock_t Client::getSocket() const
+{
+  return m_socket.getSocket();
+}
+
+void Client::start()
+{
+}
+
+size_t Client::send(std::string const &buffer)
+{
+  return 0;
+}
+
 size_t Client::receive()
 {
-    return 0;
+  return 0;
+}
+
+void Client::execute()
+{
+  if (!m_commandQueue.empty())
+  {
+    Event ev = m_commandQueue.front();
+    m_commandQueue.pop();
+    m_cmdCenter.execCommand(*this, ev);
+  }
 }
 
 void Client::sendEvent(Event &e)
 {
+  m_commandQueue.push(e);
 }
 
 void Client::eventManager()

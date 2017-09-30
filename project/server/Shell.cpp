@@ -13,22 +13,17 @@ Shell::Shell(server::CommandCenter const &cmdCenter, volatile bool const &runnin
 
 bool Shell::pollEvent(server::Event &ev)
 {
-    if (!m_commandQueue.empty()) {
-        ev = m_commandQueue.front();
-        m_commandQueue.pop();
-        return true;
-    }
-    return false;
+    return (AControl::pollEvent(ev));
 }
 
 void Shell::sendResponse(server::Event const &ev)
 {
-    m_responseQueue.push(ev);
+    AControl::sendResponse(ev);
 }
 
 void Shell::sendEvent(server::Event &ev)
 {
-    m_commandQueue.push(ev);
+    AControl::sendEvent(ev);
 }
 
 void Shell::run()
@@ -45,7 +40,8 @@ void Shell::run()
         {
             displayHelpMessage();
         }
-        else if (std::find_if(m_commands.begin(), m_commands.end(), [&](server::CommandInfo const & m){ return m.name == line; }) != m_commands.end()) {
+        else if (std::find_if(m_commands.begin(), m_commands.end(), [&](server::CommandInfo const &m) { return m.name == line; }) != m_commands.end())
+        {
             // TODO: Allow to select client
             server::Event ev;
 

@@ -21,7 +21,7 @@ public:
   virtual std::string const &getDescription() const = 0;
   // Execute the plugin action
   // TODO: IControl * not void *
-  virtual void command(IClient const *, void const *) = 0;
+  virtual void command(IClient *, void const *) = 0;
 };
 }
 }

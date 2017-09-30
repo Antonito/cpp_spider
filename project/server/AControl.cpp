@@ -9,6 +9,10 @@ AControl::AControl(CommandCenter const &cmdCenter, volatile bool const &running)
 {
 }
 
+AControl::~AControl()
+{
+}
+
 bool AControl::pollEvent(Event &ev)
 {
     if (!m_commandQueue.empty())
@@ -23,6 +27,11 @@ bool AControl::pollEvent(Event &ev)
 void AControl::sendResponse(Event const &ev)
 {
     m_responseQueue.push(ev);
+}
+
+void AControl::sendEvent(Event &ev)
+{
+    m_commandQueue.push(ev);
 }
 }
 }

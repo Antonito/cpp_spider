@@ -1,3 +1,5 @@
+#include <chrono>
+#include <thread>
 #include "WebServer.h"
 #include "Logger.hpp"
 
@@ -12,15 +14,17 @@ WebServer::WebServer(server::CommandCenter const &cmdCenter, volatile bool const
 
 bool WebServer::pollEvent(server::Event &ev)
 {
-    return false;
+    return (AControl::pollEvent(ev));
 }
 
 void WebServer::sendResponse(server::Event const &ev)
 {
+    AControl::sendResponse(ev);
 }
 
 void WebServer::sendEvent(server::Event &ev)
 {
+    AControl::sendEvent(ev);
 }
 
 void WebServer::run()
@@ -28,6 +32,8 @@ void WebServer::run()
     nope::log::Log(Info) << "Starting WebServer";
     while (m_running)
     {
+        using namespace std::chrono_literals;
+        std::this_thread::sleep_for(2ms);
     }
     nope::log::Log(Info) << "Stopping WebServer";
 }

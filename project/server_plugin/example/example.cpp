@@ -19,7 +19,7 @@ class ExamplePlugin : public spider::server::IPlugin
         return m_description;
     }
 
-    virtual void command(spider::server::IClient const *, void const *)
+    virtual void command(spider::server::IClient *, void const *)
     {
     }
 

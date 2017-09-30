@@ -2,6 +2,7 @@
 #include <boost/foreach.hpp>
 #include "CommandCenter.h"
 #include "IPlugin.h"
+#include "Client.h"
 #include "Logger.hpp"
 
 namespace spider
@@ -29,7 +30,7 @@ CommandCenter::CommandCenter(std::string const &pluginDirectory) : m_infos(), m_
 
             m_infos.push_back(CommandInfo(plugin->getName(), plugin->getDescription()));
             nope::log::Log(Info) << "Plugin: " << plugin->getName() << " - " << plugin->getDescription();
-            m_action[plugin->getName()] = [plugin](IClient const *client, void const *ctrl) { plugin->command(client, ctrl); };
+            m_action[plugin->getName()] = [plugin](IClient *client, void const *ctrl) { plugin->command(client, ctrl); };
         }
     }
     nope::log::Log(Info) << "Command Center initialized. Loadded " << m_infos.size() << " plugins";
@@ -40,9 +41,9 @@ std::vector<CommandInfo> const &CommandCenter::getCommand() const
     return m_infos;
 }
 
-void CommandCenter::execCommand(Client const &client, Event const &ev) const
+void CommandCenter::execCommand(Client &client, Event const &ev) const
 {
-    m_action.at(ev.commandName)(&client, ev.emitter);
+    m_action.at(ev.commandName)(static_cast<IClient *>(&client), ev.emitter);
 }
 }
 }

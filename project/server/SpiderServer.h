@@ -5,6 +5,13 @@
 #include "AControl.h"
 #include "Client.h"
 #include "CommandCenter.h"
+#include "TCPSocket.hpp"
+
+#ifndef _WIN32
+#include <sys/select.h>
+#else
+#include <windows.h>
+#endif
 
 namespace spider
 {
@@ -25,17 +32,23 @@ public:
 
   void addController(AControl &controller);
 
-
 private:
-  void startAccept();
-  void handleAccept(Client *client, boost::system::error_code const &error);
+  std::int32_t multiplex();
+  void treatEvents();
+  bool addClient();
+  void removeClient(Client &cli);
 
   std::vector<AControl *> m_controllers;
-  std::vector<Client*> m_clients;
+  std::vector<std::unique_ptr<Client>> m_clients;
   CommandCenter &m_cmdCenter;
   volatile bool const &m_running;
-  boost::asio::io_service m_io_service;
-  boost::asio::ip::tcp::acceptor m_acceptor;
+  network::TCPSocket m_tcpSocket;
+  std::queue<Event> m_commandQueue;
+  std::int32_t m_curClients;
+
+  fd_set m_readfds;
+  fd_set m_writefds;
+  fd_set m_exceptfds;
 };
 }
 }

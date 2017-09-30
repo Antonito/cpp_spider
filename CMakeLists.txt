@@ -24,6 +24,12 @@ set(LIBLOGGER liblogger)
 add_library(${LIBLOGGER} STATIC ${LIBLOGGER_SOURCES})
 target_include_directories(${LIBLOGGER} PUBLIC "./project/liblogger")
 
+# Get network library files
+file(GLOB LIBNETWORK_SOURCES project/libnetwork/*.cpp)
+set(LIBNETWORK libnetwork)
+add_library(${LIBNETWORK} STATIC ${LIBNETWORK_SOURCES})
+target_include_directories(${LIBNETWORK} PUBLIC "./project/libnetwork" "./project/liblogger")
+
 # Get Loader library files
 file(GLOB LIBLOADER_SOURCES project/libloader/*.cpp)
 set(LIBLOADER libloader)
@@ -41,7 +47,10 @@ file(GLOB SERVER_SOURCES project/server/*.cpp)
 set(SPIDER_SERVER spider_server)
 add_executable(${SPIDER_SERVER} ${SERVER_SOURCES})
 target_include_directories(${SPIDER_SERVER} PUBLIC "./project/server/")
-target_link_libraries(${SPIDER_SERVER} PUBLIC ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${LIBLOGGER} ${LIBLOADER})
+target_link_libraries(${SPIDER_SERVER} PUBLIC ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${LIBLOGGER} ${LIBLOADER} ${LIBNETWORK})
+if(UNIX AND NOT APPLE)
+target_link_libraries(${SPIDER_SERVER} PUBLIC -lpthread -ldl)
+endif()
 
 ##
 ## Server's plugins
