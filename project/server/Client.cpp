@@ -86,22 +86,22 @@ void Client::eventManager()
 {
 }
 
-std::string const &Client::getOS()
+std::string const &Client::getOS() const
 {
   return (m_os);
 }
 
-std::string const &Client::getIP()
+std::string const &Client::getIP() const
 {
   return (m_ip);
 }
 
-std::string const &Client::getGeo()
+std::string const &Client::getGeo() const
 {
   return (m_geo);
 }
 
-std::string const &Client::getName()
+std::string const &Client::getName() const
 {
   return (m_pcName);
 }

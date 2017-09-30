@@ -27,10 +27,10 @@ public:
   virtual void sendEvent(Event &ev);
 
   // TODO: omg Lucas merde !
-  virtual std::string const &getOS();
-  virtual std::string const &getIP();
-  virtual std::string const &getGeo();
-  virtual std::string const &getName();
+  virtual std::string const &getOS() const;
+  virtual std::string const &getIP() const;
+  virtual std::string const &getGeo() const;
+  virtual std::string const &getName() const;
 
   sock_t getSocket() const;
   void setOS(std::string);
