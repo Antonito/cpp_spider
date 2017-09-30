@@ -1,3 +1,6 @@
+##
+## Configuration
+##
 cmake_minimum_required(VERSION 3.1)
 project(Spider)
 
@@ -11,11 +14,19 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost REQUIRED COMPONENTS system filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
 
+##
+## Libraries
+##
+
 # Get log library files
 file(GLOB LIBLOGGER_SOURCES project/liblogger/*.cpp)
 set(LIBLOGGER liblogger)
 add_library(${LIBLOGGER} STATIC ${LIBLOGGER_SOURCES})
 target_include_directories(${LIBLOGGER} PUBLIC "./project/liblogger")
+
+##
+## Server
+##
 
 # Get server sources files
 file(GLOB SERVER_SOURCES project/server/*.cpp)
@@ -26,6 +37,10 @@ add_executable(${SPIDER_SERVER} ${SERVER_SOURCES})
 target_include_directories(${SPIDER_SERVER} PUBLIC "./project/server/")
 target_link_libraries(${SPIDER_SERVER} PUBLIC ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${LIBLOGGER})
 
+##
+## Server's plugins
+##
+
 # Get servers plugin's sources
 file(GLOB PLUGIN_SOURCE_EXAMPLE project/server_plugin/example/*.cpp)
 
@@ -33,6 +48,15 @@ file(GLOB PLUGIN_SOURCE_EXAMPLE project/server_plugin/example/*.cpp)
 set(PLUGIN_EXAMPLE plugin_example)
 add_library(${PLUGIN_EXAMPLE} SHARED ${PLUGIN_SOURCE_EXAMPLE})
 target_include_directories(${PLUGIN_EXAMPLE} PUBLIC "./project/server_plugin/")
+
+##
+## Client
+##
+
+# Create client executable
+file(GLOB CLIENT_SOURCES project/client/*.cpp)
+set(SPIDER_CLIENT spider_client)
+target_include_directories(${PLUGIN_EXAMPLE} PUBLIC "./project/client/")
 
 install(TARGETS ${SPIDER_SERVER} DESTINATION bin)
 install(TARGETS ${PLUGIN_EXAMPLE} DESTINATION bin/plugins)
