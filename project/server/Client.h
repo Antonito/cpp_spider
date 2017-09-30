@@ -33,7 +33,6 @@ public:
   virtual std::string const &getName();
 
   sock_t getSocket() const;
-  void start();
   void setOS(std::string);
   void setIP(std::string);
   void setGeo(std::string);

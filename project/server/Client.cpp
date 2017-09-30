@@ -23,6 +23,7 @@ network::IClient::ClientAction Client::treatIncomingData()
 
 network::IClient::ClientAction Client::treatOutgoingData()
 {
+  // queue datas to write
   return network::IClient::ClientAction::FAILURE;
 }
 
@@ -54,10 +55,6 @@ Client::~Client()
 sock_t Client::getSocket() const
 {
   return m_socket.getSocket();
-}
-
-void Client::start()
-{
 }
 
 size_t Client::send(std::string const &buffer)
