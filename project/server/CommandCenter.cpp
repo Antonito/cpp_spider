@@ -2,8 +2,7 @@
 #include <boost/foreach.hpp>
 #include "CommandCenter.h"
 #include "IPlugin.h"
-
-#include <iostream>
+#include "Logger.hpp"
 
 namespace spider
 {
@@ -19,6 +18,7 @@ CommandCenter::CommandCenter(std::string const &pluginDirectory) : m_infos(), m_
     {
         if (boost::filesystem::is_regular_file(p))
         {
+            nope::log::Log(Info) << "Loading " << p;
             m_plugins.push_back(GenLibrary());
 
             GenLibrary &currentLib = m_plugins.back();
@@ -28,9 +28,11 @@ CommandCenter::CommandCenter(std::string const &pluginDirectory) : m_infos(), m_
             IPlugin *plugin = getPlugin();
 
             m_infos.push_back(CommandInfo(plugin->getName(), plugin->getDescription()));
+            nope::log::Log(Info) << "Plugin: " << plugin->getName() << " - " << plugin->getDescription();
             m_action[plugin->getName()] = [plugin](IClient const *client, void const *ctrl) { plugin->command(client, ctrl); };
         }
     }
+    nope::log::Log(Info) << "Command Center initialized. Loadded " << m_infos.size() << " plugins";
 }
 
 std::vector<CommandInfo> const &CommandCenter::getCommand() const

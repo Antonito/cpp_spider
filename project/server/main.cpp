@@ -1,36 +1,50 @@
-#include <cstddef>
 #include <thread>
 #include "CommandCenter.h"
 #include "SpiderServer.h"
 #include "WebServer.h"
+#include "Logger.hpp"
 
 int main()
 {
-    int ret = EXIT_SUCCESS;
+  int ret = EXIT_SUCCESS;
 
-    // Create and initialize CommandCenter
-    spider::server::CommandCenter cmdCenter("./plugins");
+  try
+  {
+    nope::log::Logger::start("spider_server.log");
+    nope::log::Logger::logLevel = nope::log::LogLevel::LOG_DEBUG;
 
-    // Create keylogger server
-    spider::server::SpiderServer keyloggerServer(cmdCenter);
+    nope::log::Log(Info) << "Logger started";
+  }
+  catch (std::exception const &e)
+  {
+    std::cerr << "Fatal error while initializing the logger: " << e.what()
+              << std::endl;
+    return (EXIT_FAILURE);
+  }
 
-    // Create controllers here
-    spider::http::WebServer httpServer(cmdCenter);
+  // Create and initialize CommandCenter
+  spider::server::CommandCenter cmdCenter("./plugins");
 
-    // Add controllers to keylogger server
-    keyloggerServer.addController(httpServer);
+  // Create keylogger server
+  spider::server::SpiderServer keyloggerServer(cmdCenter);
 
-    // Run controllers
-    std::thread httpServerThread{[&]() { httpServer.run(); }};
+  // Create controllers here
+  spider::http::WebServer httpServer(cmdCenter);
 
-    // Run server
-    keyloggerServer.run();
+  // Add controllers to keylogger server
+  keyloggerServer.addController(httpServer);
 
-    // Stop controllers
-    if (httpServerThread.joinable())
-    {
-        httpServerThread.join();
-    }
+  // Run controllers
+  std::thread httpServerThread{[&]() { httpServer.run(); }};
 
-    return ret;
+  // Run server
+  keyloggerServer.run();
+
+  // Stop controllers
+  if (httpServerThread.joinable())
+  {
+    httpServerThread.join();
+  }
+
+  return (ret);
 }

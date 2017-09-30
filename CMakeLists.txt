@@ -11,6 +11,12 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost REQUIRED COMPONENTS system filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
 
+# Get log library files
+file(GLOB LIBLOGGER_SOURCES project/liblogger/*.cpp)
+set(LIBLOGGER liblogger)
+add_library(${LIBLOGGER} STATIC ${LIBLOGGER_SOURCES})
+target_include_directories(${LIBLOGGER} PUBLIC "./project/liblogger")
+
 # Get server sources files
 file(GLOB SERVER_SOURCES project/server/*.cpp)
 
@@ -18,7 +24,7 @@ file(GLOB SERVER_SOURCES project/server/*.cpp)
 set(SPIDER_SERVER spider_server)
 add_executable(${SPIDER_SERVER} ${SERVER_SOURCES})
 target_include_directories(${SPIDER_SERVER} PUBLIC "./project/server/")
-target_link_libraries(${SPIDER_SERVER} PUBLIC ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries(${SPIDER_SERVER} PUBLIC ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${LIBLOGGER})
 
 # Get servers plugin's sources
 file(GLOB PLUGIN_SOURCE_EXAMPLE project/server_plugin/example/*.cpp)
