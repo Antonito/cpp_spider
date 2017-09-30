@@ -18,13 +18,20 @@ public:
   Client(boost::asio::io_service &);
   virtual size_t send();
   virtual size_t receive();
-  virtual void getters();
   virtual void sendEvent(Event &ev);
+  virtual std::string const &getOS();
+  virtual std::string const &getIP();
+  virtual std::string const &getGeo();
+  virtual std::string const &getName();
 
   boost::asio::ip::tcp::socket &getSocket();
   void start();
   void handleRead(const boost::system::error_code& error, size_t bytesTransferred);
   void handleWrite(const boost::system::error_code& error);
+  void setOS(std::string);
+  void setIP(std::string);
+  void setGeo(std::string);
+  void setName(std::string);
 
   void eventManager();
   static constexpr std::size_t maxLength = 1024;
@@ -32,6 +39,10 @@ public:
 private:
   boost::asio::ip::tcp::socket m_socket;
   std::array<char, 1024> m_buffer;
+  std::string m_os;
+  std::string m_ip;
+  std::string m_geo;
+  std::string m_pcName;
 // TODO: rm
 #if 0
   boostAsioTCPSocket m_commandSocket;

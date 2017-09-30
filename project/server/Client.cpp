@@ -83,16 +83,52 @@ size_t Client::receive()
     return 0;
 }
 
-void Client::getters()
-{
-}
-
 void Client::sendEvent(Event &e)
 {
 }
 
 void Client::eventManager()
 {
+}
+
+std::string const &Client::getOS()
+{
+  return (m_os);
+}
+
+std::string const &Client::getIP()
+{
+  return (m_ip);
+}
+
+std::string const &Client::getGeo()
+{
+  return (m_geo);
+}
+
+std::string const &Client::getName()
+{
+  return (m_pcName);
+}
+
+void Client::setOS(std::string os)
+{
+  m_os = os;
+}
+
+void Client::setIP(std::string ip)
+{
+  m_ip = ip;
+}
+
+void Client::setGeo(std::string geo)
+{
+  m_geo = geo;
+}
+
+void Client::setName(std::string pcName)
+{
+  m_pcName = pcName;
 }
 }
 }

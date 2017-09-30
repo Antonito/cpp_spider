@@ -55,6 +55,14 @@ set(PLUGIN_EXAMPLE plugin_example)
 add_library(${PLUGIN_EXAMPLE} SHARED ${PLUGIN_SOURCE_EXAMPLE})
 target_include_directories(${PLUGIN_EXAMPLE} PUBLIC "./project/server_plugin/")
 
+# Get GetInfo plugin's sources
+file(GLOB PLUGIN_SOURCE_GETINFO project/server_plugin/getinfo/*.cpp)
+
+# Create plugin library
+set(PLUGIN_GETINFO plugin_getinfo)
+add_library(${PLUGIN_GETINFO} SHARED ${PLUGIN_SOURCE_GETINFO})
+target_include_directories(${PLUGIN_GETINFO} PUBLIC "./project/server_plugin/")
+
 ##
 ## Client
 ##
@@ -68,3 +76,4 @@ target_link_libraries(${SPIDER_CLIENT} PUBLIC ${LIBLOADER})
 
 install(TARGETS ${SPIDER_SERVER} DESTINATION bin)
 install(TARGETS ${PLUGIN_EXAMPLE} DESTINATION bin/plugins)
+install(TARGETS ${PLUGIN_GETINFO} DESTINATION bin/plugins)

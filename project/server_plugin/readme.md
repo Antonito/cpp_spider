@@ -41,7 +41,7 @@ std::string const &MyPlugin::getName() const {
 }
 
 std::string const &MyPlugin::getDescription() const {
-	return m_name;
+	return m_description;
 }
 
 void MyPlugin::command(spider::server::IClient const *, void const *) {
