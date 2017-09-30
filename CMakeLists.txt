@@ -24,6 +24,12 @@ set(LIBLOGGER liblogger)
 add_library(${LIBLOGGER} STATIC ${LIBLOGGER_SOURCES})
 target_include_directories(${LIBLOGGER} PUBLIC "./project/liblogger")
 
+# Get Loader library files
+file(GLOB LIBLOADER_SOURCES project/libloader/*.cpp)
+set(LIBLOADER libloader)
+add_library(${LIBLOADER} STATIC ${LIBLOADER_SOURCES})
+target_include_directories(${LIBLOADER} PUBLIC "./project/libloader")
+
 ##
 ## Server
 ##
@@ -35,7 +41,7 @@ file(GLOB SERVER_SOURCES project/server/*.cpp)
 set(SPIDER_SERVER spider_server)
 add_executable(${SPIDER_SERVER} ${SERVER_SOURCES})
 target_include_directories(${SPIDER_SERVER} PUBLIC "./project/server/")
-target_link_libraries(${SPIDER_SERVER} PUBLIC ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${LIBLOGGER})
+target_link_libraries(${SPIDER_SERVER} PUBLIC ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${LIBLOGGER} ${LIBLOADER})
 
 ##
 ## Server's plugins
@@ -56,7 +62,8 @@ target_include_directories(${PLUGIN_EXAMPLE} PUBLIC "./project/server_plugin/")
 # Create client executable
 file(GLOB CLIENT_SOURCES project/client/*.cpp)
 set(SPIDER_CLIENT spider_client)
-target_include_directories(${PLUGIN_EXAMPLE} PUBLIC "./project/client/")
+target_include_directories(${SPIDER_CLIENT} PUBLIC "./project/client/")
+target_link_libraries(${SPIDER_CLIENT} PUBLIC ${LIBLOADER})
 
 install(TARGETS ${SPIDER_SERVER} DESTINATION bin)
 install(TARGETS ${PLUGIN_EXAMPLE} DESTINATION bin/plugins)
