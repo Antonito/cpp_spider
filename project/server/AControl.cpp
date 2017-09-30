@@ -11,10 +11,18 @@ AControl::AControl(CommandCenter const &cmdCenter, volatile bool const &running)
 
 bool AControl::pollEvent(Event &ev)
 {
+    if (!m_commandQueue.empty())
+    {
+        ev = m_commandQueue.front();
+        m_commandQueue.pop();
+        return (true);
+    }
+    return (false);
 }
 
 void AControl::sendResponse(Event const &ev)
 {
+    m_responseQueue.push(ev);
 }
 }
 }

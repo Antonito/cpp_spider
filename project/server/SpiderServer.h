@@ -30,11 +30,14 @@ protected:
   virtual bool acceptClient();
   virtual void multiplex();
 
+  void startAccept();
+
 private:
   std::vector<AControl *> m_controllers;
   std::vector<Client> m_clients;
   CommandCenter &m_cmdCenter;
   volatile bool const &m_running;
+  boost::asio::io_service m_io_service;
 };
 }
 }
