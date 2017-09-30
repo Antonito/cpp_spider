@@ -1,19 +1,11 @@
-/**
- * Project Untitled
- */
-
 #include "AControl.h"
-
-/**
- * AControl implementation
- */
 
 namespace spider
 {
 namespace server
 {
 
-AControl::AControl(CommandCenter const &cmdCenter) : m_cmdCenter(cmdCenter), m_responseQueue(), m_commandQueue()
+AControl::AControl(CommandCenter const &cmdCenter, volatile bool const &running) : m_cmdCenter(cmdCenter), m_responseQueue(), m_commandQueue(), m_commands(m_cmdCenter.getCommand()), m_running(running)
 {
 }
 

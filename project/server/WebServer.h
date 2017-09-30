@@ -11,7 +11,7 @@ namespace http
 class WebServer final : public server::IServer, public server::AControl
 {
 public:
-  explicit WebServer(server::CommandCenter const &);
+  explicit WebServer(server::CommandCenter const &, volatile bool const &);
   virtual ~WebServer() = default;
 
   WebServer(WebServer const &) = delete;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <queue>
+#include <vector>
 #include "IControl.h"
 #include "IEventable.h"
 #include "CommandCenter.h"
@@ -12,7 +13,7 @@ namespace server
 class AControl : public IControl, public IEventable
 {
 public:
-  explicit AControl(CommandCenter const &);
+  explicit AControl(CommandCenter const &, volatile bool const &running);
   virtual ~AControl() = default;
 
   AControl(AControl const &) = delete;
@@ -30,6 +31,8 @@ protected:
   CommandCenter const &m_cmdCenter;
   std::queue<Event> m_responseQueue;
   std::queue<Event> m_commandQueue;
+  std::vector<CommandInfo> const &m_commands;
+  volatile bool const &m_running;
 };
 }
 }
