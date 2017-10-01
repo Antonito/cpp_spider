@@ -1,4 +1,5 @@
 #include "AntiDbg.h"
+#include "GenLibrary.h"
 
 #ifndef _WIN32
 #include <sys/types.h>
@@ -12,6 +13,8 @@
 #include <windows.h>
 #endif
 
+#include <thread>
+#include <chrono>
 #include <iostream>
 
 namespace spider
@@ -20,24 +23,40 @@ namespace misc
 {
 bool Debugger::isBeingAV()
 {
-// TODO: Make cross-plateform
-#if _WIN32
-    // Check if syscalls are being intercepted
-    HINSTANCE dll = LoadLibrary(TEXT("fake.dll"));
-    if (dll)
+    // Check if being analyzed
+    bool isBeingAnalyzed = true;
+    try
+    {
+        // Try to load an non-existing library
+        // If the loading is successful, it means we are being analyzed
+        GenLibrary fakeLib(
+#if defined _WIN32
+            "./fake.dll"
+#elif defined __APPLE__
+            "./fake.dylib"
+#else
+            "./fake.so"
+#endif
+            );
+    }
+    catch (...)
+    {
+        isBeingAnalyzed = false;
+    }
+    if (isBeingAnalyzed)
     {
         return true;
     }
 
-    // Check if time is being faked
-    int const Tick = GetTickCount();
-    Sleep(1000);
-    int const Tac = GetTickCount();
-    if ((Tac - Tick) < 1000)
+    // Check if we're in an sandbox
+    using namespace std::chrono_literals;
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    std::this_thread::sleep_for(2s);
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    if (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() < std::chrono::duration_cast<std::chrono::microseconds>(2s).count())
     {
         return true;
     }
-#endif
     return false;
 }
 

@@ -64,7 +64,7 @@ bool SpiderPlugin::hideThreadWindows(void *handleThread) {
 		return false;
 	}
 	// Get NtSetInformationThread
-	pNtSetInformationThread NtSIT = (pNtSetInformationThread)GetProcAddress(GetModuleHandle(TEXT("ntdll.dll")), "NtSetInformationThread");
+	pNtSetInformationThread NtSIT = reinterpret_cast<pNtSetInformationThread>(GetProcAddress(GetModuleHandle(TEXT("ntdll.dll")), "NtSetInformationThread"));
 
 	// Shouldn't fail
 	if (!NtSIT)
