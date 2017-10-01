@@ -7,7 +7,7 @@ namespace server
 
 constexpr std::size_t Client::maxLength;
 
-Client::Client(sock_t const sock, CommandCenter const &cmdCenter, std::size_t const ndx) : m_os(""), m_ip(""), m_geo(""), m_pcName(""), m_commandQueue(), m_cmdCenter(cmdCenter), m_socket(sock), m_id(static_cast<std::uint16_t>(ndx)), m_canWrite(false), m_outputQueue(), m_inputBuffer(Client::maxLength)
+Client::Client(sock_t const sock, CommandCenter const &cmdCenter, std::size_t const ndx) : m_os(""), m_ip(""), m_geo(""), m_pcName(""), m_commandQueue(), m_cmdCenter(cmdCenter), m_socket(sock), m_id(static_cast<std::uint16_t>(ndx)), m_canWrite(false), m_outputQueue(), m_inputBuffer{Client::maxLength}
 {
 }
 
@@ -53,19 +53,27 @@ network::IClient::ClientAction Client::readFromNetwork(std::string &str)
 {
   auto ret = network::IClient::ClientAction::SUCCESS;
 
-  // - client must send first message
-  // - test send /getInfos
-  // - test receiving infos
   // - returning infos to the shell
   // - limiting shell control
 
-  nope::log::Log(Info) << "Going to receive datas";
-  if (m_socket.recUntil(m_inputBuffer, "\n") == false)
+  if (m_socket.recUntil(m_inputBuffer, "\r\n") == false)
   {
     nope::log::Log(Info) << "Failed to read data [Client]";
     ret = network::IClient::ClientAction::FAILURE;
   }
-  nope::log::Log(Info) << "Data received !";
+
+  // How to store datas ? getline ? Store in a queue ?
+
+  // /!\ TODO: Check that this is not broken
+  if (!m_inputBuffer.is_linearized())
+  {
+    m_inputBuffer.linearize();
+  }
+  str = m_inputBuffer.array_one().first;
+  for (std::size_t i = 0; i < str.length(); ++i)
+  {
+    m_inputBuffer.pop_front();
+  }
   return ret;
 }
 

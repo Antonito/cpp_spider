@@ -242,7 +242,7 @@ bool TCPSocket::recUntilBlocking(boost::circular_buffer<char> &buff, std::string
     }
     for (ssize_t i = 0; i < buffLen; ++i)
     {
-      buff.push_back(buff[i]);
+      buff.push_back(buffer[i]);
       if (!found && (sizeof(buffer) - i) > needle.length() &&
           !memcmp(&buffer[i], needle.c_str(), needle.length()))
       {
@@ -250,7 +250,7 @@ bool TCPSocket::recUntilBlocking(boost::circular_buffer<char> &buff, std::string
         found = true;
         for (std::size_t j = 0; j < needle.length(); ++j)
         {
-          buff.push_back(buff[i]);
+          buff.push_back(buffer[i]);
           ++i;
         }
         buff.push_back('\0');
