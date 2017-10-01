@@ -81,7 +81,15 @@ file(GLOB CLIENT_SOURCES project/client/*.cpp)
 set(SPIDER_CLIENT spider_client)
 add_executable(${SPIDER_CLIENT} ${CLIENT_SOURCES})
 target_include_directories(${SPIDER_CLIENT} PUBLIC "./project/client/")
-target_link_libraries(${SPIDER_CLIENT} PUBLIC ${LIBLOADER})
+target_link_libraries(${SPIDER_CLIENT} PUBLIC ${LIBLOGGER} ${LIBLOADER})
+
+##
+## Client's plugins
+##
+file(GLOB CLIENT_PLUGIN_SOURCES project/client_plugin/*.cpp)
+set(SPIDER_CLIENT_PLUGIN foo)
+add_library(${SPIDER_CLIENT_PLUGIN} SHARED ${CLIENT_PLUGIN_SOURCES})
+target_include_directories(${SPIDER_CLIENT_PLUGIN} PUBLIC "./project/client_plugin/")
 
 install(TARGETS ${SPIDER_SERVER} DESTINATION bin)
 install(TARGETS ${PLUGIN_EXAMPLE} DESTINATION bin/plugins)
