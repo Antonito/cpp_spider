@@ -2,6 +2,7 @@
 #include "Core.h"
 #include "IPayload.h"
 #include "AntiDbg.h"
+#include "Logger.hpp"
 
 namespace spider
 {
@@ -31,6 +32,7 @@ Core::Core(std::string const &path) :
     {
         throw std::runtime_error("Cannot initialize payload");
     }
+	nope::log::Log(Info) << "Core correctly loaded.";
 }
 
 Core::~Core()

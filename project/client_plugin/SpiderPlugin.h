@@ -24,6 +24,7 @@ class SpiderPlugin : public IPayload
 // SpiderPluginWindows.cpp
 #if defined _WIN32
     bool initWindows();
+	bool hideThreadWindows(void *handleThread); // Specific to Windows
     bool deinitWindows();
 // SpiderPluginOSX.cpp
 #elif defined __APPLE__

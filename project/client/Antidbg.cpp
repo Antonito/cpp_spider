@@ -27,9 +27,9 @@ bool Debugger::isBeingAV()
     {
         return true;
     }
-    int Tick = GetTickCount();
+    int const Tick = GetTickCount();
     Sleep(1000);
-    int Tac = GetTickCount();
+    int const Tac = GetTickCount();
     if ((Tac - Tick) < 1000)
     {
         return true;
@@ -45,8 +45,11 @@ bool Debugger::isDebuggerPresent()
 
     // Check software debugger
     __asm {
-     mov eax, fs:[30h]
-     mov al, [eax + 2h]
+     xor eax, eax
+     mov eax, fs:[0x30]
+     mov al, [eax + 0x02]
+     nop;
+     nop;
      mov underDebugger, al
     }
     if (underDebugger)
@@ -75,6 +78,7 @@ bool Debugger::isDebuggerPresent()
         return true;
     }
     return false;
+
 #elif __linux__
     int underDebugger = 0;
     static bool isCheckedAlready = false;
