@@ -13,6 +13,32 @@ WebServer::WebServer(server::CommandCenter const &cmdCenter, volatile bool const
   m_acceptor(m_io_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), m_port)), m_cmdCenter(cmdCenter), m_running(running)
 {
   nope::log::Log(Info) << "Creating WebServer";
+  nope::log::Log(Debug) << "creating custom routes for WebServer";
+  for (auto const &cur : m_commands)
+  {
+    nope::log::Log(Info) << "route: " << cur.name;
+    m_routes["/" + cur.name] = [&]() -> std::string
+    {
+
+      nope::log::Log(Info) << "route for: " << cur.name << " created";
+      server::Event ev;
+      //TODO: get id from route
+      ev.destId = 0;
+      ev.emitter = this;
+      ev.commandName = cur.name;
+
+      sendEvent(ev);
+
+      std::stringstream res;
+    std::string sHTML = "GETINFO HERE";
+    res << "HTTP/1.1 200 OK" << std::endl;
+    res << "content-type: text/html" << std::endl;
+    res << "content-length: " << sHTML.length() << std::endl;
+    res << std::endl;
+    res << sHTML;
+      return (res.str());
+    };
+  }
 }
 
 WebServer::~WebServer()
