@@ -20,6 +20,7 @@ namespace misc
 {
 bool Debugger::isBeingAV()
 {
+// TODO: Make cross-plateform
 #if _WIN32
     // Check if syscalls are being intercepted
     HINSTANCE dll = LoadLibrary(TEXT("fake.dll"));
@@ -27,6 +28,8 @@ bool Debugger::isBeingAV()
     {
         return true;
     }
+
+    // Check if time is being faked
     int const Tick = GetTickCount();
     Sleep(1000);
     int const Tac = GetTickCount();

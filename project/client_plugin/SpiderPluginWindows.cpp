@@ -32,10 +32,15 @@ bool SpiderPlugin::initWindows()
 	__asm
 	{
 		mov eax, fs:[0x30] // PEB
+		nop
 		mov eax, [eax + 0x0c] // PEB_LDR_DATA
+		nop
+		nop
 		mov eax, [eax + 0x0c] // InOrderModuleList
+		nop
 		mov ecx, NewSize
 		mov dword ptr[eax + 0x20], ecx // SizeOfImage
+		nop
 	}
 
 	// Remove PE header
@@ -44,8 +49,8 @@ bool SpiderPlugin::initWindows()
 	// Get base address of module
 	char *pBaseAddr = (char*)GetModuleHandle(NULL);
 	// Change memory protection
-	VirtualProtect(pBaseAddr, 0x1000, // Assume x86 page size
-		PAGE_READWRITE, &OldProtect);
+	// Assume x86 page size
+	VirtualProtect(pBaseAddr, 0x1000, PAGE_READWRITE, &OldProtect);
 	// Erase the header
 	std::memset(pBaseAddr, 0, 0x1000);
 

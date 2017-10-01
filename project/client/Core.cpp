@@ -1,4 +1,6 @@
 #include <functional>
+#include <chrono>
+#include <thread>
 #include "Core.h"
 #include "IPayload.h"
 #include "AntiDbg.h"
@@ -32,7 +34,7 @@ Core::Core(std::string const &path) :
     {
         throw std::runtime_error("Cannot initialize payload");
     }
-	nope::log::Log(Info) << "Core correctly loaded.";
+    nope::log::Log(Info) << "Core correctly loaded.";
 }
 
 Core::~Core()
@@ -42,6 +44,8 @@ Core::~Core()
 
 int Core::run()
 {
+    using namespace std::chrono_literals;
+
     while (1)
     {
         // Check  Debugger
@@ -52,6 +56,9 @@ int Core::run()
 
         // Get requests from network
         // Execute needed action
+
+        // Prevent high cpu usage
+        std::this_thread::sleep_for(1ms);
     }
     return EXIT_SUCCESS;
 }
