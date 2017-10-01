@@ -12,6 +12,8 @@
 #include <windows.h>
 #endif
 
+#include <iostream>
+
 namespace spider
 {
 namespace misc
@@ -32,22 +34,47 @@ bool Debugger::isBeingAV()
     {
         return true;
     }
-#else
-    return false;
 #endif
+    return false;
 }
 
 bool Debugger::isDebuggerPresent()
 {
 #if _MSC_VER && !__INTEL_COMPILER
     char underDebugger = 0;
+
+    // Check software debugger
     __asm {
      mov eax, fs:[30h]
      mov al, [eax + 2h]
      mov underDebugger, al
     }
+    if (underDebugger)
+    {
+        return true;
+    }
 
-    return underDebugger == 1;
+    // Check hardware breakpoints
+    CONTEXT ctx;
+    std::memset(&ctx, 0, sizeof(CONTEXT));
+    ctx.ContextFlags = CONTEXT_DEBUG_REGISTERS;
+
+    // Get a handle to our thread
+    HANDLE hThread = GetCurrentThread();
+
+    // Get the registers
+    if (GetThreadContext(hThread, &ctx) == 0)
+    {
+        return false;
+    }
+
+    // Now we can check for hardware breakpoints, its not
+    // necessary to check Dr6 and Dr7, however feel free to
+    if (ctx.Dr0 || ctx.Dr1 || ctx.Dr2 || ctx.Dr3)
+    {
+        return true;
+    }
+    return false;
 #elif __linux__
     int underDebugger = 0;
     static bool isCheckedAlready = false;
