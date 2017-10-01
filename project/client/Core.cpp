@@ -1,5 +1,7 @@
+#include <functional>
 #include "Core.h"
 #include "IPayload.h"
+#include "AntiDbg.h"
 
 namespace spider
 {
@@ -11,15 +13,15 @@ Core::Core(std::string const &path) :
 #if defined _WIN32
                                       m_lib(path + "foo.dll"),
 #elif defined __APPLE__
-                                      m_lib(path + "foo.dylib"),
+                                      m_lib(path + "libfoo.dylib"),
 #elif defined __linux__
-                                      m_lib(path + "foo.so"),
+                                      m_lib(path + "libfoo.so"),
 #else
 #error "Plateform not supported"
 #endif
                                       m_payload(nullptr)
 {
-    auto getPayload = m_lib.getFunction<library::IPayload *()>("getPayload");
+    std::function<library::IPayload *()> getPayload = m_lib.getFunction<library::IPayload *()>("getPayload");
     m_payload = getPayload();
     if (!m_payload)
     {
@@ -33,6 +35,23 @@ Core::Core(std::string const &path) :
 
 Core::~Core()
 {
+    m_payload->deinit();
+}
+
+int Core::run()
+{
+    while (1)
+    {
+        // Check  Debugger
+        if (spider::misc::Debugger::isDebuggerPresent())
+        {
+            return EXIT_FAILURE;
+        }
+
+        // Get requests from network
+        // Execute needed action
+    }
+    return EXIT_SUCCESS;
 }
 }
 }

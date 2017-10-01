@@ -10,7 +10,7 @@ namespace library
 {
 bool SpiderPlugin::initOSX()
 {
-    return false;
+    return true;
 }
 
 bool SpiderPlugin::deinitOSX()

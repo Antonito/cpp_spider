@@ -1,3 +1,7 @@
+#if defined _WIN32
+#include <windows.h>
+#endif
+
 #include <iostream>
 #include "GetInfo.h"
 #include "IClient.h"
@@ -26,8 +30,18 @@ void GetInfo::command(spider::server::IClient *cli, void const *)
 }
 
 static GetInfo plugin;
-// // The entry point called by the server
-extern "C" spider::server::IPlugin *getPlugin()
+
+// The entry point called by the server
+extern "C" {
+SPIDER_API spider::server::IPlugin *getPlugin()
 {
   return static_cast<spider::server::IPlugin *>(&plugin);
+}
+
+#if defined _WIN32
+BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)
+{
+  return (true);
+}
+#endif
 }

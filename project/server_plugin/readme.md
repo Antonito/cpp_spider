@@ -31,6 +31,10 @@ private:
 MyPlugin.cpp:
 
 ```cpp
+#if defined_WIN32
+#include <windows.h>
+#endif
+
 #include "MyPlugin.h"
 
 MyPlugin::MyPlugin() : m_name("MyPlugin"), m_description("My very own plugin") {
@@ -51,8 +55,20 @@ void MyPlugin::command(spider::server::IClient const *, void const *) {
 static MyPlugin plugin;
 
 // The entry point called by the server
-extern "C" spider::server::IPlugin *getPlugin()
+extern "C" {
+
+SPIDER_API spider::server::IPlugin *getPlugin()
 {
     return static_cast<spider::server::IPlugin *>(&plugin);
 }
+
+#if defined _WIN32
+BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)
+{
+    return (true);
+}
+#endif
+
+}
+
 ```

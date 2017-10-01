@@ -25,6 +25,8 @@ public:
   Core &operator=(Core const &) = delete;
   Core &operator=(Core &&) = delete;
 
+  int run();
+
 private:
   GenLibrary m_lib;
   library::IPayload *m_payload;

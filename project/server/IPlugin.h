@@ -2,6 +2,12 @@
 
 #include <string>
 
+#if defined(__linux__) || (__APPLE__)
+#define SPIDER_API
+#else
+#define SPIDER_API __declspec(dllexport)
+#endif
+
 namespace spider
 {
 namespace server

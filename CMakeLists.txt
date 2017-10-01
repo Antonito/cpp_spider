@@ -7,12 +7,15 @@ project(Spider)
 # Configure C++ version
 set(CMAKE_CXX_STANDARD 14)
 
+
+if (!WIN32)
 # Configure Boost
 set(Boost_USE_STATIC_LIBS OFF) 
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
 find_package(Boost REQUIRED COMPONENTS system filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
+endif()
 
 ##
 ## Libraries
@@ -36,6 +39,7 @@ set(LIBLOADER libloader)
 add_library(${LIBLOADER} STATIC ${LIBLOADER_SOURCES})
 target_include_directories(${LIBLOADER} PUBLIC "./project/libloader")
 
+if (!WIN32)
 ##
 ## Server
 ##
@@ -71,6 +75,7 @@ file(GLOB PLUGIN_SOURCE_GETINFO project/server_plugin/getinfo/*.cpp)
 set(PLUGIN_GETINFO plugin_getinfo)
 add_library(${PLUGIN_GETINFO} SHARED ${PLUGIN_SOURCE_GETINFO})
 target_include_directories(${PLUGIN_GETINFO} PUBLIC "./project/server_plugin/")
+endif()
 
 ##
 ## Client
@@ -82,6 +87,9 @@ set(SPIDER_CLIENT spider_client)
 add_executable(${SPIDER_CLIENT} ${CLIENT_SOURCES})
 target_include_directories(${SPIDER_CLIENT} PUBLIC "./project/client/")
 target_link_libraries(${SPIDER_CLIENT} PUBLIC ${LIBLOGGER} ${LIBLOADER})
+if(UNIX AND NOT APPLE)
+target_link_libraries(${SPIDER_CLIENT} PUBLIC -lpthread -ldl)
+endif()
 
 ##
 ## Client's plugins
@@ -89,7 +97,7 @@ target_link_libraries(${SPIDER_CLIENT} PUBLIC ${LIBLOGGER} ${LIBLOADER})
 file(GLOB CLIENT_PLUGIN_SOURCES project/client_plugin/*.cpp)
 set(SPIDER_CLIENT_PLUGIN foo)
 add_library(${SPIDER_CLIENT_PLUGIN} SHARED ${CLIENT_PLUGIN_SOURCES})
-target_include_directories(${SPIDER_CLIENT_PLUGIN} PUBLIC "./project/client_plugin/")
+target_include_directories(${SPIDER_CLIENT_PLUGIN} PUBLIC "./project/client_plugin/" "./project/client/")
 
 install(TARGETS ${SPIDER_SERVER} DESTINATION bin)
 install(TARGETS ${PLUGIN_EXAMPLE} DESTINATION bin/plugins)

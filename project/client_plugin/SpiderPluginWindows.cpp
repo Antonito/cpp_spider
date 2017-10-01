@@ -10,7 +10,7 @@ namespace library
 {
 bool SpiderPlugin::initWindows()
 {
-    return false;
+    return true;
 }
 
 bool SpiderPlugin::deinitWindows()

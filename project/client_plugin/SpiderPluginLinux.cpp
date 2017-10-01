@@ -10,7 +10,7 @@ namespace library
 {
 bool SpiderPlugin::initLinux()
 {
-    return false;
+    return true;
 }
 
 bool SpiderPlugin::deinitLinux()
