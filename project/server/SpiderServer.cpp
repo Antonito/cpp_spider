@@ -34,8 +34,11 @@ void SpiderServer::run()
             while (ctrl->pollEvent(ev))
             {
                 // Link to correct client
-                ev.dest = m_clients[ev.destId].get();
-                ev.dest->sendEvent(ev);
+                if (ev.destId < m_clients.size())
+                {
+                    ev.dest = m_clients[ev.destId].get();
+                    ev.dest->sendEvent(ev);
+                }
             }
         }
 
@@ -70,8 +73,8 @@ std::int32_t SpiderServer::multiplex()
 
         FD_ZERO(&m_readfds);
         FD_ZERO(&m_writefds);
-        tv.tv_sec = 5;
-        tv.tv_usec = 0;
+        tv.tv_sec = 0;
+        tv.tv_usec = 50;
 
         FD_SET(sock, &m_readfds);
 

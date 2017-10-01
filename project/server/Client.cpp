@@ -7,7 +7,7 @@ namespace server
 
 constexpr std::size_t Client::maxLength;
 
-Client::Client(sock_t const sock, CommandCenter const &cmdCenter, std::size_t const ndx) : m_os(""), m_ip(""), m_geo(""), m_pcName(""), m_commandQueue(), m_cmdCenter(cmdCenter), m_socket(sock), m_id(static_cast<std::uint16_t>(ndx)), m_canWrite(false)
+Client::Client(sock_t const sock, CommandCenter const &cmdCenter, std::size_t const ndx) : m_os(""), m_ip(""), m_geo(""), m_pcName(""), m_commandQueue(), m_cmdCenter(cmdCenter), m_socket(sock), m_id(static_cast<std::uint16_t>(ndx)), m_canWrite(false), m_outputQueue(), m_inputBuffer{Client::maxLength}
 {
 }
 
@@ -16,15 +16,77 @@ bool Client::canWrite() const
   return m_canWrite;
 }
 
+void Client::toggleWrite()
+{
+  m_canWrite = !m_canWrite;
+}
+
 network::IClient::ClientAction Client::treatIncomingData()
 {
-  return network::IClient::ClientAction::FAILURE;
+  auto ret = network::IClient::ClientAction::FAILURE;
+
+  std::string str;
+  ret = readFromNetwork(str);
+  nope::log::Log(Info) << "Read: [" << m_id << "] " << str;
+  return ret;
 }
 
 network::IClient::ClientAction Client::treatOutgoingData()
 {
-  // queue datas to write
-  return network::IClient::ClientAction::FAILURE;
+  auto ret = network::IClient::ClientAction::FAILURE;
+
+  if (!m_outputQueue.empty())
+  {
+    nope::log::Log(Info) << "Writing data to client";
+    ret = sendNetwork(m_outputQueue.front());
+    m_outputQueue.pop();
+  }
+  if (ret == network::IClient::ClientAction::SUCCESS)
+  {
+    toggleWrite();
+  }
+
+  return ret;
+}
+
+network::IClient::ClientAction Client::readFromNetwork(std::string &str)
+{
+  auto ret = network::IClient::ClientAction::SUCCESS;
+
+  // - returning infos to the shell
+  // - limiting shell control
+
+  if (m_socket.recUntil(m_inputBuffer, "\r\n") == false)
+  {
+    nope::log::Log(Info) << "Failed to read data [Client]";
+    ret = network::IClient::ClientAction::FAILURE;
+  }
+
+  // How to store datas ? getline ? Store in a queue ?
+
+  // /!\ TODO: Check that this is not broken
+  if (!m_inputBuffer.is_linearized())
+  {
+    m_inputBuffer.linearize();
+  }
+  str = m_inputBuffer.array_one().first;
+  for (std::size_t i = 0; i < str.length(); ++i)
+  {
+    m_inputBuffer.pop_front();
+  }
+  return ret;
+}
+
+network::IClient::ClientAction Client::sendNetwork(std::string const &str)
+{
+  auto ret = network::IClient::ClientAction::SUCCESS;
+
+  if (m_socket.send(str.c_str(), str.length()) == false)
+  {
+    nope::log::Log(Debug) << "Failed to write data [Client]";
+    ret = network::IClient::ClientAction::FAILURE;
+  }
+  return (ret);
 }
 
 bool Client::operator==(Client const &other) const
@@ -57,9 +119,9 @@ sock_t Client::getSocket() const
   return m_socket.getSocket();
 }
 
-size_t Client::send(std::string const &buffer)
+void Client::send(std::string const &buffer)
 {
-  return 0;
+  m_outputQueue.push(buffer);
 }
 
 size_t Client::receive()
@@ -80,6 +142,7 @@ void Client::execute()
 void Client::sendEvent(Event &e)
 {
   m_commandQueue.push(e);
+  m_canWrite = true;
 }
 
 void Client::eventManager()

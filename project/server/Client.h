@@ -22,7 +22,7 @@ public:
 
   void execute();
 
-  virtual size_t send(std::string const &buffer);
+  virtual void send(std::string const &buffer);
   virtual size_t receive();
   virtual void sendEvent(Event &ev);
 
@@ -50,6 +50,11 @@ public:
   std::uint16_t getId() const;
 
 private:
+  network::IClient::ClientAction sendNetwork(std::string const &str);
+  network::IClient::ClientAction readFromNetwork(std::string &str);
+
+  void toggleWrite();
+
   std::string m_os;
   std::string m_ip;
   std::string m_geo;
@@ -59,6 +64,8 @@ private:
   network::TCPSocket m_socket;
   std::uint16_t m_id;
   bool m_canWrite;
+  std::queue<std::string> m_outputQueue;
+  boost::circular_buffer<char> m_inputBuffer;
 };
 }
 }
