@@ -220,4 +220,53 @@ bool TCPSocket::rec(void *buffer, std::size_t rlen, ssize_t *buffLen) const
   }
   return (recNonBlocking(buffer, rlen, buffLen));
 }
+
+bool TCPSocket::recUntilBlocking(boost::circular_buffer<char> &buff, std::string const &needle)
+{
+  assert(getType() == ASocket::BLOCKING);
+
+  bool found = false;
+
+  while (!found)
+  {
+    char buffer[1024] = {0};
+    ssize_t buffLen = 0;
+    assert(needle.length() < sizeof(buffer));
+    do
+    {
+      buffLen = ::recv(m_socket, buffer, sizeof(buffer) - 1, 0);
+    } while (buffLen == -1 && errno == EINTR);
+    if (buffLen <= 0)
+    {
+      return (false);
+    }
+    for (ssize_t i = 0; i < buffLen; ++i)
+    {
+      buff.push_back(buff[i]);
+      if (!found && (sizeof(buffer) - i) > needle.length() &&
+          !memcmp(&buffer[i], needle.c_str(), needle.length()))
+      {
+        // Found
+        found = true;
+        for (std::size_t j = 0; j < needle.length(); ++j)
+        {
+          buff.push_back(buff[i]);
+          ++i;
+        }
+        buff.push_back('\0');
+      }
+    }
+  }
+  return (true);
+}
+
+bool TCPSocket::recUntil(boost::circular_buffer<char> &buff, std::string const &needle)
+{
+  assert(isStarted());
+  if (getType() == ASocket::BLOCKING)
+  {
+    return recUntilBlocking(buff, needle);
+  }
+  return false; // Not implemented
+}
 }
