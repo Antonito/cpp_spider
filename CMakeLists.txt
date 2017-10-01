@@ -8,7 +8,7 @@ project(Spider)
 set(CMAKE_CXX_STANDARD 14)
 
 
-if (!WIN32)
+if (NOT WIN32)
 # Configure Boost
 set(Boost_USE_STATIC_LIBS OFF) 
 set(Boost_USE_MULTITHREADED ON)  
@@ -39,7 +39,7 @@ set(LIBLOADER libloader)
 add_library(${LIBLOADER} STATIC ${LIBLOADER_SOURCES})
 target_include_directories(${LIBLOADER} PUBLIC "./project/libloader")
 
-if (!WIN32)
+if (NOT WIN32)
 ##
 ## Server
 ##
