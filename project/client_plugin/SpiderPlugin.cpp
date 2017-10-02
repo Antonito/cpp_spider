@@ -42,6 +42,17 @@ bool SpiderPlugin::deinit()
 #endif
     return ret;
 }
+
+SystemInfos SpiderPlugin::getInfos() const
+{
+#if defined _WIN32
+    return getInfosWindows();
+#elif defined __APPLE__
+    return getInfosOSX();
+#elif defined __linux__
+    return getInfosLinux();
+#endif
+}
 }
 }
 }
