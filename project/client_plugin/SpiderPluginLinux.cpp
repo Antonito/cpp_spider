@@ -1,6 +1,9 @@
 #if defined __linux__
 
 #include "SpiderPlugin.h"
+#include <string>
+#include <fstream>
+#include <limits>
 
 namespace spider
 {
@@ -22,11 +25,17 @@ SystemInfos SpiderPlugin::getInfosLinux() const
 {
     SystemInfos infos;
 
-    infos.arch = Architecture::BITS_UNKNOWN;
+#if INTPTR_MAX == INT64_MAX
+    infos.pArch = ProcArchitecture::AMD64; // Assume x86_64
+    infos.arch = Architecture::BITS_64;
+#elif INTPTR_MAX == INT32_MAX
+    infos.pArch = ProcArchitecture::x86; // Assume x86
+    infos.arch = Architecture::BITS_32;
+#else
     infos.os = OperatingSystem::Linux;
     infos.pageSize = getPageSize();
-    infos.ram = getRAMLinux();
     infos.nbProc = getNumberProcessors();
+    infos.ram = getRAMLinux();
     return infos;
 }
 
@@ -44,7 +53,7 @@ std::uint64_t SpiderPlugin::getRAMLinux() const
                 std::uint64_t mem;
                 if (file >> mem)
                 {
-                    return mem;
+                    return mem / (1024);
                 }
                 break;
             }

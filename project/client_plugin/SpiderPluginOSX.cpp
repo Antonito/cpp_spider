@@ -3,7 +3,6 @@
 #include "SpiderPlugin.h"
 #include <sys/types.h>
 #include <sys/sysctl.h>
-#include <sys/mman.h>
 
 namespace spider
 {
@@ -38,6 +37,7 @@ SystemInfos SpiderPlugin::getInfosOSX() const
 {
     SystemInfos infos;
 
+    infos.pArch = ProcArchitecture::AMD64; // Assume x86_64
     infos.arch = Architecture::BITS_64;
     infos.os = OperatingSystem::MacOS;
     infos.pageSize = getPageSize();
