@@ -1,11 +1,12 @@
 #if defined _WIN32
 #include <windows.h>
+#else
+#include <sys/mman.h>
 #endif
 
 #include "SpiderPlugin.h"
 #include "CPUID.h"
 #include <string>
-#include <sys/mman.h>
 
 namespace spider
 {

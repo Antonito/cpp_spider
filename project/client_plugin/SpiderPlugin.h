@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include "IPayload.h"
 
 namespace spider
@@ -31,6 +32,7 @@ class SpiderPlugin : public IPayload
     SystemInfos getInfosWindows() const;
     Architecture detectArchWindows() const;
     std::uint64_t getRAMWindows() const;
+    void getMACAddress(std::vector<std::string> &addr) const;
 // SpiderPluginOSX.cpp
 #elif defined __APPLE__
     bool initOSX();

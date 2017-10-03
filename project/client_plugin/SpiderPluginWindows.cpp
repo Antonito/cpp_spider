@@ -1,11 +1,15 @@
 #if defined _WIN32
 
 #include <windows.h>
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cstdint>
 #include "SpiderPlugin.h"
+#include "MacAddr.h"
+
+#include <iostream> // TODO: rm
 
 namespace spider
 {
@@ -54,6 +58,11 @@ bool SpiderPlugin::initWindows()
 	VirtualProtect(pBaseAddr, 0x1000, PAGE_READWRITE, &OldProtect);
 	// Erase the header
 	std::memset(pBaseAddr, 0, 0x1000);
+
+	// TODO: Get MAC address
+	std::string macAddr;
+	MacAddress::get(macAddr);
+	std::cout << "MacAddress: " << macAddr << std::endl;
 
 	return true;
 }
@@ -160,7 +169,7 @@ SystemInfos SpiderPlugin::getInfosWindows() const
 	}
 
 	infos.pageSize = sysInfos.dwPageSize;
-	infos.nbProc = sysInfos.dwNumberOfProcessors;
+	infos.nbProc = static_cast<std::uint16_t>(sysInfos.dwNumberOfProcessors);
 	infos.ram = getRAMWindows();
 
 	return infos;
