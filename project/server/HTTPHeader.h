@@ -4,6 +4,7 @@
 #include <string>
 #include <cstddef>
 #include <sstream>
+#include <functional>
 
 namespace spider
 {

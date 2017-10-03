@@ -3,6 +3,7 @@
 #include <boost/asio.hpp>
 #include <map>
 #include <cstddef>
+#include <functional>
 #include "HTTPUserSession.h"
 #include "IServer.h"
 #include "AControl.h"
