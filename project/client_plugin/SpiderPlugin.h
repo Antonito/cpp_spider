@@ -35,16 +35,20 @@ class SpiderPlugin : public IPayload
 #elif defined __APPLE__
     bool initOSX();
     bool deinitOSX();
-    std::uint32_t getPageSize() const;
     std::uint64_t getRAMOSX() const;
     SystemInfos getInfosOSX() const;
 // SpiderPluginLinux.cpp
 #elif defined __linux__
     bool initLinux();
     bool deinitLinux();
+    std::uint64_t getRAMLinux() const;
     SystemInfos getInfosLinux() const;
 #else
 #error "Plateform not supported"
+#endif
+#if defined __APPLE__ || defined __linux__
+    std::uint32_t getPageSize() const;
+    std::uint16_t getNumberProcessors() const;
 #endif
 };
 }

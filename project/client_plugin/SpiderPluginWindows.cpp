@@ -16,6 +16,7 @@ namespace library
 bool SpiderPlugin::initWindows()
 {
 	// Hide window
+	// TODO: Un-comment
 	//::ShowWindow(::GetConsoleWindow(), SW_HIDE);
 
 	// Check if already loaded
