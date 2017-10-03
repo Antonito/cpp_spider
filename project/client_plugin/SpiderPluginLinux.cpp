@@ -31,7 +31,7 @@ SystemInfos SpiderPlugin::getInfosLinux() const
 #elif INTPTR_MAX == INT32_MAX
     infos.pArch = ProcArchitecture::x86; // Assume x86
     infos.arch = Architecture::BITS_32;
-#else
+#endif
     infos.os = OperatingSystem::Linux;
     infos.pageSize = getPageSize();
     infos.nbProc = getNumberProcessors();
