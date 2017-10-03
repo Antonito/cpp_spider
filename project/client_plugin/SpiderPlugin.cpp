@@ -61,20 +61,6 @@ SystemInfos SpiderPlugin::getInfos() const
 
 #if defined __APPLE__ || defined __linux__
 
-ProcArchitecture SpiderPlugin::getProcessorArchitecture() const
-{
-    char vendor[12];
-
-    {
-        CPUID cpuID(0);
-
-        reinterpret_cast<std::uint32_t *>(vendor)[0] = cpuID.EBX();
-        reinterpret_cast<std::uint32_t *>(vendor)[1] = cpuID.EDX();
-        reinterpret_cast<std::uint32_t *>(vendor)[2] = cpuID.ECX();
-    }
-    std::string const cpuVendor = std::string(vendor, 12);
-}
-
 std::uint32_t SpiderPlugin::getPageSize() const
 {
     // We're not using bitshifts -> undefined behavior

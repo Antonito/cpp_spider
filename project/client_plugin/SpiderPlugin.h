@@ -49,7 +49,6 @@ class SpiderPlugin : public IPayload
 #error "Plateform not supported"
 #endif
 #if defined __APPLE__ || defined __linux__
-    ProcArchitecture getProcessorArchitecture() const;
     std::uint32_t getPageSize() const;
     std::uint16_t getNumberProcessors() const;
 #endif
