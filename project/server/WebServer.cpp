@@ -146,19 +146,25 @@ void WebServer::checkResponse()
     else if (ev.response.getResponse() == "ClientCount")
     {
       //create json with number of client here
-      res = "il ya ---------------------------->42\r\n";
+      res = "42\r\n";
     }
     else if (ev.response.getResponse() == "404")
     {
       //send 404 page here
       res = "404\r\n";
     }
+    std::stringstream ss;
+    ss << "HTTP/1.1 200 OK" << std::endl;
+    ss << "content-type: text/html" << std::endl;
+    ss << "content-length: " << res.length() << std::endl;
+    ss << std::endl;
+    ss << res;
     m_responseQueue.pop();
     for (auto &client : m_clients)
     {
       if (ev.askId == client->getId())
       {
-        std::shared_ptr<std::string> str = std::make_shared<std::string>(res);
+        std::shared_ptr<std::string> str = std::make_shared<std::string>(ss.str());
         boost::asio::async_write(client->getSocket(), boost::asio::buffer(str->c_str(), str->length()),
             [&client, str](boost::system::error_code const &e, std::size_t n)
             {
