@@ -29,13 +29,14 @@ WebServer::WebServer(server::CommandCenter const &cmdCenter, volatile bool const
 
       sendEvent(ev);
 
+      sleep(10);
       std::stringstream res;
-    std::string sHTML = "GETINFO HERE";
-    res << "HTTP/1.1 200 OK" << std::endl;
-    res << "content-type: text/html" << std::endl;
-    res << "content-length: " << sHTML.length() << std::endl;
-    res << std::endl;
-    res << sHTML;
+      std::string sHTML = "GETINFO HERE";
+      res << "HTTP/1.1 200 OK" << std::endl;
+      res << "content-type: text/html" << std::endl;
+      res << "content-length: " << sHTML.length() << std::endl;
+      res << std::endl;
+      res << sHTML;
       return (res.str());
     };
   }

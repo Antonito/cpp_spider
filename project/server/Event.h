@@ -18,6 +18,7 @@ struct Event final
     };
     IEventable *emitter;
     std::string commandName;
+    std::uint32_t askId;
 };
 }
 }
