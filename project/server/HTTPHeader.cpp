@@ -5,7 +5,7 @@ namespace spider
 {
 namespace http
 {
-HTTPHeader::HTTPHeader(std::map<std::string, std::function<std::string()>> const &routes)
+HTTPHeader::HTTPHeader(std::map<std::string, std::function<void(std::uint32_t)>> const &routes)
   : m_method(), m_url(), m_version(), m_headers(), m_routes(routes)
 {
 }
@@ -14,14 +14,15 @@ HTTPHeader::~HTTPHeader()
 {
 }
 
-std::string HTTPHeader::getResponse()
+void HTTPHeader::getResponse(std::uint32_t id)
 {
   std::stringstream res;
-  auto search = m_routes.find(m_url);
+  std::string realURL(m_url.substr(0, m_url.find("/", 1)));
+  auto search = m_routes.find(realURL);
   if(search != m_routes.end())
   {
     nope::log::Log(Info) << "response is: " << search->first;
-    return (search->second());
+    return (search->second(id));
   }
   else
   {
@@ -31,10 +32,11 @@ std::string HTTPHeader::getResponse()
     res << "content-length: " << sHTML.length() << std::endl;
     res << std::endl;
     res << sHTML;
+    m_routes.at("404")(id);
   }
 
   //TODO: insert in doc as example to create a route in plugin (potentially)
-  /*if (m_url == "/test")
+  // if (m_url == "/test")
   {
     std::string sHTML = "<html><body><h1>Hello World</h1><p>This is a test web server in c++</p></body></html>";
     res << "HTTP/1.1 200 OK" << std::endl;
@@ -42,8 +44,8 @@ std::string HTTPHeader::getResponse()
     res << "content-length: " << sHTML.length() << std::endl;
     res << std::endl;
     res << sHTML;
-  }*/
-  return (res.str());
+  }
+  //return (res.str());
 }
 
 std::uint32_t HTTPHeader::contentLength()

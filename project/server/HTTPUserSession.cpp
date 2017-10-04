@@ -6,7 +6,7 @@ namespace spider
 namespace http
 {
 HTTPUserSession::HTTPUserSession(boost::asio::io_service &io_service,
-    std::map<std::string, std::function<std::string()>> const &routes) : m_socket(io_service), m_buff(), m_header(routes)
+    std::map<std::string, std::function<void(std::uint32_t)>> const &routes, std::uint32_t const id) : m_socket(io_service), m_buff(), m_header(routes), m_id(id)
 {
 }
 
@@ -43,12 +43,14 @@ void HTTPUserSession::readNextLine(std::shared_ptr<HTTPUserSession> that)
       {
       if (that->getHeader().contentLength() == 0)
       {
-      std::shared_ptr<std::string> str = std::make_shared<std::string>(that->getHeader().getResponse());
+      nope::log::Log(Info) << "end reading AControl's client";
+      that->getHeader().getResponse(that->getId()); //will find the route requested
+      /*std::shared_ptr<std::string> str = std::make_shared<std::string>(that->getHeader().getResponse());
       boost::asio::async_write(that->getSocket(), boost::asio::buffer(str->c_str(), str->length()),
           [that, str](boost::system::error_code const &e, std::size_t n)
           {
             nope::log::Log(Debug) << "wrtting on socket...";
-          });
+          });*/
       }
       else
       {
@@ -71,6 +73,11 @@ void HTTPUserSession::readBody(std::shared_ptr<HTTPUserSession> that)
       {
         nope::log::Log(Debug) << "reading on socket...";
       });
+}
+
+std::uint32_t const HTTPUserSession::getId() const
+{
+  return (m_id);
 }
 
 boost::asio::ip::tcp::socket &HTTPUserSession::getSocket()

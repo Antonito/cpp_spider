@@ -11,7 +11,7 @@ namespace http
 class HTTPUserSession
 {
   public:
-    HTTPUserSession(boost::asio::io_service &io_service, std::map<std::string, std::function<std::string()>> const &routes);
+    HTTPUserSession(boost::asio::io_service &io_service, std::map<std::string, std::function<void(std::uint32_t)>> const &routes, std::uint32_t const id);
     ~HTTPUserSession();
 
     HTTPUserSession(HTTPUserSession const &) = delete;
@@ -23,6 +23,8 @@ class HTTPUserSession
     static void readBody(std::shared_ptr<HTTPUserSession> that);
     static void readNextLine(std::shared_ptr<HTTPUserSession> that);
 
+    std::uint32_t const getId() const;
+
     //non const because this is used by acceptor to set the socket
     boost::asio::ip::tcp::socket &getSocket();
     boost::asio::streambuf &getBuff();
@@ -32,6 +34,7 @@ class HTTPUserSession
     boost::asio::ip::tcp::socket m_socket;
     boost::asio::streambuf m_buff;
     HTTPHeader m_header;
+    std::uint32_t const m_id;
 };
 }
 }
