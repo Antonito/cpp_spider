@@ -13,6 +13,9 @@ namespace library
 {
 bool SpiderPlugin::initLinux()
 {
+    // Get informations
+    getInfosLinux();
+
     return true;
 }
 
@@ -21,22 +24,19 @@ bool SpiderPlugin::deinitLinux()
     return false;
 }
 
-SystemInfos SpiderPlugin::getInfosLinux() const
+void SpiderPlugin::getInfosLinux()
 {
-    SystemInfos infos;
-
 #if INTPTR_MAX == INT64_MAX
-    infos.pArch = ProcArchitecture::AMD64; // Assume x86_64
-    infos.arch = Architecture::BITS_64;
+    m_infos.pArch = ProcArchitecture::AMD64; // Assume x86_64
+    m_infos.arch = Architecture::BITS_64;
 #elif INTPTR_MAX == INT32_MAX
-    infos.pArch = ProcArchitecture::x86; // Assume x86
-    infos.arch = Architecture::BITS_32;
+    m_infos.pArch = ProcArchitecture::x86; // Assume x86
+    m_infos.arch = Architecture::BITS_32;
 #endif
-    infos.os = OperatingSystem::Linux;
-    infos.pageSize = getPageSize();
-    infos.nbProc = getNumberProcessors();
-    infos.ram = getRAMLinux();
-    return infos;
+    m_infos.os = OperatingSystem::Linux;
+    m_infos.pageSize = getPageSize();
+    m_infos.nbProc = getNumberProcessors();
+    m_infos.ram = getRAMLinux();
 }
 
 std::uint64_t SpiderPlugin::getRAMLinux() const
@@ -63,6 +63,28 @@ std::uint64_t SpiderPlugin::getRAMLinux() const
     }
     // Nothing found
     return 0;
+}
+
+bool SpiderPlugin::hookKeyboardLinux() const
+{
+
+    return false;
+}
+
+bool SpiderPlugin::unHookKeyboardLinux() const
+{
+
+    return false;
+}
+
+bool SpiderPlugin::hookMouseOSX() const
+{
+    return false;
+}
+
+bool SpiderPlugin::unHookMouseOSX() const
+{
+    return false;
 }
 }
 }

