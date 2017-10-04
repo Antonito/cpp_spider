@@ -27,7 +27,7 @@ public:
   virtual void sendEvent(Event &ev);
 
   // Push a Event into the response queue
-  virtual void sendResponse(Event const &ev);
+  virtual void sendResponse(Event &ev);
 
 protected:
   CommandCenter const &m_cmdCenter;

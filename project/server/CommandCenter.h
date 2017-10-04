@@ -28,7 +28,7 @@ public:
   CommandCenter &operator=(CommandCenter &&) = delete;
 
   std::vector<CommandInfo> const &getCommand() const;
-  void execCommand(Client &client, Event const &ev) const;
+  void execCommand(Client &client, Event &ev) const;
 
 private:
   std::vector<CommandInfo> m_infos;

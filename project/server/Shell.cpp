@@ -16,7 +16,7 @@ bool Shell::pollEvent(server::Event &ev)
     return (AControl::pollEvent(ev));
 }
 
-void Shell::sendResponse(server::Event const &ev)
+void Shell::sendResponse(server::Event &ev)
 {
     AControl::sendResponse(ev);
 }

@@ -28,7 +28,7 @@ class WebServer final : public server::IServer, public server::AControl
   WebServer &operator=(WebServer &&) = delete;
 
   virtual bool pollEvent(server::Event &ev);
-  virtual void sendResponse(server::Event const &ev);
+  virtual void sendResponse(server::Event &ev);
   virtual void sendEvent(server::Event &ev);
   virtual void run();
 

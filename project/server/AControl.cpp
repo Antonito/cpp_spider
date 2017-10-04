@@ -24,7 +24,7 @@ bool AControl::pollEvent(Event &ev)
     return (false);
 }
 
-void AControl::sendResponse(Event const &ev)
+void AControl::sendResponse(Event &ev)
 {
     m_responseQueue.push(ev);
 }
