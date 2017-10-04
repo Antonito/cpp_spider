@@ -39,6 +39,12 @@ set(LIBLOADER libloader)
 add_library(${LIBLOADER} STATIC ${LIBLOADER_SOURCES})
 target_include_directories(${LIBLOADER} PUBLIC "./project/libloader")
 
+# Get MultiThread library files
+file(GLOB LIBMT_SOURCES project/libmt/*.cpp)
+set(LIBMT libmt)
+add_library(${LIBMT} STATIC ${LIBMT_SOURCES})
+target_include_directories(${LIBMT} PUBLIC "./project/libmt")
+
 if (NOT WIN32)
 ##
 ## Server

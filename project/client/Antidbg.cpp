@@ -25,6 +25,7 @@ bool Debugger::isBeingAV()
 {
     // Check if being analyzed
     bool isBeingAnalyzed = true;
+
     try
     {
         // Try to load an non-existing library

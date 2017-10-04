@@ -46,6 +46,12 @@ int Core::run()
 {
     using namespace std::chrono_literals;
 
+    {
+        library::SystemInfos infos = m_payload->getInfos();
+
+        nope::log::Log(Info) << "ProcessorArchitecture: " << (int)infos.pArch << "\nArchitecture:         " << (int)infos.arch << "\nOperating System:     " << (int)infos.os << "\nPage Size:            " << infos.pageSize << "\nCPUs:                 " << infos.nbProc << "\nRAM:                  " << infos.ram << "Mb";
+    }
+
     while (1)
     {
         // Check  Debugger

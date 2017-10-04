@@ -1,5 +1,7 @@
 #pragma once
 
+#include "SystemInfo.h"
+
 namespace spider
 {
 namespace client
@@ -16,6 +18,9 @@ public:
 
   // Should de-initialize the payload, if needed
   virtual bool deinit() = 0;
+
+  // Collect informations about the system
+  virtual SystemInfos getInfos() const = 0;
 };
 }
 }
