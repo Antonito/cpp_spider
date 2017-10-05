@@ -1,6 +1,8 @@
 #pragma once
 
 #include "SystemInfo.h"
+#include "SystemMsg.h"
+#include "Queue.h"
 
 namespace spider
 {
@@ -14,7 +16,10 @@ public:
   virtual ~IPayload() = default;
 
   // Should initialize the payload, if needed
-  virtual bool init() = 0;
+  virtual bool init(mt::Queue<SystemMsg> &inputQueue) = 0;
+
+  // Get the event thread-safe queue, in order to control the client
+  virtual mt::Queue<SystemMsg> &getOrderQueue() = 0;
 
   // Should de-initialize the payload, if needed
   virtual bool deinit() = 0;

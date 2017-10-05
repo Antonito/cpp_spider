@@ -22,7 +22,7 @@ Core::Core(std::string const &path) :
 #else
 #error "Plateform not supported"
 #endif
-                                      m_payload(nullptr)
+                                      m_payload(nullptr), m_sendToNetwork{}
 {
     std::function<library::IPayload *()> getPayload = m_lib.getFunction<library::IPayload *()>("getPayload");
     m_payload = getPayload();
@@ -30,10 +30,11 @@ Core::Core(std::string const &path) :
     {
         throw std::runtime_error("Invalid payload");
     }
-    if (!m_payload->init())
+    if (!m_payload->init(m_sendToNetwork))
     {
         throw std::runtime_error("Cannot initialize payload");
     }
+    m_receivedFromNetwork = &m_payload->getOrderQueue();
     nope::log::Log(Info) << "Core correctly loaded.";
 }
 
@@ -63,7 +64,14 @@ int Core::run()
         }
 
         // Get requests from network
-        // Execute needed action
+        while (!m_receivedFromNetwork->empty())
+        {
+            SystemMsg msg = m_receivedFromNetwork->front();
+            // Execute needed action
+            // TODO
+
+            m_receivedFromNetwork->pop();
+        }
         m_payload->run();
 
         // Prevent high cpu usage

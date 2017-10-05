@@ -1,6 +1,8 @@
 #pragma once
 
 #include "GenLibrary.h"
+#include "Queue.h"
+#include "SystemMsg.h"
 
 namespace spider
 {
@@ -30,6 +32,8 @@ public:
 private:
   GenLibrary m_lib;
   library::IPayload *m_payload;
+  mt::Queue<SystemMsg> m_sendToNetwork;
+  mt::Queue<SystemMsg> *m_receivedFromNetwork; // TODO: Change type
 };
 }
 }

