@@ -159,6 +159,7 @@ void WebServer::checkResponse()
     ss << "content-length: " << res.length() << std::endl;
     ss << std::endl;
     ss << res;
+    ss << "\r\n";
     m_responseQueue.pop();
     for (auto &client : m_clients)
     {
