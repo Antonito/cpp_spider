@@ -2,6 +2,7 @@
 
 #include <string>
 #include <cstdint>
+#include "Response.h"
 
 namespace spider
 {
@@ -19,6 +20,7 @@ struct Event final
     IEventable *emitter;
     std::string commandName;
     std::uint32_t askId;
+    Response response;
 };
 }
 }

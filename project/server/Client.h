@@ -26,7 +26,7 @@ public:
   virtual size_t receive();
   virtual void sendEvent(Event &ev);
 
-  // TODO: omg Lucas merde !
+  // TODO: omg Lucas merde ! | - <3
   virtual std::string const &getOS() const;
   virtual std::string const &getIP() const;
   virtual std::string const &getGeo() const;

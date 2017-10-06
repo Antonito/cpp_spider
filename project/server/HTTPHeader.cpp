@@ -26,25 +26,19 @@ void HTTPHeader::getResponse(std::uint32_t id)
   }
   else
   {
-    std::string sHTML = "<html><body><h1>404 Not Found</h1><p>There's nothing here.</p></body></html>";
-    res << "HTTP/1.1 404 Not Found" << std::endl;
-    res << "content-type: text/html" << std::endl;
-    res << "content-length: " << sHTML.length() << std::endl;
-    res << std::endl;
-    res << sHTML;
-    m_routes.at("404")(id);
+    m_routes.at("/404")(id);
   }
 
   //TODO: insert in doc as example to create a route in plugin (potentially)
   // if (m_url == "/test")
-  {
+  /*{
     std::string sHTML = "<html><body><h1>Hello World</h1><p>This is a test web server in c++</p></body></html>";
     res << "HTTP/1.1 200 OK" << std::endl;
     res << "content-type: text/html" << std::endl;
     res << "content-length: " << sHTML.length() << std::endl;
     res << std::endl;
     res << sHTML;
-  }
+  }*/
   //return (res.str());
 }
 

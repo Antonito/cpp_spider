@@ -31,6 +31,7 @@ void SpiderServer::run()
         for (auto *ctrl : m_controllers)
         {
             Event ev;
+            ev.response.setNbClient(m_clients.size());
             while (ctrl->pollEvent(ev))
             {
                 // Link to correct client
@@ -197,6 +198,11 @@ void SpiderServer::removeClient(Client &cli)
                     m_clients.end());
     --m_curClients;
     nope::log::Log(Info) << "There are now " << m_curClients << " clients.";
+}
+
+std::vector<std::unique_ptr<Client>> const &SpiderServer::getClients() const
+{
+  return (m_clients);
 }
 }
 }
