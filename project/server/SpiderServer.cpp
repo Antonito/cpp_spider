@@ -199,5 +199,10 @@ void SpiderServer::removeClient(Client &cli)
     --m_curClients;
     nope::log::Log(Info) << "There are now " << m_curClients << " clients.";
 }
+
+std::vector<std::unique_ptr<Client>> const &SpiderServer::getClients() const
+{
+  return (m_clients);
+}
 }
 }

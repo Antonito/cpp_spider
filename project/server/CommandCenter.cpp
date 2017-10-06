@@ -43,40 +43,15 @@ std::vector<CommandInfo> const &CommandCenter::getCommand() const
 
 void CommandCenter::execCommand(Client &client, Event &ev) const
 {
-  if (ev.commandName == "commandInfo")
+  try
   {
-    //send commandInfo struct
-    ev.response.setResponse("CommandInfo");
-    std::cout << "COMMAND INFO OMG" << std::endl;
+    m_action.at(ev.commandName)(static_cast<IClient *>(&client), ev.emitter);
+    return ;
   }
-  else if (ev.commandName == "clientCount")
+  catch (const std::exception& e)
   {
-    //send the number of client connected
-    ev.response.setResponse("ClientCount");
-    std::cout << "CLient Count OMGOMGOMG" << std::endl;
-  }
-  else
-  {
-    try
-    {
-      m_action.at(ev.commandName)(static_cast<IClient *>(&client), ev.emitter);
-      return ;
-    }
-    catch (const std::exception& e)
-    {
-      //send 404 route
-      ev.response.setResponse("404");
-    }
-  }
-  if (ev.emitter != NULL)
-  {
-    std::cout << "[PPPP] SENDING EVENT !" << std::endl;
-    //spider::server::IEventable *tmp = ev.emitter;
-    /*ev.emitter = ev.dest;
-    ev.dest = tmp;
-    ev.emitter->sendEvent(ev);*/
-    //ev.emitter->sendResponse(ev);
-    //client.sendEvent(ev);
+    //send 404 route
+    ev.response.setResponse("404");
   }
 }
 }

@@ -5,7 +5,7 @@ namespace spider
 namespace server
 {
 
-AControl::AControl(CommandCenter const &cmdCenter, volatile bool const &running) : m_cmdCenter(cmdCenter), m_responseQueue(), m_commandQueue(), m_commands(m_cmdCenter.getCommand()), m_running(running)
+AControl::AControl(CommandCenter const &cmdCenter, volatile bool const &running, std::vector<std::unique_ptr<Client>> const &clients) : m_cmdCenter(cmdCenter), m_responseQueue(), m_commandQueue(), m_commands(m_cmdCenter.getCommand()), m_running(running), m_clients(clients)
 {
 }
 
@@ -32,6 +32,11 @@ void AControl::sendResponse(Event &ev)
 void AControl::sendEvent(Event &ev)
 {
     m_commandQueue.push(ev);
+}
+
+std::size_t AControl::getNbClient() const
+{
+  return (m_clients.size());
 }
 }
 }

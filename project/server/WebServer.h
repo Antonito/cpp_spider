@@ -8,6 +8,7 @@
 #include "IServer.h"
 #include "AControl.h"
 #include "CommandCenter.h"
+#include "Client.h"
 
 namespace spider
 {
@@ -16,7 +17,7 @@ namespace http
 class WebServer final : public server::IServer, public server::AControl
 {
   public:
-    explicit WebServer(server::CommandCenter const &, volatile bool const &, std::uint32_t);
+    explicit WebServer(server::CommandCenter const &, volatile bool const &, std::uint32_t, std::vector<std::unique_ptr<::spider::server::Client>> const &);
     virtual ~WebServer();
     void addRoute(std::string, std::function<void(std::uint32_t)> x);
     static void acceptClient(boost::asio::ip::tcp::acceptor &acceptor, boost::asio::io_service &io_service,

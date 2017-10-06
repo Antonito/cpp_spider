@@ -26,12 +26,6 @@ void HTTPHeader::getResponse(std::uint32_t id)
   }
   else
   {
-    std::string sHTML = "<html><body><h1>404 Not Found</h1><p>There's nothing here.</p></body></html>";
-    res << "HTTP/1.1 404 Not Found" << std::endl;
-    res << "content-type: text/html" << std::endl;
-    res << "content-length: " << sHTML.length() << std::endl;
-    res << std::endl;
-    res << sHTML;
     m_routes.at("/404")(id);
   }
 
