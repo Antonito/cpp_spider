@@ -1,0 +1,44 @@
+#pragma once
+
+#include <memory>
+#include <sys/select.h>
+#include "RingBuffer.h"
+#include "SystemMsg.h"
+#include "IPayload.h"
+#include "Queue.h"
+#include "TCPSocket.hpp"
+
+namespace spider
+{
+namespace client
+{
+class Network
+{
+  public:
+    explicit Network(mt::Queue<SystemMsg> &sendToNetwork, mt::Queue<library::IPayload::Order> &receivedFromNetwork);
+    ~Network();
+
+    Network(Network const &) = delete;
+    Network(Network &&) = delete;
+    Network &operator=(Network const &) = delete;
+    Network &operator=(Network &&) = delete;
+
+    void run(std::uint32_t const port, std::string const &addr, bool const isIP);
+
+  private:
+    std::int32_t multiplex(fd_set &readfds, fd_set &writefds, fd_set &exceptfds);
+    std::int32_t treatEvents(fd_set const &readfds, fd_set const &writefds, fd_set const &exceptfds);
+
+    std::int32_t receivedCommand();
+    std::int32_t writeCommandResponse();
+
+    mt::Queue<SystemMsg> &m_sendToNetwork;
+    mt::Queue<library::IPayload::Order> &m_receivedFromNetwork;
+    std::queue<std::string> m_cmdResponse;
+    bool m_isConnected;
+    std::unique_ptr<::network::TCPSocket> m_sock;
+    std::unique_ptr<::network::TCPSocket> m_sockData;
+    RingBuffer<4096> m_cmdReceived;
+};
+}
+}

@@ -31,11 +31,12 @@ struct SystemMsg
             std::uint32_t posX;
             std::uint32_t posY;
             SystemMsgEventState state;
+            std::uint8_t upper;
         } event;
         struct
         {
             std::uint32_t size;
-            std::uint8_t *raw;
+            std::uint8_t const *raw;
         } data;
     };
 };

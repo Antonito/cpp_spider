@@ -18,7 +18,8 @@ public:
   virtual bool send(void const *data, std::size_t len) const;
   virtual bool rec(void *buffer, std::size_t rlen, ssize_t *buffLen) const;
   virtual bool openConnection();
-  virtual bool recUntil(boost::circular_buffer<char> &buff, std::string const &needle);
+
+  bool recUntil(boost::circular_buffer<char> &buff, std::string const &needle);
 
 private:
   bool sendBlocking(void const *data, std::size_t len) const;

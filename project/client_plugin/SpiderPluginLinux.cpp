@@ -86,6 +86,10 @@ bool SpiderPlugin::unHookMouseOSX() const
 {
     return false;
 }
+
+void SpiderPlugin::runLinux() const
+{
+}
 }
 }
 }

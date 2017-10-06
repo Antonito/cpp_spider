@@ -3,16 +3,12 @@
 #include "GenLibrary.h"
 #include "Queue.h"
 #include "SystemMsg.h"
+#include "IPayload.h"
 
 namespace spider
 {
 namespace client
 {
-namespace library
-{
-class IPayload;
-}
-
 namespace core
 {
 class Core final
@@ -29,11 +25,14 @@ public:
 
   int run();
 
+  mt::Queue<SystemMsg> &getSendToNetwork();
+  mt::Queue<library::IPayload::Order> &getReceivedFromNetwork();
+
 private:
   GenLibrary m_lib;
   library::IPayload *m_payload;
   mt::Queue<SystemMsg> m_sendToNetwork;
-  mt::Queue<SystemMsg> *m_receivedFromNetwork; // TODO: Change type
+  mt::Queue<library::IPayload::Order> *m_receivedFromNetwork;
 };
 }
 }

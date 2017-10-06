@@ -19,6 +19,7 @@ namespace udp
 {
 
 using PathArray = std::array<std::uint8_t, 64>;
+using MacAddrArray = std::array<std::uint8_t, 22>;
 
 // The different types of packets
 enum class PacketType : std::uint8_t
@@ -38,10 +39,11 @@ enum class PacketEventState : std::uint8_t
 
 PACK_STRUCT(
     struct PacketHeader {
-        std::uint64_t time; // Timestamp
-        PacketType type;    // Packet type
+        std::uint64_t time;      // Timestamp
+        PacketType type;         // Packet type
+        MacAddrArray macAddress; // MAC address of the emitter
     });
-static_assert(sizeof(PacketHeader) == sizeof(std::uint64_t) + sizeof(std::uint8_t),
+static_assert(sizeof(PacketHeader) == sizeof(std::uint64_t) + sizeof(std::uint8_t) + sizeof(MacAddrArray),
               "Invalid PacketHeader size");
 
 PACK_STRUCT(
@@ -49,9 +51,10 @@ PACK_STRUCT(
         std::uint32_t key;      // The key / button that was pressed
         PacketEventState state; // The state of the pressed key / button
         std::uint8_t repeat;    // How many time was this key pressed during this event ?
+        std::uint8_t shift;     // is shift pressed ?
         PathArray processName;  // The foreground process at the moment of the event
     });
-static_assert(sizeof(PacketEvent) == sizeof(std::uint32_t) + sizeof(std::uint8_t) * 2 + sizeof(std::uint8_t) * 64,
+static_assert(sizeof(PacketEvent) == sizeof(std::uint32_t) + sizeof(std::uint8_t) * 3 + sizeof(std::uint8_t) * 64,
               "Invalid PacketEvent size");
 
 PACK_STRUCT(
@@ -65,10 +68,11 @@ static_assert(sizeof(PacketMov) == sizeof(std::uint32_t) * 2 + sizeof(std::uint8
 
 PACK_STRUCT(
     struct PacketImgHeader {
-        std::uint32_t size; // Total size of the image
-        std::uint16_t id;   // Current part of the image chunk
+        std::uint32_t totalSize; // Total size of the image
+        std::uint32_t size;      // Size of this chunk of the image
+        std::uint16_t id;        // Current part of the image chunk
     });
-static_assert(sizeof(PacketImgHeader) == sizeof(std::uint32_t) + sizeof(std::uint16_t),
+static_assert(sizeof(PacketImgHeader) == sizeof(std::uint32_t) * 2 + sizeof(std::uint16_t),
               "Invalid PacketImgHeader size");
 }
 }
