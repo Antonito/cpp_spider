@@ -124,7 +124,19 @@ void WebServer::checkResponse()
     if (ev.response.getResponse() == "CommandInfo")
     {
       code = "HTTP/1.1 200 OK";
-      res << "all Commands: de, dfew, wef wef, we, we, we,g \r\n";
+      res << "{\"commands\": [\n";
+      for (auto const &cur : m_commands)
+      {
+        res << "{\n\"name\": \"" << cur.name << "\",\n";
+        res << "\"description\": \"" << cur.description << "\",\n";
+        res << "\"route\": \"/" << cur.name << "/id\"\n";
+        res << "}";
+        if (&cur != &m_commands.back())
+        {
+          res << ",\n";
+        }
+      }
+      res << "]\n}\n\r\n";
     }
     else if (ev.response.getResponse() == "ClientCount")
     {
