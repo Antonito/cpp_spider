@@ -50,8 +50,9 @@ void CommandCenter::execCommand(Client &client, Event &ev) const
   }
   catch (const std::exception& e)
   {
+    nope::log::Log(Info) << "Command requested not found";
     //send 404 route
-    ev.response.setResponse("404");
+    //ev.response.setResponse("404");
   }
 }
 }

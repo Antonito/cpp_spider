@@ -5,7 +5,7 @@ namespace spider
 {
 namespace http
 {
-HTTPHeader::HTTPHeader(std::map<std::string, std::function<void(std::uint32_t)>> const &routes)
+HTTPHeader::HTTPHeader(std::map<std::string, std::function<void(std::uint32_t, std::uint32_t)>> const &routes)
   : m_method(), m_url(), m_version(), m_headers(), m_routes(routes)
 {
 }
@@ -16,17 +16,19 @@ HTTPHeader::~HTTPHeader()
 
 void HTTPHeader::getResponse(std::uint32_t id)
 {
-  std::stringstream res;
+  std::uint32_t victimId = 0;
+  std::stringstream res(m_url.substr(m_url.find_first_of('/', 1) + 1));;
+  res >> victimId;
   std::string realURL(m_url.substr(0, m_url.find("/", 1)));
   auto search = m_routes.find(realURL);
   if(search != m_routes.end())
   {
     nope::log::Log(Info) << "response is: " << search->first;
-    return (search->second(id));
+    return (search->second(id, victimId));
   }
   else
   {
-    m_routes.at("/404")(id);
+    m_routes.at("/404")(id, victimId);
   }
 
   //TODO: insert in doc as example to create a route in plugin (potentially)

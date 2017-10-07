@@ -6,7 +6,7 @@ namespace spider
 namespace http
 {
 HTTPUserSession::HTTPUserSession(boost::asio::io_service &io_service,
-    std::map<std::string, std::function<void(std::uint32_t)>> const &routes, std::uint32_t const id) : m_socket(io_service), m_buff(), m_header(routes), m_id(id)
+    std::map<std::string, std::function<void(std::uint32_t, std::uint32_t)>> const &routes, std::uint32_t const id) : m_socket(io_service), m_buff(), m_header(routes), m_id(id)
 {
 }
 

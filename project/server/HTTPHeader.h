@@ -13,7 +13,7 @@ namespace http
 class HTTPHeader
 {
   public:
-    HTTPHeader(std::map<std::string, std::function<void(std::uint32_t)>> const &routes);
+    HTTPHeader(std::map<std::string, std::function<void(std::uint32_t, std::uint32_t)>> const &routes);
     ~HTTPHeader();
 
     HTTPHeader(HTTPHeader const &) = delete;
@@ -31,7 +31,7 @@ class HTTPHeader
     std::string m_url;
     std::string m_version;
     std::map<std::string, std::string> m_headers;
-    std::map<std::string, std::function<void(std::uint32_t)>> const &m_routes;
+    std::map<std::string, std::function<void(std::uint32_t, std::uint32_t)>> const &m_routes;
 };
 }
 }

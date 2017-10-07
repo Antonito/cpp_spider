@@ -11,7 +11,7 @@ namespace http
 class HTTPUserSession
 {
   public:
-    HTTPUserSession(boost::asio::io_service &io_service, std::map<std::string, std::function<void(std::uint32_t)>> const &routes, std::uint32_t const id);
+    HTTPUserSession(boost::asio::io_service &io_service, std::map<std::string, std::function<void(std::uint32_t, std::uint32_t)>> const &routes, std::uint32_t const id);
     ~HTTPUserSession();
 
     HTTPUserSession(HTTPUserSession const &) = delete;
