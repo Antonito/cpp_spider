@@ -6,7 +6,7 @@
 #include "GetInfo.h"
 #include "IClient.h"
 
-GetInfo::GetInfo() : m_name("GetInfo"), m_description("get Client's information like OS, IP geolocalisation, etc...")
+GetInfo::GetInfo() : m_name("getInfo"), m_description("get Client's information like OS, IP geolocalisation, etc...")
 {
 }
 
@@ -22,11 +22,8 @@ std::string const &GetInfo::getDescription() const
 
 void GetInfo::command(spider::server::IClient *cli, void const *)
 {
-  static std::string const cmd = "/getInfo\r\n";
+  static std::string const cmd = "/getInfos\r\n";
   cli->send(cmd);
-  //
-  //on Client's side:
-  //response("Windows 10; 165.4.67.84; FRANCE; DESKTOP-09876");
 }
 
 static GetInfo plugin;

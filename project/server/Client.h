@@ -9,6 +9,7 @@
 #include "Logger.hpp"
 #include "TCPSocket.hpp"
 #include "IClient.hpp"
+#include "RingBuffer.h"
 
 namespace spider
 {
@@ -50,7 +51,7 @@ public:
 
 private:
   network::IClient::ClientAction sendNetwork(std::string const &str);
-  network::IClient::ClientAction readFromNetwork(std::string &str);
+  network::IClient::ClientAction readFromNetwork(std::queue<std::string> &str);
 
   void toggleWrite();
 
@@ -64,6 +65,7 @@ private:
   std::uint16_t m_id;
   bool m_canWrite;
   std::queue<std::string> m_outputQueue;
+  RingBuffer<0x1000> m_receiveBuffer;
 };
 }
 }

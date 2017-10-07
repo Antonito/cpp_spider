@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "SpiderServer.h"
 #include "Logger.hpp"
 #include "IClient.hpp"
@@ -129,9 +130,9 @@ void SpiderServer::treatEvents()
             // Handle output
             network::IClient::ClientAction action;
 
-            nope::log::Log(Info) << "Can write from socket #" << sock;
+            nope::log::Log(Info) << "Can write to socket #" << sock;
             action = cli.treatOutgoingData();
-            if (action != network::IClient::ClientAction::SUCCESS)
+            if (action == network::IClient::ClientAction::DISCONNECT)
             {
                 removeClient(cli);
                 deleted = true;

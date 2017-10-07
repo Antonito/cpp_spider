@@ -77,12 +77,12 @@ bool SpiderPlugin::unHookKeyboardLinux() const
     return false;
 }
 
-bool SpiderPlugin::hookMouseOSX() const
+bool SpiderPlugin::hookMouseLinux() const
 {
     return false;
 }
 
-bool SpiderPlugin::unHookMouseOSX() const
+bool SpiderPlugin::unHookMouseLinux() const
 {
     return false;
 }

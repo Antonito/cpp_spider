@@ -6,6 +6,8 @@ project(Spider)
 
 # Configure C++ version
 set(CMAKE_CXX_STANDARD 14)
+SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g")
+SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS}")
 
 
 # Configure Boost
@@ -59,7 +61,7 @@ file(GLOB SERVER_SOURCES project/server/*.cpp)
 set(SPIDER_SERVER spider_server)
 add_executable(${SPIDER_SERVER} ${SERVER_SOURCES})
 target_include_directories(${SPIDER_SERVER} PUBLIC "./project/server/" "./project/common/")
-target_link_libraries(${SPIDER_SERVER} PUBLIC ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${LIBLOGGER} ${LIBLOADER} ${LIBNETWORK})
+target_link_libraries(${SPIDER_SERVER} PUBLIC ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${LIBLOGGER} ${LIBLOADER} ${LIBNETWORK} ${LIBMT})
 if(UNIX AND NOT APPLE)
 target_link_libraries(${SPIDER_SERVER} PUBLIC -lpthread -ldl)
 endif()
@@ -68,14 +70,6 @@ endif()
 ## Server's plugins
 ##
 
-# Get servers plugin's sources
-file(GLOB PLUGIN_SOURCE_EXAMPLE project/server_plugin/example/*.cpp)
-
-# Create plugin library
-set(PLUGIN_EXAMPLE plugin_example)
-add_library(${PLUGIN_EXAMPLE} SHARED ${PLUGIN_SOURCE_EXAMPLE})
-target_include_directories(${PLUGIN_EXAMPLE} PUBLIC "./project/server_plugin/" "./project/common/")
-
 # Get GetInfo plugin's sources
 file(GLOB PLUGIN_SOURCE_GETINFO project/server_plugin/getinfo/*.cpp)
 
@@ -83,6 +77,39 @@ file(GLOB PLUGIN_SOURCE_GETINFO project/server_plugin/getinfo/*.cpp)
 set(PLUGIN_GETINFO plugin_getinfo)
 add_library(${PLUGIN_GETINFO} SHARED ${PLUGIN_SOURCE_GETINFO})
 target_include_directories(${PLUGIN_GETINFO} PUBLIC "./project/server_plugin/" "./project/common/")
+
+# Get Mouse plugin's sources
+file(GLOB PLUGIN_SOURCE_MOUSE project/server_plugin/mouse/*.cpp)
+
+# Create plugin library
+set(PLUGIN_MOUSE plugin_mouse)
+add_library(${PLUGIN_MOUSE} SHARED ${PLUGIN_SOURCE_MOUSE})
+target_include_directories(${PLUGIN_MOUSE} PUBLIC "./project/server_plugin/" "./project/common/")
+
+# Get keyboard plugin's sources
+file(GLOB PLUGIN_SOURCE_KEYBOARD project/server_plugin/keyboard/*.cpp)
+
+# Create plugin library
+set(PLUGIN_KEYBOARD plugin_keyboard)
+add_library(${PLUGIN_KEYBOARD} SHARED ${PLUGIN_SOURCE_KEYBOARD})
+target_include_directories(${PLUGIN_KEYBOARD} PUBLIC "./project/server_plugin/" "./project/common/")
+
+# Get replicate plugin's sources
+file(GLOB PLUGIN_SOURCE_REPLICATE project/server_plugin/replicate/*.cpp)
+
+# Create plugin library
+set(PLUGIN_REPLICATE plugin_replicate)
+add_library(${PLUGIN_REPLICATE} SHARED ${PLUGIN_SOURCE_REPLICATE})
+target_include_directories(${PLUGIN_REPLICATE} PUBLIC "./project/server_plugin/" "./project/common/")
+
+# Get kill plugin's sources
+file(GLOB PLUGIN_SOURCE_KILL project/server_plugin/kill/*.cpp)
+
+# Create plugin library
+set(PLUGIN_KILL plugin_kill)
+add_library(${PLUGIN_KILL} SHARED ${PLUGIN_SOURCE_KILL})
+target_include_directories(${PLUGIN_KILL} PUBLIC "./project/server_plugin/" "./project/common/")
+
 endif()
 
 ##

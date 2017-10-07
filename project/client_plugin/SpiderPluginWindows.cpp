@@ -145,8 +145,10 @@ bool SpiderPlugin::initWindows()
 		return false;
 	}
 
+#ifndef _WIN64
 	// Hide current thread
 	hideThreadWindows(GetCurrentThread());
+#endif
 
 	// Change image size, preventing from memory dump
 	std::uint32_t NewSize = (std::rand() & 0x7777) + 0x100000;

@@ -1,6 +1,7 @@
 #include <chrono>
 #include <thread>
 #include "Network.h"
+#include "Logger.hpp" // TODO: rm
 
 namespace spider
 {
@@ -24,9 +25,10 @@ void Network::run(std::uint32_t const port, std::string const &addr, bool const 
         m_sock = std::make_unique<::network::TCPSocket>(port, addr, isIP, ::network::ASocket::SocketType::BLOCKING);
 
         m_isConnected = m_sock->openConnection();
-
+        nope::log::Log(Info) << "Trying to connect to server..."; // TOOD: Put in Log(Debug)
         while (m_isConnected)
         {
+            bool disconnect = false;
             fd_set readfds, writefds, exceptfds;
 
             // Network loop here
@@ -35,15 +37,20 @@ void Network::run(std::uint32_t const port, std::string const &addr, bool const 
             if (rc < 0)
             {
                 // Something happened
-                break;
+                disconnect = true;
             }
             else if (rc)
             {
                 if (treatEvents(readfds, writefds, exceptfds) < 0)
                 {
                     // Disconnect from the server
-                    break;
+                    disconnect = true;
                 }
+            }
+            if (disconnect)
+            {
+                nope::log::Log(Info) << "Disconnected from server"; // TOOD: Put in Log(Debug)
+                break;
             }
         }
 
@@ -53,7 +60,7 @@ void Network::run(std::uint32_t const port, std::string const &addr, bool const 
         m_isConnected = false;
 
         // Prevent high cpu usage
-        std::this_thread::sleep_for(100ms);
+        std::this_thread::sleep_for(3s);
     }
 }
 
@@ -121,12 +128,14 @@ std::int32_t Network::receivedCommand()
             {
                 data.fill(0);
                 m_cmdReceived.read(reinterpret_cast<std::uint8_t *>(data.data()), cmdLen);
+                nope::log::Log(Info) << "Received: " << data.data(); // TOOD: Put in Log(Debug)
                 m_receivedFromNetwork.push(library::IPayload::Order(data.data()));
             }
 
         } while (cmdLen);
+        return 0;
     }
-    return 0;
+    return -1;
 }
 
 std::int32_t Network::writeCommandResponse()

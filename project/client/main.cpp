@@ -41,7 +41,13 @@ int main()
             // Start network thread
             spider::client::Network net(core.getSendToNetwork(), core.getReceivedFromNetwork());
             std::thread networkThread([&]() {
-                net.run(12345, "127.0.0.1", true);
+				try
+				{
+					net.run(1337, "172.16.107.1", true);
+				}
+				catch (std::exception const &err) {
+					nope::log::Log(Error) << err.what();
+				}
             });
 
             // Run core
@@ -57,6 +63,7 @@ int main()
     catch (std::exception const &e)
     {
         nope::log::Log(Error) << e.what();
+		system("pause");
         ret = EXIT_FAILURE;
     }
 

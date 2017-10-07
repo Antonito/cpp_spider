@@ -71,6 +71,7 @@ int Core::run()
             library::IPayload::Order msg = m_receivedFromNetwork->front();
 
             // Execute needed action
+            nope::log::Log(Info) << "Executing: " << msg; // TOOD: Put in Log(Debug)
             m_payload->exec(msg);
 
             // Suppress data from the queue

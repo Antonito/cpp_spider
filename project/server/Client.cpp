@@ -7,7 +7,7 @@ namespace server
 
 constexpr std::size_t Client::maxLength;
 
-Client::Client(sock_t const sock, CommandCenter const &cmdCenter, std::size_t const ndx) : m_os(""), m_ip(""), m_geo(""), m_pcName(""), m_commandQueue(), m_cmdCenter(cmdCenter), m_socket(sock), m_id(static_cast<std::uint16_t>(ndx)), m_canWrite(false), m_outputQueue()
+Client::Client(sock_t const sock, CommandCenter const &cmdCenter, std::size_t const ndx) : m_os(""), m_ip(""), m_geo(""), m_pcName(""), m_commandQueue(), m_cmdCenter(cmdCenter), m_socket(sock), m_id(static_cast<std::uint16_t>(ndx)), m_canWrite(false), m_outputQueue(), m_receiveBuffer()
 {
 }
 
@@ -25,9 +25,14 @@ network::IClient::ClientAction Client::treatIncomingData()
 {
   auto ret = network::IClient::ClientAction::FAILURE;
 
-  std::string str;
-  ret = readFromNetwork(str);
-  nope::log::Log(Info) << "Read: [" << m_id << "] " << str;
+  // TODO: treat values
+  std::queue<std::string> resp;
+  ret = readFromNetwork(resp);
+  while (!resp.empty())
+  {
+    nope::log::Log(Info) << "Read: [" << m_id << "] " << resp.front();
+    resp.pop();
+  }
   return ret;
 }
 
@@ -49,33 +54,34 @@ network::IClient::ClientAction Client::treatOutgoingData()
   return ret;
 }
 
-network::IClient::ClientAction Client::readFromNetwork(std::string &str)
+network::IClient::ClientAction Client::readFromNetwork(std::queue<std::string> &str)
 {
-  auto ret = network::IClient::ClientAction::SUCCESS;
+  auto ret = network::IClient::ClientAction::FAILURE;
+  std::array<char, 0x1000> data;
+  ssize_t buffLen = 0;
 
-// - returning infos to the shell
-// - limiting shell control
-
-#if 0
-  if (m_socket.recUntil(m_inputBuffer, "\r\n") == false)
+  if (m_socket.rec(data.data(), sizeof(data), &buffLen))
   {
-    nope::log::Log(Info) << "Failed to read data [Client]";
-    ret = network::IClient::ClientAction::FAILURE;
+    if (!buffLen)
+    {
+      return network::IClient::ClientAction::DISCONNECT;
+    }
+    ret = network::IClient::ClientAction::SUCCESS;
+    m_receiveBuffer.write(reinterpret_cast<std::uint8_t const *>(data.data()), buffLen);
+
+    size_t cmdLen = 0;
+    do
+    {
+      cmdLen = m_receiveBuffer.hasCommand();
+      if (cmdLen)
+      {
+        data.fill(0);
+        m_receiveBuffer.read(reinterpret_cast<std::uint8_t *>(data.data()), cmdLen);
+        str.push(std::string(data.data()));
+      }
+    } while (cmdLen);
   }
 
-  // How to store datas ? getline ? Store in a queue ?
-
-  // /!\ TODO: Check that this is not broken
-  if (!m_inputBuffer.is_linearized())
-  {
-    m_inputBuffer.linearize();
-  }
-  str = m_inputBuffer.array_one().first;
-  for (std::size_t i = 0; i < str.length(); ++i)
-  {
-    m_inputBuffer.pop_front();
-  }
-#endif
   return ret;
 }
 

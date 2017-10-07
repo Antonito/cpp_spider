@@ -1,5 +1,6 @@
 #include "AntiDbg.h"
 #include "GenLibrary.h"
+#include "Logger.hpp"
 
 #ifndef _WIN32
 #include <sys/types.h>
@@ -46,6 +47,7 @@ bool Debugger::isBeingAV()
     }
     if (isBeingAnalyzed)
     {
+        nope::log::Log(Info) << "We are being analyzed by an anti-virus..."; // TOOD: Put in Log(Debug)
         return true;
     }
 
@@ -56,6 +58,7 @@ bool Debugger::isBeingAV()
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     if (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() < std::chrono::duration_cast<std::chrono::microseconds>(2s).count())
     {
+        nope::log::Log(Info) << "We are being analyzed by an anti-virus..."; // TOOD: Put in Log(Debug)
         return true;
     }
     return false;
@@ -63,10 +66,11 @@ bool Debugger::isBeingAV()
 
 bool Debugger::isDebuggerPresent()
 {
+    return false; // TODO: rm
 #if _MSC_VER && !__INTEL_COMPILER
     char underDebugger = 0;
 
-    // Check software debugger
+// Check software debugger
 #ifndef _WIN64
     __asm {
      xor eax, eax
@@ -77,7 +81,7 @@ bool Debugger::isDebuggerPresent()
      mov underDebugger, al
     }
 #else
-	underDebugger = IsDebuggerPresent();
+    underDebugger = IsDebuggerPresent();
 #endif
     if (underDebugger)
     {
