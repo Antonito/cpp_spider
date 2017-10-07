@@ -6,7 +6,7 @@ namespace spider
 {
 namespace shell
 {
-Shell::Shell(server::CommandCenter const &cmdCenter, volatile bool const &running) : AControl(cmdCenter, running)
+Shell::Shell(server::CommandCenter const &cmdCenter, volatile bool const &running, std::vector<std::unique_ptr<::spider::server::Client>> const &clients) : AControl(cmdCenter, running, clients)
 {
     nope::log::Log(Info) << "Creating Shell control";
 }
@@ -16,7 +16,7 @@ bool Shell::pollEvent(server::Event &ev)
     return (AControl::pollEvent(ev));
 }
 
-void Shell::sendResponse(server::Event const &ev)
+void Shell::sendResponse(server::Event &ev)
 {
     AControl::sendResponse(ev);
 }

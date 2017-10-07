@@ -38,9 +38,19 @@ std::vector<CommandInfo> const &CommandCenter::getCommand() const
     return m_infos;
 }
 
-void CommandCenter::execCommand(Client &client, Event const &ev) const
+void CommandCenter::execCommand(Client &client, Event &ev) const
 {
+  try
+  {
     m_action.at(ev.commandName)(static_cast<IClient *>(&client), ev.emitter);
+    return ;
+  }
+  catch (const std::exception& e)
+  {
+    nope::log::Log(Info) << "Command requested not found";
+    //send 404 route
+    //ev.response.setResponse("404");
+  }
 }
 }
 }

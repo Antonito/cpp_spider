@@ -8,6 +8,7 @@
 #include "IServer.h"
 #include "AControl.h"
 #include "CommandCenter.h"
+#include "Client.h"
 
 namespace spider
 {
@@ -16,11 +17,11 @@ namespace http
 class WebServer final : public server::IServer, public server::AControl
 {
   public:
-    explicit WebServer(server::CommandCenter const &, volatile bool const &, std::uint32_t);
+    explicit WebServer(server::CommandCenter const &, volatile bool const &, std::uint32_t, std::vector<std::unique_ptr<::spider::server::Client>> const &);
     virtual ~WebServer();
-    void addRoute(std::string, std::function<void(std::uint32_t)> x);
+    void addRoute(std::string, std::function<void(std::uint32_t, std::uint32_t)> x);
     static void acceptClient(boost::asio::ip::tcp::acceptor &acceptor, boost::asio::io_service &io_service,
-        std::map<std::string, std::function<void(std::uint32_t)>> &routes, std::uint32_t &clientCount, std::vector<std::shared_ptr<HTTPUserSession>> &clients);
+        std::map<std::string, std::function<void(std::uint32_t, std::uint32_t)>> &routes, std::uint32_t &clientCount, std::vector<std::shared_ptr<HTTPUserSession>> &clients);
 
   WebServer(WebServer const &) = delete;
   WebServer(WebServer &&) = delete;
@@ -28,7 +29,7 @@ class WebServer final : public server::IServer, public server::AControl
   WebServer &operator=(WebServer &&) = delete;
 
   virtual bool pollEvent(server::Event &ev);
-  virtual void sendResponse(server::Event const &ev);
+  virtual void sendResponse(server::Event &ev);
   virtual void sendEvent(server::Event &ev);
   virtual void run();
 
@@ -36,7 +37,7 @@ class WebServer final : public server::IServer, public server::AControl
 
   private:
     std::uint32_t m_port;
-    std::map<std::string, std::function<void(std::uint32_t)>> m_routes;
+    std::map<std::string, std::function<void(std::uint32_t, std::uint32_t)>> m_routes;
     boost::asio::io_service m_io_service;
     boost::asio::ip::tcp::acceptor m_acceptor;
     server::CommandCenter const &m_cmdCenter;

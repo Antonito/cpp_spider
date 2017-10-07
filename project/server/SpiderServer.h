@@ -32,6 +32,7 @@ public:
   virtual void run();
 
   void addController(AControl &controller);
+  std::vector<std::unique_ptr<Client>> const &getClients() const;
 
 private:
   std::int32_t multiplex();
