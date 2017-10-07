@@ -1,7 +1,6 @@
 #ifndef TCPSOCKET_HPP_
 #define TCPSOCKET_HPP_
 
-#include <boost/circular_buffer.hpp>
 #include "ASocket.hpp"
 
 namespace network
@@ -19,15 +18,12 @@ public:
   virtual bool rec(void *buffer, std::size_t rlen, ssize_t *buffLen) const;
   virtual bool openConnection();
 
-  bool recUntil(boost::circular_buffer<char> &buff, std::string const &needle);
-
 private:
   bool sendBlocking(void const *data, std::size_t len) const;
   bool sendNonBlocking(void const *data, std::size_t len) const;
   bool recBlocking(void *buffer, std::size_t rlen, ssize_t *buffLen) const;
   bool recNonBlocking(void *buffer, std::size_t rlen,
                       ssize_t *buffLen) const;
-  bool recUntilBlocking(boost::circular_buffer<char> &buff, std::string const &needle);
 };
 }
 

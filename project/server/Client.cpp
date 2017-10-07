@@ -7,7 +7,7 @@ namespace server
 
 constexpr std::size_t Client::maxLength;
 
-Client::Client(sock_t const sock, CommandCenter const &cmdCenter, std::size_t const ndx) : m_os(""), m_ip(""), m_geo(""), m_pcName(""), m_commandQueue(), m_cmdCenter(cmdCenter), m_socket(sock), m_id(static_cast<std::uint16_t>(ndx)), m_canWrite(false), m_outputQueue(), m_inputBuffer{Client::maxLength}
+Client::Client(sock_t const sock, CommandCenter const &cmdCenter, std::size_t const ndx) : m_os(""), m_ip(""), m_geo(""), m_pcName(""), m_commandQueue(), m_cmdCenter(cmdCenter), m_socket(sock), m_id(static_cast<std::uint16_t>(ndx)), m_canWrite(false), m_outputQueue()
 {
 }
 
@@ -53,9 +53,10 @@ network::IClient::ClientAction Client::readFromNetwork(std::string &str)
 {
   auto ret = network::IClient::ClientAction::SUCCESS;
 
-  // - returning infos to the shell
-  // - limiting shell control
+// - returning infos to the shell
+// - limiting shell control
 
+#if 0
   if (m_socket.recUntil(m_inputBuffer, "\r\n") == false)
   {
     nope::log::Log(Info) << "Failed to read data [Client]";
@@ -74,6 +75,7 @@ network::IClient::ClientAction Client::readFromNetwork(std::string &str)
   {
     m_inputBuffer.pop_front();
   }
+#endif
   return ret;
 }
 

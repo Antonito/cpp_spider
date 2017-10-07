@@ -8,8 +8,10 @@ project(Spider)
 set(CMAKE_CXX_STANDARD 14)
 
 
-if (NOT WIN32)
 # Configure Boost
+
+#set(BOOST_ROOT "C:\\boost_1_63_0")
+if (NOT WIN32)
 set(Boost_USE_STATIC_LIBS OFF) 
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 

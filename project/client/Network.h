@@ -1,7 +1,11 @@
 #pragma once
 
 #include <memory>
+
+#ifndef _WIN32
 #include <sys/select.h>
+#endif
+
 #include "RingBuffer.h"
 #include "SystemMsg.h"
 #include "IPayload.h"
@@ -31,6 +35,8 @@ class Network
 
     std::int32_t receivedCommand();
     std::int32_t writeCommandResponse();
+
+    std::int32_t sendMsg(SystemMsg const &msg) const;
 
     mt::Queue<SystemMsg> &m_sendToNetwork;
     mt::Queue<library::IPayload::Order> &m_receivedFromNetwork;

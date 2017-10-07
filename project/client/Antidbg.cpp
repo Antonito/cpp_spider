@@ -67,6 +67,7 @@ bool Debugger::isDebuggerPresent()
     char underDebugger = 0;
 
     // Check software debugger
+#ifndef _WIN64
     __asm {
      xor eax, eax
      mov eax, fs:[0x30]
@@ -75,6 +76,9 @@ bool Debugger::isDebuggerPresent()
      nop;
      mov underDebugger, al
     }
+#else
+	underDebugger = IsDebuggerPresent();
+#endif
     if (underDebugger)
     {
         return true;

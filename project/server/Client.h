@@ -26,7 +26,6 @@ public:
   virtual size_t receive();
   virtual void sendEvent(Event &ev);
 
-  // TODO: omg Lucas merde !
   virtual std::string const &getOS() const;
   virtual std::string const &getIP() const;
   virtual std::string const &getGeo() const;
@@ -65,7 +64,6 @@ private:
   std::uint16_t m_id;
   bool m_canWrite;
   std::queue<std::string> m_outputQueue;
-  boost::circular_buffer<char> m_inputBuffer;
 };
 }
 }

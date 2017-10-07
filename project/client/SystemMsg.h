@@ -11,6 +11,7 @@ enum class SystemMsgType : std::uint32_t
 {
     EventKeyboard,
     EventMouse,
+    Data,
     Infos
 };
 
@@ -23,7 +24,9 @@ enum class SystemMsgEventState : std::uint8_t
 struct SystemMsg
 {
     SystemMsgType type;
-    network::udp::PathArray currentWindow;
+    network::tcp::PathArray currentWindow;
+    network::tcp::MacAddrArray mac;
+    std::uint64_t time;
     union {
         struct
         {
