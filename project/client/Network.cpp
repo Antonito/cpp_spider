@@ -7,7 +7,7 @@ namespace spider
 {
 namespace client
 {
-Network::Network(mt::Queue<SystemMsg> &sendToNetwork, mt::Queue<library::IPayload::Order> &receivedFromNetwork) : m_sendToNetwork(sendToNetwork), m_receivedFromNetwork(receivedFromNetwork), m_cmdResponse{}, m_isConnected(false), m_sock(nullptr), m_sockData(nullptr), m_cmdReceived{}
+Network::Network(mt::Queue<SystemMsg> &sendToNetwork, mt::Queue<library::IPayload::Order> &receivedFromNetwork, mt::Queue<std::string> &responseQueue) : m_sendToNetwork(sendToNetwork), m_receivedFromNetwork(receivedFromNetwork), m_cmdResponse(responseQueue), m_isConnected(false), m_sock(nullptr), m_sockData(nullptr), m_cmdReceived{}
 {
 }
 
@@ -128,6 +128,8 @@ std::int32_t Network::receivedCommand()
             {
                 data.fill(0);
                 m_cmdReceived.read(reinterpret_cast<std::uint8_t *>(data.data()), cmdLen);
+                data[cmdLen - 1] = '\0';
+                data[cmdLen - 2] = '\0';
                 nope::log::Log(Info) << "Received: " << data.data(); // TOOD: Put in Log(Debug)
                 m_receivedFromNetwork.push(library::IPayload::Order(data.data()));
             }
@@ -146,6 +148,7 @@ std::int32_t Network::writeCommandResponse()
     if (!m_cmdResponse.empty())
     {
         std::string const &cur = m_cmdResponse.front();
+        nope::log::Log(Info) << "Sending: " << cur;
         if (!m_sock->send(cur.c_str(), cur.length()))
         {
             rc = -1;

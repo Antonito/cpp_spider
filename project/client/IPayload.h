@@ -24,6 +24,12 @@ public:
   // Get the event thread-safe queue, in order to control the client
   virtual mt::Queue<Order> &getOrderQueue() = 0;
 
+  // Get the message thread-safe queue, in order to response to the server
+  virtual mt::Queue<std::string> &getReponseQueue() = 0;
+
+  // Replicate the virus on the host computer
+  virtual void replicate() = 0;
+
   // Should de-initialize the payload, if needed
   virtual bool deinit() = 0;
 
@@ -35,6 +41,9 @@ public:
 
   // Toggle Mouse hook
   virtual bool getMouse() = 0;
+
+  // Kill the client
+  virtual bool kill() = 0;
 
   // Execute all the actions needed
   virtual void run() = 0;

@@ -18,6 +18,8 @@ public:
   explicit Core(std::string const &path);
   ~Core();
 
+  void init();
+
   Core(Core const &) = delete;
   Core(Core &&) = delete;
   Core &operator=(Core const &) = delete;
@@ -27,6 +29,7 @@ public:
 
   mt::Queue<SystemMsg> &getSendToNetwork();
   mt::Queue<library::IPayload::Order> &getReceivedFromNetwork();
+  mt::Queue<std::string> &getResponseQueue() const;
 
 private:
   GenLibrary m_lib;

