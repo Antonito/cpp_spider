@@ -9,6 +9,7 @@
 #include "Logger.hpp"
 #include "TCPSocket.hpp"
 #include "IClient.hpp"
+#include "RingBuffer.h"
 
 namespace spider
 {
@@ -26,7 +27,6 @@ public:
   virtual size_t receive();
   virtual void sendEvent(Event &ev);
 
-  // TODO: omg Lucas merde ! | - <3
   virtual std::string const &getOS() const;
   virtual std::string const &getIP() const;
   virtual std::string const &getGeo() const;
@@ -51,7 +51,7 @@ public:
 
 private:
   network::IClient::ClientAction sendNetwork(std::string const &str);
-  network::IClient::ClientAction readFromNetwork(std::string &str);
+  network::IClient::ClientAction readFromNetwork(std::queue<std::string> &str);
 
   void toggleWrite();
 
@@ -65,7 +65,7 @@ private:
   std::uint16_t m_id;
   bool m_canWrite;
   std::queue<std::string> m_outputQueue;
-  boost::circular_buffer<char> m_inputBuffer;
+  RingBuffer<0x1000> m_receiveBuffer;
 };
 }
 }

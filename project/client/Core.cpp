@@ -22,7 +22,7 @@ Core::Core(std::string const &path) :
 #else
 #error "Plateform not supported"
 #endif
-                                      m_payload(nullptr)
+                                      m_payload(nullptr), m_sendToNetwork{}
 {
     std::function<library::IPayload *()> getPayload = m_lib.getFunction<library::IPayload *()>("getPayload");
     m_payload = getPayload();
@@ -30,10 +30,11 @@ Core::Core(std::string const &path) :
     {
         throw std::runtime_error("Invalid payload");
     }
-    if (!m_payload->init())
+    if (!m_payload->init(m_sendToNetwork))
     {
         throw std::runtime_error("Cannot initialize payload");
     }
+    m_receivedFromNetwork = &m_payload->getOrderQueue();
     nope::log::Log(Info) << "Core correctly loaded.";
 }
 
@@ -42,17 +43,19 @@ Core::~Core()
     m_payload->deinit();
 }
 
+mt::Queue<SystemMsg> &Core::getSendToNetwork()
+{
+    return m_sendToNetwork;
+}
+
+mt::Queue<library::IPayload::Order> &Core::getReceivedFromNetwork()
+{
+    return *m_receivedFromNetwork;
+}
+
 int Core::run()
 {
     using namespace std::chrono_literals;
-
-    {
-        library::SystemInfos const &infos = m_payload->getInfos();
-
-        nope::log::Log(Info) << "ProcessorArchitecture: " << (int)infos.pArch << "\nArchitecture:         " << (int)infos.arch << "\nOperating System:     " << (int)infos.os << "\nPage Size:            " << infos.pageSize << "\nCPUs:                 " << infos.nbProc << "\nRAM:                  " << infos.ram << "Mb";
-    }
-    m_payload->getKeyboard();
-    m_payload->getMouse();
 
     while (1)
     {
@@ -63,7 +66,17 @@ int Core::run()
         }
 
         // Get requests from network
-        // Execute needed action
+        while (!m_receivedFromNetwork->empty())
+        {
+            library::IPayload::Order msg = m_receivedFromNetwork->front();
+
+            // Execute needed action
+            nope::log::Log(Info) << "Executing: " << msg; // TOOD: Put in Log(Debug)
+            m_payload->exec(msg);
+
+            // Suppress data from the queue
+            m_receivedFromNetwork->pop();
+        }
         m_payload->run();
 
         // Prevent high cpu usage

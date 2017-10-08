@@ -5,6 +5,8 @@
 #include "IControl.h"
 #include "IEventable.h"
 #include "CommandCenter.h"
+
+#include "Queue.h"
 #include "Client.h"
 
 namespace spider
@@ -34,8 +36,8 @@ public:
 
 protected:
   CommandCenter const &m_cmdCenter;
-  std::queue<Event> m_responseQueue;
-  std::queue<Event> m_commandQueue;
+  mt::Queue<Event> m_responseQueue;
+  mt::Queue<Event> m_commandQueue;
   std::vector<CommandInfo> const &m_commands;
   volatile bool const &m_running;
   std::vector<std::unique_ptr<Client>> const &m_clients;

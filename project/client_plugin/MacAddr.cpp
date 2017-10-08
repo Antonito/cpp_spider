@@ -82,7 +82,7 @@ std::int32_t MacAddress::getAddressLinux(std::array<std::uint8_t, 6> &result)
 
     // TODO: Fix
     // Retrieve the interfaces names
-    ioctl(socket, SIOCGIFCONF, &interfaceConf);
+    //ioctl(socket, SIOCGIFCONF, &interfaceConf);
 
     struct ifreq *interfaceList = interfaceConf.ifc_req;
     for (std::int32_t i = interfaceConf.ifc_len / sizeof(struct ifreq); --i >= 0; ++interfaceList)

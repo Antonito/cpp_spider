@@ -47,7 +47,7 @@ class Queue
     // Capacity
     bool empty() const
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
+        std::lock_guard<std::mutex> lock{m_mutex};
         return m_queue.empty();
     }
 
@@ -78,6 +78,6 @@ class Queue
 
   private:
     std::queue<T> m_queue;
-    std::mutex m_mutex;
+    mutable std::mutex m_mutex;
 };
 }

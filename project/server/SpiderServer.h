@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 #include "IServer.h"
 #include "AControl.h"
 #include "Client.h"

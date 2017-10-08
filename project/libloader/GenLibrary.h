@@ -24,11 +24,13 @@ class GenLibrary
 {
   public:
     GenLibrary();
-    GenLibrary(GenLibrary const &other);
     GenLibrary(std::string const &filename);
     ~GenLibrary();
 
-    GenLibrary &operator=(GenLibrary const &);
+    GenLibrary(GenLibrary const &other) = delete;
+    GenLibrary &operator=(GenLibrary const &) = delete;
+    GenLibrary &operator=(GenLibrary &&);
+    GenLibrary(GenLibrary &&);
 
     void load(std::string const &filename);
 

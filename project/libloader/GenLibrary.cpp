@@ -8,14 +8,9 @@ GenLibrary::GenLibrary() : m_filename(""), m_libPtr(nullptr)
 {
 }
 
-GenLibrary::GenLibrary(std::string const &filename) : m_filename(filename)
+GenLibrary::GenLibrary(std::string const &filename) : m_filename(filename), m_libPtr(nullptr)
 {
     this->load(filename);
-}
-
-GenLibrary::GenLibrary(GenLibrary const &other)
-    : m_filename(other.m_filename)
-{
 }
 
 GenLibrary::~GenLibrary()
@@ -31,14 +26,20 @@ GenLibrary::~GenLibrary()
     }
 }
 
-GenLibrary &GenLibrary::operator=(GenLibrary const &other)
+GenLibrary &GenLibrary::operator=(GenLibrary &&other)
 {
     if (&other != this)
     {
         m_filename = other.m_filename;
         m_libPtr = other.m_libPtr;
+        other.m_libPtr = nullptr;
     }
     return (*this);
+}
+
+GenLibrary::GenLibrary(GenLibrary &&other) : m_filename(other.m_filename), m_libPtr(other.m_libPtr)
+{
+    other.m_libPtr = nullptr;
 }
 
 void GenLibrary::load(std::string const &filename)
