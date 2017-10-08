@@ -23,7 +23,7 @@ void HTTPUserSession::sessionStart(std::shared_ptr<HTTPUserSession> that)
       std::istream stream(&that->getBuff());
       std::getline(stream, line, '\r'); //http requests end with /r/n
       std::getline(stream, trash, '\n'); // ^
-      that->getHeader().onReadRequestLine(line); // TODO check if client needed inside
+      that->getHeader().onReadRequestLine(line);
       readNextLine(that);
       });
 }

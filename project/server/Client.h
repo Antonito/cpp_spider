@@ -60,6 +60,7 @@ private:
   std::string m_geo;
   std::string m_pcName;
   std::queue<Event> m_commandQueue;
+  std::queue<Event> m_responseQueue;
   CommandCenter const &m_cmdCenter;
   network::TCPSocket m_socket;
   std::uint16_t m_id;

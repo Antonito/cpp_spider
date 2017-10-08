@@ -3,6 +3,7 @@
 #endif
 
 #include <iostream>
+#include <sstream>
 #include "GetInfo.h"
 #include "IClient.h"
 
@@ -18,6 +19,13 @@ std::string const &GetInfo::getName() const
 std::string const &GetInfo::getDescription() const
 {
   return m_description;
+}
+
+std::string const GetInfo::getJSON(std::string const &res) const
+{
+  std::stringstream ss;
+  ss << "{\"response\" : \"" << res << "\"}";
+  return (ss.str());
 }
 
 void GetInfo::command(spider::server::IClient *cli, void const *)
