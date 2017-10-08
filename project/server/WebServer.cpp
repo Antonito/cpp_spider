@@ -60,6 +60,7 @@ WebServer::WebServer(server::CommandCenter const &cmdCenter, volatile bool const
       ev.emitter = this;
       ev.askId = askId;
       ev.commandName = cur.name;
+      ev.response.setResponse(cur.name);
       sendToSpider(ev);
     };
   }
@@ -111,7 +112,7 @@ void WebServer::checkResponse()
     m_responseQueue.pop();
     std::stringstream res;
     std::string code;
-    if (ev.response.getResponse() == "CommandInfo")
+    if (ev.commandName == "commandInfo")
     {
       code = "HTTP/1.1 200 OK";
       res << "{\"commands\": [\n";
@@ -128,15 +129,19 @@ void WebServer::checkResponse()
       }
       res << "]\n}\n\r\n";
     }
-    else if (ev.response.getResponse() == "ClientCount")
+    else if (ev.commandName == "clientCount")
     {
       code = "HTTP/1.1 200 OK";
       res << "{\"nbClients\" : " << getNbClient() << "}\r\n";
     }
-    else if (ev.response.getResponse() == "404")
+    else if (ev.commandName == "404")
     {
       code = "HTTP/1.1 404 NOT FOUND";
       res << "{\"error\" : 404}\r\n";
+    }
+    else
+    {
+      //checking throught all plugins call for WebJSON
     }
     std::stringstream ss;
     ss << code << std::endl;

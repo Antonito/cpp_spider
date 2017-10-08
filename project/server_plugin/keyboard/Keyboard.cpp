@@ -3,6 +3,7 @@
 #endif
 
 #include <iostream>
+#include <sstream>
 #include "Keyboard.h"
 #include "IClient.h"
 
@@ -18,6 +19,13 @@ std::string const &Keyboard::getName() const
 std::string const &Keyboard::getDescription() const
 {
     return m_description;
+}
+
+std::string const Keyboard::getJSON(std::string const &res) const
+{
+  std::stringstream ss;
+  ss << "{\"response\" : \"" << res << "\"}";
+  return (ss.str());
 }
 
 void Keyboard::command(spider::server::IClient *cli, void const *)

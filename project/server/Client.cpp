@@ -30,6 +30,15 @@ network::IClient::ClientAction Client::treatIncomingData()
   ret = readFromNetwork(resp);
   while (!resp.empty())
   {
+    //TODO: this is is for the Data socket
+    if (!m_responseQueue.empty())
+    {
+      Event ev = m_responseQueue.front();
+      m_responseQueue.pop();
+      //ev.response.setResponse("ClientCount");
+      ev.commandName = "commandInfo";
+      ev.emitter->sendEvent(ev);
+    }
     nope::log::Log(Info) << "Read: [" << m_id << "] " << resp.front();
     resp.pop();
   }
@@ -143,6 +152,7 @@ void Client::execute()
   {
     Event ev = m_commandQueue.front();
     m_commandQueue.pop();
+    m_responseQueue.push(ev);
     m_cmdCenter.execCommand(*this, ev);
   }
 }
