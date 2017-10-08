@@ -16,14 +16,14 @@ bool Shell::pollEvent(server::Event &ev)
     return (AControl::pollEvent(ev));
 }
 
-void Shell::sendResponse(server::Event &ev)
-{
-    AControl::sendResponse(ev);
-}
-
 void Shell::sendEvent(server::Event &ev)
 {
     AControl::sendEvent(ev);
+}
+
+void Shell::sendToSpider(server::Event &ev)
+{
+    AControl::sendToSpider(ev);
 }
 
 void Shell::run()
@@ -49,7 +49,7 @@ void Shell::run()
             ev.emitter = this;
             ev.commandName = line;
 
-            sendEvent(ev);
+            sendToSpider(ev);
         }
 
     } while (m_running && std::cin);

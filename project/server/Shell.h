@@ -21,8 +21,8 @@ class Shell : public server::AControl
     Shell &operator=(Shell &&) = delete;
 
     virtual bool pollEvent(server::Event &ev);
-    virtual void sendResponse(server::Event &ev);
     virtual void sendEvent(server::Event &ev);
+    virtual void sendToSpider(server::Event &ev);
 
     void run();
 

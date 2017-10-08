@@ -27,10 +27,10 @@ public:
   // Pull an event from the command queue
   virtual bool pollEvent(Event &ev);
   // Push an event into the command queue
-  virtual void sendEvent(Event &ev);
+  virtual void sendToSpider(Event &ev);
 
   // Push a Event into the response queue
-  virtual void sendResponse(Event &ev);
+  virtual void sendEvent(Event &ev);
 
   std::size_t getNbClient() const;
 
