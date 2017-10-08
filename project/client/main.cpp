@@ -43,7 +43,7 @@ int main()
             std::thread networkThread([&]() {
                 try
                 {
-                    spider::client::Network net(core.getSendToNetwork(), core.getReceivedFromNetwork());
+                    spider::client::Network net(core.getSendToNetwork(), core.getReceivedFromNetwork(), core.getResponseQueue());
                     net.run(1337, "172.16.107.1", true);
                 }
                 catch (std::exception const &err)
@@ -53,8 +53,8 @@ int main()
             });
 
             // Run core
-			core.init();
-			ret = core.run();
+            core.init();
+            ret = core.run();
 
             // Stop thread
             if (networkThread.joinable())

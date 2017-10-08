@@ -19,7 +19,7 @@ namespace client
 class Network
 {
 public:
-  explicit Network(mt::Queue<SystemMsg> &sendToNetwork, mt::Queue<library::IPayload::Order> &receivedFromNetwork);
+  explicit Network(mt::Queue<SystemMsg> &sendToNetwork, mt::Queue<library::IPayload::Order> &receivedFromNetwork, mt::Queue<std::string> &responseQueue);
   ~Network();
 
   Network(Network const &) = delete;
@@ -40,7 +40,7 @@ private:
 
   mt::Queue<SystemMsg> &m_sendToNetwork;
   mt::Queue<library::IPayload::Order> &m_receivedFromNetwork;
-  std::queue<std::string> m_cmdResponse;
+  mt::Queue<std::string> &m_cmdResponse;
   bool m_isConnected;
   std::unique_ptr<::network::TCPSocket> m_sock;
   std::unique_ptr<::network::TCPSocket> m_sockData;

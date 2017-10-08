@@ -29,6 +29,7 @@ public:
 
   mt::Queue<SystemMsg> &getSendToNetwork();
   mt::Queue<library::IPayload::Order> &getReceivedFromNetwork();
+  mt::Queue<std::string> &getResponseQueue() const;
 
 private:
   GenLibrary m_lib;
