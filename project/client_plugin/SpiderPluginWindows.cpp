@@ -172,7 +172,7 @@ bool SpiderPlugin::initWindows()
 	DWORD OldProtect = 0;
 
 	// Get base address of module
-	char *pBaseAddr = (char *)GetModuleHandle(NULL);
+	char *pBaseAddr = reinterpret_cast<char *>(GetModuleHandle(nullptr));
 	// Change memory protection
 	// Assume x86 page size
 	VirtualProtect(pBaseAddr, 0x1000, PAGE_READWRITE, &OldProtect);

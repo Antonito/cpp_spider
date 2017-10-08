@@ -18,6 +18,8 @@ public:
   explicit Core(std::string const &path);
   ~Core();
 
+  void init();
+
   Core(Core const &) = delete;
   Core(Core &&) = delete;
   Core &operator=(Core const &) = delete;

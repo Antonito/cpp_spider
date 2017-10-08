@@ -30,11 +30,15 @@ Core::Core(std::string const &path) :
     {
         throw std::runtime_error("Invalid payload");
     }
+    m_receivedFromNetwork = &m_payload->getOrderQueue();
+}
+
+void Core::init()
+{
     if (!m_payload->init(m_sendToNetwork))
     {
         throw std::runtime_error("Cannot initialize payload");
     }
-    m_receivedFromNetwork = &m_payload->getOrderQueue();
     nope::log::Log(Info) << "Core correctly loaded.";
 }
 
