@@ -12,7 +12,7 @@ class IControl
 {
 public:
   virtual ~IControl() = default;
-  virtual void sendResponse(Event &ev) = 0;
+  virtual void sendEvent(Event &ev) = 0;
 };
 }
 }

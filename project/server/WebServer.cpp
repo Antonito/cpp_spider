@@ -78,14 +78,14 @@ bool WebServer::pollEvent(server::Event &ev)
   return (AControl::pollEvent(ev));
 }
 
-void WebServer::sendResponse(server::Event &ev)
-{
-  AControl::sendResponse(ev);
-}
-
 void WebServer::sendEvent(server::Event &ev)
 {
   AControl::sendEvent(ev);
+}
+
+void WebServer::sendToSpider(server::Event &ev)
+{
+  AControl::sendToSpider(ev);
 }
 
 void WebServer::run()

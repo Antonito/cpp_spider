@@ -24,12 +24,12 @@ bool AControl::pollEvent(Event &ev)
     return (false);
 }
 
-void AControl::sendResponse(Event &ev)
+void AControl::sendEvent(Event &ev)
 {
     m_responseQueue.push(ev);
 }
 
-void AControl::sendEvent(Event &ev)
+void AControl::sendToSpider(Event &ev)
 {
     m_commandQueue.push(ev);
 }

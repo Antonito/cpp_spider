@@ -53,6 +53,7 @@ void CommandCenter::execCommand(Client &client, Event &ev) const
     nope::log::Log(Info) << "Command requested not found";
     //send 404 route
     //ev.response.setResponse("404");
+    client.sendEvent(ev);
   }
 }
 }
