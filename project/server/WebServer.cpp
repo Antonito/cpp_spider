@@ -64,7 +64,7 @@ WebServer::WebServer(server::CommandCenter const &cmdCenter, volatile bool const
       ev.emitter = this;
       ev.askId = askId;
       ev.commandName = cur.name;
-      sendEvent(ev);
+      sendToSpider(ev);
     };
   }
 }

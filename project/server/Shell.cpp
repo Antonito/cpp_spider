@@ -49,7 +49,7 @@ void Shell::run()
             ev.emitter = this;
             ev.commandName = line;
 
-            sendEvent(ev);
+            sendToSpider(ev);
         }
 
     } while (m_running && std::cin);
