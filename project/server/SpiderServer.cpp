@@ -282,7 +282,7 @@ namespace spider
 		else
 		  {
 		    ev.key = ntohl(ev.key);
-		    // TODO: Store events
+		    // TODO: Store events in Storage
 		  }
 	      }
 	      break;
