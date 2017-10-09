@@ -6,13 +6,13 @@
 
 namespace spider
 {
-namespace server
-{
-class IControl
-{
-public:
-  virtual ~IControl() = default;
-  virtual void sendEvent(Event &ev) = 0;
-};
-}
+  namespace server
+  {
+    class IControl
+    {
+    public:
+      virtual ~IControl() = default;
+      virtual void sendEvent(Event &ev) = 0;
+    };
+  }
 }

@@ -13,12 +13,12 @@ Kill::Kill() : m_name("kill"), m_description("Stop the execution of the virus")
 
 std::string const &Kill::getName() const
 {
-    return m_name;
+  return m_name;
 }
 
 std::string const &Kill::getDescription() const
 {
-    return m_description;
+  return m_description;
 }
 
 std::string const Kill::getJSON(std::string const &res) const
@@ -30,8 +30,8 @@ std::string const Kill::getJSON(std::string const &res) const
 
 void Kill::command(spider::server::IClient *cli, void const *)
 {
-    static std::string const cmd = "/kill\r\n";
-    cli->send(cmd);
+  static std::string const cmd = "/kill\r\n";
+  cli->send(cmd);
 }
 
 static Kill plugin;
@@ -40,13 +40,13 @@ static Kill plugin;
 extern "C" {
 SPIDER_API spider::server::IPlugin *getPlugin()
 {
-    return static_cast<spider::server::IPlugin *>(&plugin);
+  return static_cast<spider::server::IPlugin *>(&plugin);
 }
 
 #if defined _WIN32
 BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)
 {
-    return (true);
+  return (true);
 }
 #endif
 }

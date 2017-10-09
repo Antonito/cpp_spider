@@ -9,24 +9,24 @@
 
 namespace network
 {
-class IClient
-{
-public:
-  enum ClientAction
+  class IClient
   {
-    SUCCESS,
-    FAILURE,
-    DISCONNECT
-  };
+  public:
+    enum ClientAction
+    {
+      SUCCESS,
+      FAILURE,
+      DISCONNECT
+    };
 
-  virtual ~IClient()
-  {
-  }
-  virtual bool disconnect() = 0;
-  virtual network::IClient::ClientAction write(std::string const &) = 0;
-  virtual network::IClient::ClientAction read(std::string &) = 0;
-  virtual bool hasTimedOut() const = 0;
-};
+    virtual ~IClient()
+    {
+    }
+    virtual bool                           disconnect() = 0;
+    virtual network::IClient::ClientAction write(std::string const &) = 0;
+    virtual network::IClient::ClientAction read(std::string &) = 0;
+    virtual bool                           hasTimedOut() const = 0;
+  };
 }
 
 #if defined(__clang__)

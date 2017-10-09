@@ -7,36 +7,36 @@
 
 namespace spider
 {
-namespace client
-{
-namespace core
-{
-class Core final
-{
-public:
-  // The folder where the foo dynamic libraries are located
-  explicit Core(std::string const &path);
-  ~Core();
+  namespace client
+  {
+    namespace core
+    {
+      class Core final
+      {
+      public:
+	// The folder where the foo dynamic libraries are located
+	explicit Core(std::string const &path);
+	~Core();
 
-  void init();
+	void init();
 
-  Core(Core const &) = delete;
-  Core(Core &&) = delete;
-  Core &operator=(Core const &) = delete;
-  Core &operator=(Core &&) = delete;
+	Core(Core const &) = delete;
+	Core(Core &&) = delete;
+	Core &operator=(Core const &) = delete;
+	Core &operator=(Core &&) = delete;
 
-  int run();
+	int run();
 
-  mt::Queue<SystemMsg> &getSendToNetwork();
-  mt::Queue<library::IPayload::Order> &getReceivedFromNetwork();
-  mt::Queue<std::string> &getResponseQueue() const;
+	mt::Queue<SystemMsg> &               getSendToNetwork();
+	mt::Queue<library::IPayload::Order> &getReceivedFromNetwork();
+	mt::Queue<std::string> &             getResponseQueue() const;
 
-private:
-  GenLibrary m_lib;
-  library::IPayload *m_payload;
-  mt::Queue<SystemMsg> m_sendToNetwork;
-  mt::Queue<library::IPayload::Order> *m_receivedFromNetwork;
-};
-}
-}
+      private:
+	GenLibrary                           m_lib;
+	library::IPayload *                  m_payload;
+	mt::Queue<SystemMsg>                 m_sendToNetwork;
+	mt::Queue<library::IPayload::Order> *m_receivedFromNetwork;
+      };
+    }
+  }
 }

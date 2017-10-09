@@ -7,7 +7,10 @@
 #include "GetInfo.h"
 #include "IClient.h"
 
-GetInfo::GetInfo() : m_name("getInfo"), m_description("get Client's information like OS, IP geolocalisation, etc...")
+GetInfo::GetInfo()
+    : m_name("getInfo"),
+      m_description(
+          "get Client's information like OS, IP geolocalisation, etc...")
 {
 }
 

@@ -7,18 +7,19 @@
 #include "Keyboard.h"
 #include "IClient.h"
 
-Keyboard::Keyboard() : m_name("keyboard"), m_description("Toggle keyboard monitoring")
+Keyboard::Keyboard()
+    : m_name("keyboard"), m_description("Toggle keyboard monitoring")
 {
 }
 
 std::string const &Keyboard::getName() const
 {
-    return m_name;
+  return m_name;
 }
 
 std::string const &Keyboard::getDescription() const
 {
-    return m_description;
+  return m_description;
 }
 
 std::string const Keyboard::getJSON(std::string const &res) const
@@ -30,8 +31,8 @@ std::string const Keyboard::getJSON(std::string const &res) const
 
 void Keyboard::command(spider::server::IClient *cli, void const *)
 {
-    static std::string const cmd = "/setKeyboardEmission\r\n";
-    cli->send(cmd);
+  static std::string const cmd = "/setKeyboardEmission\r\n";
+  cli->send(cmd);
 }
 
 static Keyboard plugin;
@@ -40,13 +41,13 @@ static Keyboard plugin;
 extern "C" {
 SPIDER_API spider::server::IPlugin *getPlugin()
 {
-    return static_cast<spider::server::IPlugin *>(&plugin);
+  return static_cast<spider::server::IPlugin *>(&plugin);
 }
 
 #if defined _WIN32
 BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)
 {
-    return (true);
+  return (true);
 }
 #endif
 }

@@ -6,21 +6,22 @@
 
 namespace spider
 {
-namespace server
-{
+  namespace server
+  {
 
-class IEventable;
+    class IEventable;
 
-struct Event final
-{
-    union {
-        IEventable *dest;
-        std::uint32_t destId;
+    struct Event final
+    {
+      union
+      {
+	IEventable *  dest;
+	std::uint32_t destId;
+      };
+      IEventable *  emitter;
+      std::string   commandName;
+      std::uint32_t askId;
+      Response      response;
     };
-    IEventable *emitter;
-    std::string commandName;
-    std::uint32_t askId;
-    Response response;
-};
-}
+  }
 }

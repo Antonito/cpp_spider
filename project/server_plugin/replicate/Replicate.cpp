@@ -13,12 +13,12 @@ Replicate::Replicate() : m_name("replicate"), m_description("Replicate virus")
 
 std::string const &Replicate::getName() const
 {
-    return m_name;
+  return m_name;
 }
 
 std::string const &Replicate::getDescription() const
 {
-    return m_description;
+  return m_description;
 }
 
 std::string const Replicate::getJSON(std::string const &res) const
@@ -30,8 +30,8 @@ std::string const Replicate::getJSON(std::string const &res) const
 
 void Replicate::command(spider::server::IClient *cli, void const *)
 {
-    static std::string const cmd = "/replicate\r\n";
-    cli->send(cmd);
+  static std::string const cmd = "/replicate\r\n";
+  cli->send(cmd);
 }
 
 static Replicate plugin;
@@ -40,13 +40,13 @@ static Replicate plugin;
 extern "C" {
 SPIDER_API spider::server::IPlugin *getPlugin()
 {
-    return static_cast<spider::server::IPlugin *>(&plugin);
+  return static_cast<spider::server::IPlugin *>(&plugin);
 }
 
 #if defined _WIN32
 BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)
 {
-    return (true);
+  return (true);
 }
 #endif
 }

@@ -13,12 +13,12 @@ Mouse::Mouse() : m_name("mouse"), m_description("Toggle mouse monitoring")
 
 std::string const &Mouse::getName() const
 {
-    return m_name;
+  return m_name;
 }
 
 std::string const &Mouse::getDescription() const
 {
-    return m_description;
+  return m_description;
 }
 
 std::string const Mouse::getJSON(std::string const &res) const
@@ -30,8 +30,8 @@ std::string const Mouse::getJSON(std::string const &res) const
 
 void Mouse::command(spider::server::IClient *cli, void const *)
 {
-    static std::string const cmd = "/setMouseEmission\r\n";
-    cli->send(cmd);
+  static std::string const cmd = "/setMouseEmission\r\n";
+  cli->send(cmd);
 }
 
 static Mouse plugin;
@@ -40,13 +40,13 @@ static Mouse plugin;
 extern "C" {
 SPIDER_API spider::server::IPlugin *getPlugin()
 {
-    return static_cast<spider::server::IPlugin *>(&plugin);
+  return static_cast<spider::server::IPlugin *>(&plugin);
 }
 
 #if defined _WIN32
 BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)
 {
-    return (true);
+  return (true);
 }
 #endif
 }

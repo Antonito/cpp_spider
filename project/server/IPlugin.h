@@ -10,26 +10,26 @@
 
 namespace spider
 {
-namespace server
-{
+  namespace server
+  {
 
-class IClient;
-class IControl;
+    class IClient;
+    class IControl;
 
-class IPlugin
-{
-public:
-  virtual ~IPlugin() = default;
+    class IPlugin
+    {
+    public:
+      virtual ~IPlugin() = default;
 
-  // Return the name of the plugin
-  virtual std::string const &getName() const = 0;
-  // Return the description of the plugin
-  virtual std::string const &getDescription() const = 0;
-  // return the JSON for webPanel
-  virtual std::string const getJSON(std::string const &res) const = 0;
-  // Execute the plugin action
-  // TODO: IControl * not void *
-  virtual void command(IClient *, void const *) = 0;
-};
-}
+      // Return the name of the plugin
+      virtual std::string const &getName() const = 0;
+      // Return the description of the plugin
+      virtual std::string const &getDescription() const = 0;
+      // return the JSON for webPanel
+      virtual std::string const getJSON(std::string const &res) const = 0;
+      // Execute the plugin action
+      // TODO: IControl * not void *
+      virtual void command(IClient *, void const *) = 0;
+    };
+  }
 }

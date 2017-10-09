@@ -7,27 +7,29 @@
 
 namespace spider
 {
-namespace shell
-{
-class Shell : public server::AControl
-{
-  public:
-    explicit Shell(server::CommandCenter const &, volatile bool const &, std::vector<std::unique_ptr<::spider::server::Client>> const &);
-    virtual ~Shell() = default;
+  namespace shell
+  {
+    class Shell : public server::AControl
+    {
+    public:
+      explicit Shell(
+          server::CommandCenter const &, volatile bool const &,
+          std::vector<std::unique_ptr<::spider::server::Client>> const &);
+      virtual ~Shell() = default;
 
-    Shell(Shell const &) = delete;
-    Shell(Shell &&) = delete;
-    Shell &operator=(Shell const &) = delete;
-    Shell &operator=(Shell &&) = delete;
+      Shell(Shell const &) = delete;
+      Shell(Shell &&) = delete;
+      Shell &operator=(Shell const &) = delete;
+      Shell &operator=(Shell &&) = delete;
 
-    virtual bool pollEvent(server::Event &ev);
-    virtual void sendEvent(server::Event &ev);
-    virtual void sendToSpider(server::Event &ev);
+      virtual bool pollEvent(server::Event &ev);
+      virtual void sendEvent(server::Event &ev);
+      virtual void sendToSpider(server::Event &ev);
 
-    void run();
+      void run();
 
-  private:
-    void displayHelpMessage() const;
-};
-}
+    private:
+      void displayHelpMessage() const;
+    };
+  }
 }

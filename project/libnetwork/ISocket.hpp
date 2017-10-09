@@ -11,24 +11,24 @@
 
 namespace network
 {
-class ISocket
-{
-public:
-  virtual ~ISocket()
+  class ISocket
   {
-  }
-  virtual bool send(void const *data, std::size_t len) const = 0;
-  virtual bool rec(void *buffer, std::size_t rlen,
-                   ssize_t *buffLen) const = 0;
-  virtual bool openConnection() = 0;
-  virtual bool closeConnection() = 0;
+  public:
+    virtual ~ISocket()
+    {
+    }
+    virtual bool send(void const *data, std::size_t len) const = 0;
+    virtual bool rec(void *buffer, std::size_t rlen,
+                     ssize_t *buffLen) const = 0;
+    virtual bool openConnection() = 0;
+    virtual bool closeConnection() = 0;
 
-protected:
-  virtual bool connectToHost(std::int32_t const socktype,
-                             std::int32_t const proto,
-                             bool shouldConnect) = 0;
-  virtual void hostConnection() = 0;
-};
+  protected:
+    virtual bool connectToHost(std::int32_t const socktype,
+                               std::int32_t const proto,
+                               bool               shouldConnect) = 0;
+    virtual void hostConnection() = 0;
+  };
 }
 
 #if defined(__clang__)
