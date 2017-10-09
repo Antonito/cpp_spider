@@ -15,7 +15,8 @@ namespace spider
           m_tcpSocket(port, 64, network::ASocket::SocketType::BLOCKING),
           m_tcpDataSocket(port + 1, 64,
                           network::ASocket::SocketType::BLOCKING),
-          m_commandQueue()
+          m_commandQueue(), m_curClients(0), m_readfds(), m_writefds(),
+          m_exceptfds()
     {
       if (!m_tcpSocket.openConnection())
 	{

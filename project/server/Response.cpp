@@ -5,7 +5,7 @@ namespace spider
   namespace server
   {
 
-    Response::Response()
+    Response::Response() : m_response(), m_nbClient()
     {
     }
 

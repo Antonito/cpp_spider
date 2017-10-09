@@ -10,7 +10,7 @@
 class CPUID
 {
 public:
-  explicit CPUID(std::uint32_t i)
+  explicit CPUID(std::uint32_t i) : m_regs{}
   {
 #ifdef _WIN32
     __cpuid(reinterpret_cast<int *>(m_regs.data()), static_cast<int>(i));

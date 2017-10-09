@@ -23,7 +23,8 @@ namespace spider
 #else
 #error "Plateform not supported"
 #endif
-            m_payload(nullptr), m_sendToNetwork{}
+            m_payload(nullptr), m_sendToNetwork{},
+            m_receivedFromNetwork(nullptr)
       {
 	std::function<library::IPayload *()> getPayload =
 	    m_lib.getFunction<library::IPayload *()>("getPayload");

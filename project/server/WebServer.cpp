@@ -17,7 +17,8 @@ namespace spider
           m_io_service(),
           m_acceptor(m_io_service, boost::asio::ip::tcp::endpoint(
                                        boost::asio::ip::tcp::v4(), m_port)),
-          m_cmdCenter(cmdCenter), m_running(running), m_clientCount(0)
+          m_cmdCenter(cmdCenter), m_clients{}, m_running(running),
+          m_clientCount(0)
     {
       nope::log::Log(Info) << "Creating WebServer";
       nope::log::Log(Debug)

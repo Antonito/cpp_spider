@@ -10,7 +10,7 @@ namespace spider
     Client::Client(sock_t const sock, CommandCenter const &cmdCenter,
                    std::size_t const ndx)
         : m_os(""), m_ip(""), m_geo(""), m_pcName(""), m_commandQueue(),
-          m_cmdCenter(cmdCenter), m_socket(sock),
+          m_responseQueue(), m_cmdCenter(cmdCenter), m_socket(sock),
           m_id(static_cast<std::uint16_t>(ndx)), m_canWrite(false),
           m_outputQueue(), m_receiveBuffer()
     {

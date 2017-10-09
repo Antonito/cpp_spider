@@ -17,6 +17,11 @@ namespace spider
 #endif
     struct Event final
     {
+      Event();
+      Event(Event const &);
+
+      Event &operator=(Event const &);
+
       union
       {
 	IEventable *  dest;
