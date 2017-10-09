@@ -36,6 +36,9 @@ namespace spider
 	// Get the event thread-safe queue, in order to control the client
 	virtual mt::Queue<Order> &getOrderQueue() = 0;
 
+	// Respond to a ping from the server
+	virtual void ping() = 0;
+
 	// Get the message thread-safe queue, in order to response to the
 	// server
 	virtual mt::Queue<std::string> &getReponseQueue() = 0;

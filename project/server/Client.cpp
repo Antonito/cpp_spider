@@ -11,9 +11,14 @@ namespace spider
                    std::size_t const ndx)
         : m_os(""), m_ip(""), m_geo(""), m_pcName(""), m_commandQueue(),
           m_responseQueue(), m_cmdCenter(cmdCenter), m_socket(sock),
-          m_id(static_cast<std::uint16_t>(ndx)), m_canWrite(false),
-          m_outputQueue(), m_receiveBuffer()
+          m_socketData(-1), m_id(static_cast<std::uint16_t>(ndx)),
+          m_canWrite(false), m_outputQueue(), m_receiveBuffer(), m_macAddr{}
     {
+    }
+
+    void Client::setDataSocket(sock_t const sock)
+    {
+      m_socketData = sock;
     }
 
     bool Client::canWrite() const
@@ -26,9 +31,14 @@ namespace spider
       m_canWrite = !m_canWrite;
     }
 
-    network::IClient::ClientAction Client::treatIncomingData()
+    bool Client::operator==(network::tcp::MacAddrArray const &arr) const
     {
-      auto ret = network::IClient::ClientAction::FAILURE;
+      return arr == m_macAddr;
+    }
+
+    ::network::IClient::ClientAction Client::treatIncomingData()
+    {
+      auto ret = ::network::IClient::ClientAction::FAILURE;
 
       // TODO: treat values
       std::queue<std::string> resp;
@@ -50,9 +60,9 @@ namespace spider
       return ret;
     }
 
-    network::IClient::ClientAction Client::treatOutgoingData()
+    ::network::IClient::ClientAction Client::treatOutgoingData()
     {
-      auto ret = network::IClient::ClientAction::FAILURE;
+      auto ret = ::network::IClient::ClientAction::FAILURE;
 
       if (!m_outputQueue.empty())
 	{
@@ -60,7 +70,7 @@ namespace spider
 	  ret = sendNetwork(m_outputQueue.front());
 	  m_outputQueue.pop();
 	}
-      if (ret == network::IClient::ClientAction::SUCCESS)
+      if (ret == ::network::IClient::ClientAction::SUCCESS)
 	{
 	  toggleWrite();
 	}
@@ -68,10 +78,10 @@ namespace spider
       return ret;
     }
 
-    network::IClient::ClientAction
+    ::network::IClient::ClientAction
         Client::readFromNetwork(std::queue<std::string> &str)
     {
-      auto ret = network::IClient::ClientAction::FAILURE;
+      auto ret = ::network::IClient::ClientAction::FAILURE;
       std::array<char, 0x1000> data;
       ssize_t buffLen = 0;
 
@@ -79,9 +89,9 @@ namespace spider
 	{
 	  if (!buffLen)
 	    {
-	      return network::IClient::ClientAction::DISCONNECT;
+	      return ::network::IClient::ClientAction::DISCONNECT;
 	    }
-	  ret = network::IClient::ClientAction::SUCCESS;
+	  ret = ::network::IClient::ClientAction::SUCCESS;
 	  m_receiveBuffer.write(
 	      reinterpret_cast<std::uint8_t const *>(data.data()),
 	      static_cast<std::size_t>(buffLen));
@@ -104,14 +114,15 @@ namespace spider
       return ret;
     }
 
-    network::IClient::ClientAction Client::sendNetwork(std::string const &str)
+    ::network::IClient::ClientAction
+        Client::sendNetwork(std::string const &str)
     {
-      auto ret = network::IClient::ClientAction::SUCCESS;
+      auto ret = ::network::IClient::ClientAction::SUCCESS;
 
       if (m_socket.send(str.c_str(), str.length()) == false)
 	{
 	  nope::log::Log(Debug) << "Failed to write data [Client]";
-	  ret = network::IClient::ClientAction::FAILURE;
+	  ret = ::network::IClient::ClientAction::FAILURE;
 	}
       return (ret);
     }

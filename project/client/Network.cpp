@@ -31,8 +31,6 @@ namespace spider
     {
       using namespace std::chrono_literals;
 
-      m_cmdResponse.push(
-          "/connect 5E:FF:56:A2:AF:15\r\n"); // TODO: Put real MacAddress
       while (1)
 	{
 	  // Try to connect
@@ -46,6 +44,18 @@ namespace spider
 	  m_isConnected &= m_sockData->openConnection();
 	  nope::log::Log(Info)
 	      << "Trying to connect to server..."; // TOOD: Put in Log(Debug)
+
+	  if (m_isConnected)
+	    {
+	      // Clean reponses
+	      while (!m_cmdResponse.empty())
+		{
+		  m_cmdResponse.pop();
+		}
+	      m_cmdResponse.push(
+	          "/connect 5E:FF:56:A2:AF:15\r\n"); // TODO: Put real
+	                                             // MacAddress
+	    }
 
 	  while (m_isConnected)
 	    {
@@ -115,7 +125,8 @@ namespace spider
 	    }
 	  if (m_sockData)
 	    {
-	      std::int32_t const dataSock = static_cast<std::int32_t>(m_sockData->getSocket());
+	      std::int32_t const dataSock =
+	          static_cast<std::int32_t>(m_sockData->getSocket());
 
 	      if (!m_sendToNetwork.empty())
 		{
@@ -203,7 +214,11 @@ namespace spider
       std::int32_t               rc = 0;
       network::tcp::PacketHeader header;
 
-      header.time = msg.sys.time;
+#if defined __linux__
+      header.time = h64tobe(msg.sys.time);
+#else
+      header.time = htonll(msg.sys.time);
+#endif
       header.macAddress = msg.sys.mac;
       switch (msg.sys.type)
 	{
@@ -221,10 +236,12 @@ namespace spider
 	    event.processName = msg.sys.currentWindow;
 
 	    // Send packet
-	    rc |= static_cast<std::int32_t>(m_sock->send(&header, sizeof(header)));
-	    if (!rc)
+	    rc = static_cast<std::int32_t>(
+	        m_sockData->send(&header, sizeof(header)));
+	    if (rc)
 	      {
-		rc |= static_cast<std::int32_t>(m_sock->send(&event, sizeof(event)));
+		rc &= static_cast<std::int32_t>(
+		    m_sockData->send(&event, sizeof(event)));
 	      }
 	  }
 	  break;
@@ -279,7 +296,8 @@ namespace spider
 
       if (m_sockData)
 	{
-	  std::int32_t const dataSock = static_cast<std::int32_t>(m_sockData->getSocket());
+	  std::int32_t const dataSock =
+	      static_cast<std::int32_t>(m_sockData->getSocket());
 
 	  if (!rc && FD_ISSET(dataSock, &writefds))
 	    {

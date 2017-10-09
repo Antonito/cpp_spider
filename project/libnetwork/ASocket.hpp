@@ -32,6 +32,7 @@ namespace network
     ASocket(ASocket const &other);
     ASocket &operator=(ASocket const &);
     ASocket(ASocket &&);
+    ASocket &operator=(sock_t const sock);
 
     virtual ~ASocket();
     virtual bool closeConnection();

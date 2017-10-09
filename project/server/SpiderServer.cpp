@@ -12,13 +12,13 @@ namespace spider
                                std::uint16_t        port)
         : m_controllers(), m_clients(), m_cmdCenter(cmdCenter),
           m_running(running),
-          m_tcpSocket(port, 64, network::ASocket::SocketType::BLOCKING),
+          m_tcpSocket(port, 64, ::network::ASocket::SocketType::BLOCKING),
           m_tcpDataSocket(port + 1, 64,
-                          network::ASocket::SocketType::BLOCKING),
+                          ::network::ASocket::SocketType::BLOCKING),
           m_commandQueue(), m_curClients(0), m_readfds(), m_writefds(),
           m_exceptfds()
     {
-      if (!m_tcpSocket.openConnection())
+      if (!m_tcpSocket.openConnection() || !m_tcpDataSocket.openConnection())
 	{
 	  throw std::runtime_error("Cannot initialize connection");
 	}
@@ -105,6 +105,16 @@ namespace spider
 		  maxSock = cli->getSocket();
 		}
 	    }
+
+	  for (auto const &cli : m_clientsData)
+	    {
+	      FD_SET(cli->getSocket(), &m_readfds);
+	      if (maxSock < cli->getSocket())
+		{
+		  maxSock = cli->getSocket();
+		}
+	    }
+
 	  m_exceptfds = m_readfds;
 	  rc = select(maxSock + 1, &m_readfds, &m_writefds, &m_exceptfds, &tv);
 	}
@@ -120,10 +130,10 @@ namespace spider
 	}
       if (FD_ISSET(m_tcpDataSocket.getSocket(), &m_readfds))
 	{
-	  // TODO
-	  // Add data client
+	  addClientData();
 	}
 
+      // Treat client's commands
       for (std::vector<std::unique_ptr<Client>>::iterator ite =
                m_clients.begin();
            ite != m_clients.end();)
@@ -135,11 +145,11 @@ namespace spider
 	  if (FD_ISSET(sock, &m_readfds))
 	    {
 	      // Handle input
-	      network::IClient::ClientAction action;
+	      ::network::IClient::ClientAction action;
 
 	      nope::log::Log(Info) << "Can read from socket #" << sock;
 	      action = cli.treatIncomingData();
-	      if (action != network::IClient::ClientAction::SUCCESS)
+	      if (action != ::network::IClient::ClientAction::SUCCESS)
 		{
 		  removeClient(cli);
 		  deleted = true;
@@ -148,11 +158,11 @@ namespace spider
 	  if (deleted == false && FD_ISSET(sock, &m_writefds))
 	    {
 	      // Handle output
-	      network::IClient::ClientAction action;
+	      ::network::IClient::ClientAction action;
 
 	      nope::log::Log(Info) << "Can write to socket #" << sock;
 	      action = cli.treatOutgoingData();
-	      if (action == network::IClient::ClientAction::DISCONNECT)
+	      if (action == ::network::IClient::ClientAction::DISCONNECT)
 		{
 		  removeClient(cli);
 		  deleted = true;
@@ -171,6 +181,132 @@ namespace spider
 	      ++ite;
 	    }
 	}
+
+      // Treat client's datas
+      for (std::vector<std::unique_ptr<::network::TCPSocket>>::iterator ite =
+               m_clientsData.begin();
+           ite != m_clientsData.end();)
+	{
+	  bool                  deleted = false;
+	  ::network::TCPSocket &cli = **ite;
+	  sock_t const          sock = cli.getSocket();
+
+	  if (FD_ISSET(sock, &m_readfds))
+	    {
+	      // Handle input
+	      ::network::IClient::ClientAction action;
+
+	      nope::log::Log(Info) << "Can read from socket #" << sock;
+	      action = readData(cli);
+	      if (action != ::network::IClient::ClientAction::SUCCESS)
+		{
+		  removeClientData(cli);
+		  deleted = true;
+		}
+	    }
+	  if (deleted == false && FD_ISSET(sock, &m_exceptfds))
+	    {
+	      // Handle exception
+	      removeClientData(cli);
+	      deleted = true;
+	    }
+
+	  // Check if we deleted anything
+	  if (!deleted)
+	    {
+	      ++ite;
+	    }
+	}
+    }
+
+    bool SpiderServer::readSize(::network::TCPSocket &sock, std::uint8_t *data,
+                                size_t const size)
+    {
+      size_t totalLen = 0;
+
+      while (totalLen != size)
+	{
+	  ssize_t readLen;
+
+	  if (!sock.rec(data, size, &readLen) || !readLen)
+	    {
+	      return false;
+	    }
+	  totalLen += static_cast<std::size_t>(readLen);
+	}
+      return true;
+    }
+
+    // Read a data packet and store it
+    ::network::IClient::ClientAction
+        SpiderServer::readData(::network::TCPSocket &sock)
+    {
+      auto ret = ::network::IClient::ClientAction::SUCCESS;
+      network::tcp::PacketHeader header;
+
+      // Read header
+      if (!readSize(sock, reinterpret_cast<std::uint8_t *>(&header),
+                    sizeof(header)))
+	{
+	  ret = ::network::IClient::ClientAction::FAILURE;
+	}
+
+      if (ret == ::network::IClient::ClientAction::SUCCESS)
+	{
+#if defined __linux__
+	  header.time = be64toh(header.time);
+#else
+	  header.time = ntohll(header.time);
+#endif
+	  switch (header.type)
+	    {
+	    case network::tcp::PacketType::KeyboardEvent:
+// Explicit fallthrough
+#if __has_cpp_attribute(fallthrough)
+	      [[fallthrough]];
+#elif defined __clang__
+	      [[clang::fallthrough]];
+#elif defined __GNUC__
+	      __attribute__((fallthrough));
+#else
+#endif
+	    case network::tcp::PacketType::MouseButton:
+	      {
+		network::tcp::PacketEvent ev;
+
+		if (!readSize(sock, reinterpret_cast<std::uint8_t *>(&ev),
+		              sizeof(ev)))
+		  {
+		    ret = ::network::IClient::ClientAction::FAILURE;
+		  }
+		// TODO: Store events	
+	      }
+	      break;
+	    case network::tcp::PacketType::MousePosition:
+	      {
+		network::tcp::PacketMov ev;
+
+		if (!readSize(sock, reinterpret_cast<std::uint8_t *>(&ev),
+		              sizeof(ev)))
+		  {
+		    ret = ::network::IClient::ClientAction::FAILURE;
+		  }
+	      }
+	      break;
+	    case network::tcp::PacketType::Screenshot:
+	      {
+		// TODO: Not implemented yet
+	      }
+	      break;
+	    case network::tcp::PacketType::Infos:
+	      {
+		// TODO: Not implemented yet
+	      }
+	      break;
+	    }
+	}
+
+      return ret;
     }
 
     bool SpiderServer::addClient()
@@ -195,7 +331,7 @@ namespace spider
 	  nope::log::Log(Info)
 	      << "Added client FD #" << m_clients.back()->getSocket();
 	  nope::log::Log(Info)
-	      << "New player connected #" << m_clients.back()->getId();
+	      << "New client connected #" << m_clients.back()->getId();
 	  ++m_curClients;
 	  nope::log::Log(Info)
 	      << "There are now " << m_curClients << " clients.";
@@ -204,22 +340,56 @@ namespace spider
       return (false);
     }
 
+    bool SpiderServer::addClientData()
+    {
+      std::int32_t  rc = 0;
+      sockaddr_in_t in = {};
+      sock_t const  sock = m_tcpDataSocket.getSocket();
+
+      nope::log::Log(Info) << "There's client to accept on socket #" << sock;
+      do
+	{
+	  socklen_t len = sizeof(in);
+	  rc = ::accept(sock, reinterpret_cast<sockaddr_t *>(&in), &len);
+	}
+      while (rc == -1 && errno == EINTR);
+
+      // Check if the socket is valid
+      if (rc > 0)
+	{
+	  m_clientsData.push_back(std::make_unique<::network::TCPSocket>(rc));
+	  nope::log::Log(Info)
+	      << "Added clientData FD #" << m_clientsData.back()->getSocket();
+	  return (true);
+	}
+      return (false);
+    }
+
     void SpiderServer::removeClient(Client &cli)
     {
-      Client &g = static_cast<Client &>(cli);
-
       nope::log::Log(Info) << "Removing Client";
-      nope::log::Log(Info) << "Client disconnected #" << g.getId();
-      g.disconnect();
+      nope::log::Log(Info) << "Client disconnected #" << cli.getId();
+      cli.disconnect();
 
       // Remove asked element
       m_clients.erase(std::remove_if(m_clients.begin(), m_clients.end(),
                                      [&](std::unique_ptr<Client> const &o) {
-	                               return (*o == g);
+	                               return (*o == cli);
 	                             }),
                       m_clients.end());
       --m_curClients;
       nope::log::Log(Info) << "There are now " << m_curClients << " clients.";
+    }
+
+    void SpiderServer::removeClientData(::network::TCPSocket const &sock)
+    {
+      // Remove asked element
+      m_clientsData.erase(
+          std::remove_if(m_clientsData.begin(), m_clientsData.end(),
+                         [&](std::unique_ptr<::network::TCPSocket> const &o) {
+	                   return (*o == sock);
+	                 }),
+          m_clientsData.end());
     }
 
     std::vector<std::unique_ptr<Client>> const &

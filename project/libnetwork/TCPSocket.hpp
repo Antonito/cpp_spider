@@ -18,6 +18,8 @@ namespace network
     virtual bool rec(void *buffer, std::size_t rlen, ssize_t *buffLen) const;
     virtual bool openConnection();
 
+    TCPSocket &operator=(sock_t const sock);
+
   private:
     bool sendBlocking(void const *data, std::size_t len) const;
     bool sendNonBlocking(void const *data, std::size_t len) const;

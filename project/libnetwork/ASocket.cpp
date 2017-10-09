@@ -34,6 +34,19 @@ namespace network
 #endif
   }
 
+  ASocket &ASocket::operator=(sock_t const sock)
+  {
+    m_socket = sock;
+    m_port = 0;
+    m_host = "";
+    m_ip = false;
+    m_maxClients = 0;
+    m_curClients = 0;
+    m_addr = sockaddr_in_t{};
+    m_type = SocketType::BLOCKING;
+    return (*this);
+  }
+
   ASocket::ASocket(SocketType type)
       : m_socket(-1), m_port(0), m_host(""), m_ip(false), m_maxClients(0),
         m_curClients(0), m_addr{}, m_type(type)

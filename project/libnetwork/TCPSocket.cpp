@@ -30,6 +30,12 @@ namespace network
   {
   }
 
+  TCPSocket &TCPSocket::operator=(sock_t const sock)
+  {
+    ASocket::operator=(sock);
+    return (*this);
+  }
+
   bool TCPSocket::openConnection()
   {
     bool ret;

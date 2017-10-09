@@ -10,6 +10,7 @@
 #include "TCPSocket.hpp"
 #include "IClient.hpp"
 #include "RingBuffer.h"
+#include "Packet.h"
 
 namespace spider
 {
@@ -27,7 +28,11 @@ namespace spider
                       std::size_t const ndx);
       virtual ~Client();
 
+      bool operator==(network::tcp::MacAddrArray const &arr) const;
+
       void execute();
+
+      void setDataSocket(sock_t const sock);
 
       virtual void send(std::string const &buffer);
       virtual size_t receive();
@@ -49,31 +54,33 @@ namespace spider
 
       void disconnect();
 
-      bool                           canWrite() const;
-      network::IClient::ClientAction treatIncomingData();
-      network::IClient::ClientAction treatOutgoingData();
+      bool                             canWrite() const;
+      ::network::IClient::ClientAction treatIncomingData();
+      ::network::IClient::ClientAction treatOutgoingData();
       bool operator==(Client const &other) const;
       std::uint16_t getId() const;
 
     private:
-      network::IClient::ClientAction sendNetwork(std::string const &str);
-      network::IClient::ClientAction
+      ::network::IClient::ClientAction sendNetwork(std::string const &str);
+      ::network::IClient::ClientAction
           readFromNetwork(std::queue<std::string> &str);
 
       void toggleWrite();
 
-      std::string             m_os;
-      std::string             m_ip;
-      std::string             m_geo;
-      std::string             m_pcName;
-      std::queue<Event>       m_commandQueue;
-      std::queue<Event>       m_responseQueue;
-      CommandCenter const &   m_cmdCenter;
-      network::TCPSocket      m_socket;
-      std::uint16_t           m_id;
-      bool                    m_canWrite;
-      std::queue<std::string> m_outputQueue;
-      RingBuffer<0x1000>      m_receiveBuffer;
+      std::string                m_os;
+      std::string                m_ip;
+      std::string                m_geo;
+      std::string                m_pcName;
+      std::queue<Event>          m_commandQueue;
+      std::queue<Event>          m_responseQueue;
+      CommandCenter const &      m_cmdCenter;
+      ::network::TCPSocket       m_socket;
+      ::network::TCPSocket       m_socketData;
+      std::uint16_t              m_id;
+      bool                       m_canWrite;
+      std::queue<std::string>    m_outputQueue;
+      RingBuffer<0x1000>         m_receiveBuffer;
+      network::tcp::MacAddrArray m_macAddr;
     };
 
 #if defined   __clang__

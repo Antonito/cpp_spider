@@ -51,13 +51,10 @@ namespace spider
       };
     };
 
-    struct SystemMsg
+    union SystemMsg
     {
-      union
-      {
-	std::uint32_t valid; // is 0 if non valid
-	_SystemMsgRaw sys;
-      };
+      std::uint32_t valid; // is 0 if non valid
+      _SystemMsgRaw sys;
     };
   };
 
