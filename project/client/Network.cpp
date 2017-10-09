@@ -227,7 +227,7 @@ namespace spider
 	    network::tcp::PacketEvent event;
 
 	    header.type = network::tcp::PacketType::KeyboardEvent;
-	    event.key = msg.sys.event.key;
+	    event.key = htonl(msg.sys.event.key);
 	    event.state = (msg.sys.event.state == SystemMsgEventState::Down)
 	                      ? network::tcp::PacketEventState::Down
 	                      : network::tcp::PacketEventState::Up;

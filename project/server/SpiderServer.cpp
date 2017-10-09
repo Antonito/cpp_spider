@@ -279,7 +279,11 @@ namespace spider
 		  {
 		    ret = ::network::IClient::ClientAction::FAILURE;
 		  }
-		// TODO: Store events	
+		else
+		  {
+		    ev.key = ntohl(ev.key);
+		    // TODO: Store events
+		  }
 	      }
 	      break;
 	    case network::tcp::PacketType::MousePosition:
