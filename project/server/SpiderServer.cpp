@@ -295,6 +295,12 @@ namespace spider
 		  {
 		    ret = ::network::IClient::ClientAction::FAILURE;
 		  }
+		else
+		  {
+		    ev.posX = ntohl(ev.posX);
+		    ev.posY = ntohl(ev.posY);
+		    // TODO: Store
+		  }
 	      }
 	      break;
 	    case network::tcp::PacketType::Screenshot:

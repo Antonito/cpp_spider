@@ -211,7 +211,7 @@ namespace spider
 
     std::int32_t Network::sendMsg(SystemMsg const &msg) const
     {
-      std::int32_t               rc = 0;
+      std::int32_t               rc = 1;
       network::tcp::PacketHeader header;
 
 #if defined __linux__
@@ -246,7 +246,46 @@ namespace spider
 	  }
 	  break;
 	case SystemMsgType::EventMouse:
-	  // TODO
+	  // Send mouse button event
+	  {
+	    network::tcp::PacketEvent event;
+
+	    header.type = network::tcp::PacketType::MouseButton;
+	    event.key = htonl(msg.sys.event.key);
+	    event.state = (msg.sys.event.state == SystemMsgEventState::Down)
+	                      ? network::tcp::PacketEventState::Down
+	                      : network::tcp::PacketEventState::Up;
+	    event.repeat = 0;
+	    event.shift = 0;
+	    event.processName = msg.sys.currentWindow;
+	    rc = static_cast<std::int32_t>(
+	        m_sockData->send(&header, sizeof(header)));
+	    if (rc)
+	      {
+		rc &= static_cast<std::int32_t>(
+		    m_sockData->send(&event, sizeof(event)));
+	      }
+	  }
+
+	  // Send mouse move event
+	  {
+	    network::tcp::PacketMov event;
+
+	    header.type = network::tcp::PacketType::MousePosition;
+	    event.posX = htonl(msg.sys.event.posX);
+	    event.posY = htonl(msg.sys.event.posY);
+	    event.processName = msg.sys.currentWindow;
+	    if (rc)
+	      {
+		rc &= static_cast<std::int32_t>(
+		    m_sockData->send(&header, sizeof(header)));
+	      }
+	    if (rc)
+	      {
+		rc &= static_cast<std::int32_t>(
+		    m_sockData->send(&event, sizeof(event)));
+	      }
+	  }
 	  break;
 	case SystemMsgType::Data:
 	  {
