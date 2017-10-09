@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 14)
 if(UNIX AND NOT APPLE)
 SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Weffc++")
 elseif(APPLE)
-SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-global-constructors -Wno-exit-time-destructors")
+SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-global-constructors -Wno-exit-time-destructors -Wno-c++1z-extensions")
 endif()
 SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS}")
 

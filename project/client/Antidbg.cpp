@@ -74,8 +74,6 @@ namespace spider
 
     bool Debugger::isDebuggerPresent()
     {
-      //TODO : remove
-      return false;
 #if defined _WIN32 && _MSC_VER && !__INTEL_COMPILER
       char  underDebugger = 0;
 
