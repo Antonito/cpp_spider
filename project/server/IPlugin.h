@@ -16,6 +16,11 @@ namespace spider
     class IClient;
     class IControl;
 
+#if defined   __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wweak-vtables"
+#endif
+
     class IPlugin
     {
     public:
@@ -31,5 +36,11 @@ namespace spider
       // TODO: IControl * not void *
       virtual void command(IClient *, void const *) = 0;
     };
+
+#if defined   __clang__
+#pragma clang diagnostic pop
+#endif
   }
 }
+
+extern "C" SPIDER_API spider::server::IPlugin *getPlugin();

@@ -13,7 +13,22 @@ namespace spider
     {
     }
 
-    std::uint32_t const Response::getNbClient() const
+    Response::Response(Response const &other)
+        : m_response(other.m_response), m_nbClient(other.m_nbClient)
+    {
+    }
+
+    Response &Response::operator=(Response const &other)
+    {
+      if (this != &other)
+	{
+	  m_response = other.m_response;
+	  m_nbClient = other.m_nbClient;
+	}
+      return (*this);
+    }
+
+    std::uint32_t Response::getNbClient() const
     {
       return (m_nbClient);
     }

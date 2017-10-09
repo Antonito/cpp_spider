@@ -18,11 +18,16 @@ namespace spider
 {
   namespace server
   {
+#if defined   __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpadded"
+#endif
+
     class SpiderServer final : public IServer
     {
     public:
       explicit SpiderServer(CommandCenter &cmdCenter, volatile bool const &,
-                            std::uint32_t  port);
+                            std::uint16_t  port);
       virtual ~SpiderServer() = default;
 
       SpiderServer(SpiderServer &&) = delete;
@@ -54,5 +59,8 @@ namespace spider
       fd_set m_writefds;
       fd_set m_exceptfds;
     };
+#if defined   __clang__
+#pragma clang diagnostic pop
+#endif
   }
 }

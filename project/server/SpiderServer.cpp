@@ -9,7 +9,7 @@ namespace spider
   {
     SpiderServer::SpiderServer(CommandCenter &      cmdCenter,
                                volatile bool const &running,
-                               std::uint32_t        port)
+                               std::uint16_t        port)
         : m_controllers(), m_clients(), m_cmdCenter(cmdCenter),
           m_running(running),
           m_tcpSocket(port, 64, network::ASocket::SocketType::BLOCKING),
@@ -40,7 +40,8 @@ namespace spider
 	  for (auto *ctrl : m_controllers)
 	    {
 	      Event ev;
-	      ev.response.setNbClient(m_clients.size());
+	      ev.response.setNbClient(
+	          static_cast<std::uint32_t>(m_clients.size()));
 	      while (ctrl->pollEvent(ev))
 		{
 		  // Link to correct client
@@ -116,59 +117,59 @@ namespace spider
 	{
 	  addClient();
 	}
-    if (FD_ISSET(m_tcpDataSocket.getSocket(), &m_readfds)
-    {
-	// TODO
-	// Add data client
-    }
+      if (FD_ISSET(m_tcpDataSocket.getSocket(), &m_readfds))
+	{
+	  // TODO
+	  // Add data client
+	}
 
-    for (std::vector<std::unique_ptr<Client>>::iterator ite =
-             m_clients.begin();
-         ite != m_clients.end();)
-    {
-	bool         deleted = false;
-	Client &     cli = **ite;
-	sock_t const sock = cli.getSocket();
+      for (std::vector<std::unique_ptr<Client>>::iterator ite =
+               m_clients.begin();
+           ite != m_clients.end();)
+	{
+	  bool         deleted = false;
+	  Client &     cli = **ite;
+	  sock_t const sock = cli.getSocket();
 
-	if (FD_ISSET(sock, &m_readfds))
-	  {
-	    // Handle input
-	    network::IClient::ClientAction action;
+	  if (FD_ISSET(sock, &m_readfds))
+	    {
+	      // Handle input
+	      network::IClient::ClientAction action;
 
-	    nope::log::Log(Info) << "Can read from socket #" << sock;
-	    action = cli.treatIncomingData();
-	    if (action != network::IClient::ClientAction::SUCCESS)
-	      {
-		removeClient(cli);
-		deleted = true;
-	      }
-	  }
-	if (deleted == false && FD_ISSET(sock, &m_writefds))
-	  {
-	    // Handle output
-	    network::IClient::ClientAction action;
+	      nope::log::Log(Info) << "Can read from socket #" << sock;
+	      action = cli.treatIncomingData();
+	      if (action != network::IClient::ClientAction::SUCCESS)
+		{
+		  removeClient(cli);
+		  deleted = true;
+		}
+	    }
+	  if (deleted == false && FD_ISSET(sock, &m_writefds))
+	    {
+	      // Handle output
+	      network::IClient::ClientAction action;
 
-	    nope::log::Log(Info) << "Can write to socket #" << sock;
-	    action = cli.treatOutgoingData();
-	    if (action == network::IClient::ClientAction::DISCONNECT)
-	      {
-		removeClient(cli);
-		deleted = true;
-	      }
-	  }
-	if (deleted == false && FD_ISSET(sock, &m_exceptfds))
-	  {
-	    // Handle exception
-	    removeClient(cli);
-	    deleted = true;
-	  }
+	      nope::log::Log(Info) << "Can write to socket #" << sock;
+	      action = cli.treatOutgoingData();
+	      if (action == network::IClient::ClientAction::DISCONNECT)
+		{
+		  removeClient(cli);
+		  deleted = true;
+		}
+	    }
+	  if (deleted == false && FD_ISSET(sock, &m_exceptfds))
+	    {
+	      // Handle exception
+	      removeClient(cli);
+	      deleted = true;
+	    }
 
-	// Check if we deleted anything
-	if (!deleted)
-	  {
-	    ++ite;
-	  }
-    }
+	  // Check if we deleted anything
+	  if (!deleted)
+	    {
+	      ++ite;
+	    }
+	}
     }
 
     bool SpiderServer::addClient()

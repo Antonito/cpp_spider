@@ -21,6 +21,11 @@ namespace spider
     {
     }
 
+#if defined   __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
+#endif
+
     void Network::run(std::uint16_t const port, std::uint16_t const portData,
                       std::string const &addr, bool const isIP)
     {
@@ -81,6 +86,10 @@ namespace spider
 	}
     }
 
+#if defined   __clang__
+#pragma clang diagnostic pop
+#endif
+
     std::int32_t Network::multiplex(fd_set &readfds, fd_set &writefds,
                                     fd_set &exceptfds)
     {
@@ -137,7 +146,8 @@ namespace spider
       if (buffLen)
 	{
 	  m_cmdReceived.write(
-	      reinterpret_cast<std::uint8_t const *>(data.data()), buffLen);
+	      reinterpret_cast<std::uint8_t const *>(data.data()),
+	      static_cast<std::size_t>(buffLen));
 
 	  // Send all received datas to main thread
 	  size_t cmdLen = 0;
@@ -182,27 +192,33 @@ namespace spider
       return rc;
     }
 
+#if defined   __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcovered-switch-default"
+#pragma clang diagnostic ignored "-Wunreachable-code-break"
+#endif
+
     std::int32_t Network::sendMsg(SystemMsg const &msg) const
     {
       std::int32_t               rc = 0;
       network::tcp::PacketHeader header;
 
-      header.time = msg.time;
-      header.macAddress = msg.mac;
-      switch (msg.type)
+      header.time = msg.sys.time;
+      header.macAddress = msg.sys.mac;
+      switch (msg.sys.type)
 	{
 	case SystemMsgType::EventKeyboard:
 	  {
 	    network::tcp::PacketEvent event;
 
 	    header.type = network::tcp::PacketType::KeyboardEvent;
-	    event.key = msg.event.key;
-	    event.state = (msg.event.state == SystemMsgEventState::Down)
+	    event.key = msg.sys.event.key;
+	    event.state = (msg.sys.event.state == SystemMsgEventState::Down)
 	                      ? network::tcp::PacketEventState::Down
 	                      : network::tcp::PacketEventState::Up;
 	    event.repeat = 0;
-	    event.shift = msg.event.upper;
-	    event.processName = msg.currentWindow;
+	    event.shift = msg.sys.event.upper;
+	    event.processName = msg.sys.currentWindow;
 
 	    // Send packet
 	    rc |= m_sock->send(&header, sizeof(header));
@@ -232,6 +248,10 @@ namespace spider
 
       return rc;
     }
+
+#if defined   __clang__
+#pragma clang diagnostic pop
+#endif
 
     std::int32_t Network::treatEvents(fd_set const &readfds,
                                       fd_set const &writefds,

@@ -23,11 +23,11 @@ namespace spider
     RingBuffer &operator=(RingBuffer const &) = delete;
     RingBuffer &operator=(RingBuffer &&) = delete;
 
-    void write(std::uint8_t const *data, size_t len)
+    void write(std::uint8_t const *data, std::size_t len)
     {
       if (data)
 	{
-	  for (size_t i = 0; i < len; ++i)
+	  for (std::size_t i = 0; i < len; ++i)
 	    {
 	      if (m_ndxWrite == sizeof(m_data))
 		{
@@ -46,11 +46,11 @@ namespace spider
 	}
     }
 
-    void read(std::uint8_t *data, size_t len)
+    void read(std::uint8_t *data, std::size_t len)
     {
       if (data)
 	{
-	  for (size_t i = 0; i < len; ++i)
+	  for (std::size_t i = 0; i < len; ++i)
 	    {
 	      if (m_ndxRead == sizeof(m_data))
 		{
@@ -63,9 +63,9 @@ namespace spider
 	}
     }
 
-    size_t hasCommand() const
+    std::size_t hasCommand() const
     {
-      std::int32_t i = m_ndxRead;
+      std::size_t  i = m_ndxRead;
       std::int32_t len = 0;
 
       i = m_ndxRead;
@@ -77,7 +77,7 @@ namespace spider
 	    }
 	  if (m_data[i] == '\n')
 	    {
-	      return (len + 1);
+	      return (static_cast<std::size_t>(len) + 1);
 	    }
 	  ++i;
 	  ++len;
@@ -87,7 +87,7 @@ namespace spider
 
   private:
     std::array<std::uint8_t, S> m_data;
-    size_t m_ndxWrite;
-    size_t m_ndxRead;
+    std::size_t m_ndxWrite;
+    std::size_t m_ndxRead;
   };
 };

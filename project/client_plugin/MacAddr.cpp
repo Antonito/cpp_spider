@@ -58,7 +58,7 @@ std::int32_t MacAddress::getAddressWindows(std::array<std::uint8_t, 6> &result)
 
 #elif defined __APPLE__
 
-std::int32_t MacAddress::getAddressMacOS(std::array<std::uint8_t, 6> &result)
+std::int32_t MacAddress::getAddressMacOS(std::array<std::uint8_t, 6> &)
 {
   return -1;
 }

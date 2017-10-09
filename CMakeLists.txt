@@ -6,12 +6,16 @@ project(Spider)
 
 # Configure C++ version
 set(CMAKE_CXX_STANDARD 14)
-SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g")
+
+if(UNIX AND NOT APPLE)
+SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Weffc++")
+elseif(APPLE)
+SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-global-constructors -Wno-exit-time-destructors")
+endif()
 SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS}")
 
 # Configure Boost
 
-#set(BOOST_ROOT "C:\\boost_1_63_0")
 if (NOT WIN32)
 set(Boost_USE_STATIC_LIBS OFF) 
 set(Boost_USE_MULTITHREADED ON)  

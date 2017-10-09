@@ -8,6 +8,12 @@ namespace spider
   {
     namespace library
     {
+
+#if defined   __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpadded"
+#endif
+
       enum class ProcArchitecture : std::uint16_t
       {
 	AMD64,
@@ -54,6 +60,10 @@ namespace spider
 	// Installed memory
 	std::uint64_t ram;
       };
+
+#if defined   __clang__
+#pragma clang diagnostic pop
+#endif
     }
   }
 }

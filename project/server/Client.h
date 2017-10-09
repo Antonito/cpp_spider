@@ -15,6 +15,11 @@ namespace spider
 {
   namespace server
   {
+#if defined   __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpadded"
+#endif
+
     class Client final : public spider::server::IClient, public IEventable
     {
     public:
@@ -70,5 +75,9 @@ namespace spider
       std::queue<std::string> m_outputQueue;
       RingBuffer<0x1000>      m_receiveBuffer;
     };
+
+#if defined   __clang__
+#pragma clang diagnostic pop
+#endif
   }
 }

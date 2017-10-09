@@ -32,7 +32,6 @@ namespace spider
     void Shell::run()
     {
       nope::log::Log(Info) << "Starting Shell control";
-      bool stdinOpen = true;
       do
 	{
 	  std::cout << "> ";

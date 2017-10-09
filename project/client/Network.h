@@ -16,6 +16,12 @@ namespace spider
 {
   namespace client
   {
+
+#if defined   __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpadded"
+#endif
+
     class Network
     {
     public:
@@ -52,5 +58,9 @@ namespace spider
       std::unique_ptr<::network::TCPSocket> m_sockData;
       RingBuffer<4096>                      m_cmdReceived;
     };
+
+#if defined   __clang__
+#pragma clang diagnostic pop
+#endif
   }
 }

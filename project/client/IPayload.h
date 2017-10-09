@@ -5,12 +5,24 @@
 #include "SystemMsg.h"
 #include "Queue.h"
 
+#if defined __linux__ || defined __APPLE__
+#define SPIDER_API
+#else
+#define SPIDER_API __declspec(dllexport)
+#endif
+
 namespace spider
 {
   namespace client
   {
     namespace library
     {
+
+#if defined   __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wweak-vtables"
+#endif
+
       class IPayload
       {
       public:
@@ -52,6 +64,12 @@ namespace spider
 	// Execute an order received from the network
 	virtual void exec(Order const &) = 0;
       };
+
+#if defined   __clang__
+#pragma clang diagnostic pop
+#endif
     }
   }
 }
+
+extern "C" SPIDER_API spider::client::library::IPayload *getPayload();

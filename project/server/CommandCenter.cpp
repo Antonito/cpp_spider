@@ -56,7 +56,8 @@ namespace spider
 	}
       catch (const std::exception &e)
 	{
-	  nope::log::Log(Info) << "Command requested not found";
+	  nope::log::Log(Warning)
+	      << "Command requested not found: " << e.what();
 	  // send 404 route
 	  ev.response.setResponse("404");
 	  client.sendEvent(ev);

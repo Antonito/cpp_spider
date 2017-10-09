@@ -11,7 +11,7 @@ namespace spider
 
     WebServer::WebServer(
         server::CommandCenter const &cmdCenter, volatile bool const &running,
-        std::uint32_t                                                 port,
+        std::uint16_t                                                 port,
         std::vector<std::unique_ptr<::spider::server::Client>> const &clients)
         : AControl(cmdCenter, running, clients), m_port(port), m_routes(),
           m_io_service(),

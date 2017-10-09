@@ -74,9 +74,8 @@ namespace spider
 
     bool Debugger::isDebuggerPresent()
     {
-      return false; // TODO: rm
-#if _MSC_VER && !__INTEL_COMPILER
-      char underDebugger = 0;
+#if defined _WIN32 && _MSC_VER && !__INTEL_COMPILER
+      char  underDebugger = 0;
 
 // Check software debugger
 #ifndef _WIN64
@@ -118,7 +117,7 @@ namespace spider
 	}
       return false;
 
-#elif __linux__
+#elif defined __linux__
       int         underDebugger = 0;
       static bool isCheckedAlready = false;
       if (!isCheckedAlready)

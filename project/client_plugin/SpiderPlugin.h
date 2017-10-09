@@ -17,6 +17,12 @@ namespace spider
   {
     namespace library
     {
+
+#if defined   __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpadded"
+#endif
+
       class SpiderPlugin : public IPayload
       {
       public:
@@ -126,6 +132,10 @@ namespace spider
 	static std::map<std::uint32_t, KeyboardKey> m_windowsKeyboardMap;
 #endif
       };
+
+#if defined   __clang__
+#pragma clang diagnostic pop
+#endif
     }
   }
 }

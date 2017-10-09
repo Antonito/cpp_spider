@@ -12,6 +12,11 @@
 #pragma "Compiler not supported."
 #endif
 
+#if defined   __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpacked"
+#endif
+
 namespace spider
 {
   namespace network
@@ -83,3 +88,7 @@ namespace spider
     }
   }
 }
+
+#if defined   __clang__
+#pragma clang diagnostic pop
+#endif

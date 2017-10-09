@@ -8,7 +8,7 @@
 
 static volatile bool running = true;
 
-void sigintHandler(int signal)
+static void sigintHandler(int)
 {
   running = false;
 }

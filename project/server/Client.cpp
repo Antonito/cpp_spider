@@ -83,7 +83,8 @@ namespace spider
 	    }
 	  ret = network::IClient::ClientAction::SUCCESS;
 	  m_receiveBuffer.write(
-	      reinterpret_cast<std::uint8_t const *>(data.data()), buffLen);
+	      reinterpret_cast<std::uint8_t const *>(data.data()),
+	      static_cast<std::size_t>(buffLen));
 
 	  size_t cmdLen = 0;
 	  do

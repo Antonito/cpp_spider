@@ -11,6 +11,10 @@ namespace spider
 
     class IEventable;
 
+#if defined   __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpadded"
+#endif
     struct Event final
     {
       union
@@ -23,5 +27,9 @@ namespace spider
       std::uint32_t askId;
       Response      response;
     };
+
+#if defined   __clang__
+#pragma clang diagnostic pop
+#endif
   }
 }

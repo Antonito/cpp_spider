@@ -8,6 +8,11 @@ namespace spider
 {
   namespace http
   {
+#if defined   __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpadded"
+#endif
+
     class HTTPUserSession
     {
     public:
@@ -41,5 +46,8 @@ namespace spider
       HTTPHeader                   m_header;
       std::uint32_t const          m_id;
     };
+#if defined   __clang__
+#pragma clang diagnostic pop
+#endif
   }
 }
