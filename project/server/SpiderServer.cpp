@@ -18,7 +18,7 @@ namespace spider
           m_commandQueue(), m_curClients(0), m_readfds(), m_writefds(),
           m_exceptfds()
     {
-      if (!m_tcpSocket.openConnection())
+      if (!m_tcpSocket.openConnection() || !m_tcpDataSocket.openConnection())
 	{
 	  throw std::runtime_error("Cannot initialize connection");
 	}

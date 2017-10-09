@@ -54,6 +54,7 @@ namespace spider
                                                     m_routes;
       boost::asio::io_service                       m_io_service;
       boost::asio::ip::tcp::acceptor                m_acceptor;
+      //TODO: call m_cmdCenter getJSON module
       server::CommandCenter const &                 m_cmdCenter;
       std::vector<std::shared_ptr<HTTPUserSession>> m_clients;
       volatile bool const &                         m_running;

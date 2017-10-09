@@ -47,7 +47,7 @@ int main()
 		spider::client::Network net(core.getSendToNetwork(),
 		                            core.getReceivedFromNetwork(),
 		                            core.getResponseQueue());
-		net.run(1337, 1338, "172.16.107.1", true);
+		net.run(1337, 1338, "127.0.0.1", true);
 	      }
 	    catch (std::exception const &err)
 	      {
