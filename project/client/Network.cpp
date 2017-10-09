@@ -94,7 +94,7 @@ namespace spider
                                     fd_set &exceptfds)
     {
       std::int32_t       rc = -1;
-      std::int32_t const sock = m_sock->getSocket();
+      std::int32_t const sock = static_cast<std::int32_t>(m_sock->getSocket());
 
       do
 	{
@@ -115,7 +115,7 @@ namespace spider
 	    }
 	  if (m_sockData)
 	    {
-	      std::int32_t const dataSock = m_sockData->getSocket();
+	      std::int32_t const dataSock = static_cast<std::int32_t>(m_sockData->getSocket());
 
 	      if (!m_sendToNetwork.empty())
 		{
@@ -221,10 +221,10 @@ namespace spider
 	    event.processName = msg.sys.currentWindow;
 
 	    // Send packet
-	    rc |= m_sock->send(&header, sizeof(header));
+	    rc |= static_cast<std::int32_t>(m_sock->send(&header, sizeof(header)));
 	    if (!rc)
 	      {
-		rc |= m_sock->send(&event, sizeof(event));
+		rc |= static_cast<std::int32_t>(m_sock->send(&event, sizeof(event)));
 	      }
 	  }
 	  break;
@@ -257,7 +257,7 @@ namespace spider
                                       fd_set const &writefds,
                                       fd_set const &exceptfds)
     {
-      std::int32_t const sock = m_sock->getSocket();
+      std::int32_t const sock = static_cast<std::int32_t>(m_sock->getSocket());
       std::int32_t       rc = 0;
 
       // Check commands
@@ -279,7 +279,7 @@ namespace spider
 
       if (m_sockData)
 	{
-	  std::int32_t const dataSock = m_sockData->getSocket();
+	  std::int32_t const dataSock = static_cast<std::int32_t>(m_sockData->getSocket());
 
 	  if (!rc && FD_ISSET(dataSock, &writefds))
 	    {

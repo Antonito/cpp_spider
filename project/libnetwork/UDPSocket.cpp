@@ -42,8 +42,8 @@ namespace network
     do
       {
 #if defined(_WIN32)
-	ret = sendto(m_socket, reinterpret_cast<const char *>(data), len, 0,
-	             dest, destLen);
+	ret = sendto(m_socket, reinterpret_cast<const char *>(data), static_cast<std::int32_t>(len), 0,
+	             dest, static_cast<std::int32_t>(destLen));
 #else
 	ret = sendto(m_socket, data, len, 0, dest, destLen);
 #endif // !_WIN32
@@ -67,7 +67,7 @@ namespace network
     do
       {
 #if defined(_WIN32)
-	ret = recvfrom(m_socket, reinterpret_cast<char *>(buffer), rlen, 0,
+	ret = recvfrom(m_socket, reinterpret_cast<char *>(buffer), static_cast<std::int32_t>(rlen), 0,
 	               addr, addrLen);
 #else
 	ret = recvfrom(m_socket, buffer, rlen, 0, addr, addrLen);
