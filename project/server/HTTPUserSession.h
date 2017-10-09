@@ -33,7 +33,7 @@ namespace spider
       static void readBody(std::shared_ptr<HTTPUserSession> that);
       static void readNextLine(std::shared_ptr<HTTPUserSession> that);
 
-      std::uint32_t const getId() const;
+      std::uint32_t getId() const;
 
       // non const because this is used by acceptor to set the socket
       boost::asio::ip::tcp::socket &getSocket();

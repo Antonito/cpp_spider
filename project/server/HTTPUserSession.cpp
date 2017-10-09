@@ -23,12 +23,18 @@ namespace spider
     {
       boost::asio::async_read_until(
           that->getSocket(), that->getBuff(), '\r',
-          [that](const boost::system::error_code &e, std::size_t size) {
+          [that](const boost::system::error_code &e, std::size_t size)
+          {
+            if (e)
+            {
+              nope::log::Log(Debug) << "Erreur on read Acontrol's client [" << size << "]";
+              return ;
+            }
 	    std::string  line;
 	    std::string  trash;
 	    std::istream stream(&that->getBuff());
 	    std::getline(stream, line, '\r');  // http requests end with /r/n
-	    std::getline(stream, trash, '\n'); // ^
+	    std::getline(stream, trash, '\n');
 	    that->getHeader().onReadRequestLine(line);
 	    readNextLine(that);
 	  });
@@ -38,7 +44,13 @@ namespace spider
     {
       boost::asio::async_read_until(
           that->getSocket(), that->getBuff(), '\r',
-          [that](const boost::system::error_code &e, std::size_t size) {
+          [that](const boost::system::error_code &e, std::size_t size)
+          {
+            if (e)
+            {
+              nope::log::Log(Debug) << "Erreur on read AControl's client [" << size << "]";
+              return ;
+            }
 	    std::string  line;
 	    std::string  trash;
 	    std::istream stream(&that->getBuff());
@@ -51,17 +63,8 @@ namespace spider
 	        if (that->getHeader().contentLength() == 0)
 	          {
 		    nope::log::Log(Info) << "end reading AControl's client";
-		    that->getHeader().getResponse(
-		        that->getId()); // will find the route requested
-		    /*std::shared_ptr<std::string> str =
-		    std::make_shared<std::string>(that->getHeader().getResponse());
-		    boost::asio::async_write(that->getSocket(),
-		    boost::asio::buffer(str->c_str(), str->length()),
-		        [that, str](boost::system::error_code const &e,
-		    std::size_t n)
-		        {
-		          nope::log::Log(Debug) << "wrtting on socket...";
-		        });*/
+                    // Finding the requested route
+		    that->getHeader().getResponse(that->getId());
 	          }
 	        else
 	          {
@@ -82,12 +85,18 @@ namespace spider
           std::make_shared<std::vector<char>>(nbuff);
       boost::asio::async_read(
           that->getSocket(), boost::asio::buffer(*buff, nbuff),
-          [that](boost::system::error_code const &e, std::size_t n) {
+          [that](boost::system::error_code const &e, std::size_t n)
+          {
+            if (e)
+            {
+              nope::log::Log(Debug) << "Erreur reading Body: [" << n << "]";
+              return;
+            }
 	    nope::log::Log(Debug) << "reading on socket...";
 	  });
     }
 
-    std::uint32_t const HTTPUserSession::getId() const
+    std::uint32_t HTTPUserSession::getId() const
     {
       return (m_id);
     }
