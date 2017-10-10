@@ -157,8 +157,17 @@ namespace spider
 	    }
 	  else
 	    {
-	      // checking throught all plugins call for WebJSON
-              // call getJSON from m_cmdCenter
+              if (ev.response.getResponse().find("OK"))
+              {
+                code = "HTTP/1.1 200 OK";
+              }
+              else
+              {
+                code = "HTTP/1.1 500 Internal Server Error";
+              }
+              res << "{\"command\" : \"" << ev.commandName << "\",";
+              res << " \"response\" : \"" << ev.response.getResponse() << "\"}";
+              
 	    }
 	  std::stringstream ss;
 	  ss << code << std::endl;
