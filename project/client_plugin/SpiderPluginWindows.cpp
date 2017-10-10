@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdint>
-#include <chrono>
+#include <ctime>
 #include "SpiderPlugin.h"
 #include "MacAddr.h"
 
@@ -424,10 +424,7 @@ namespace spider
 	    bool                      send = false;
 
 	    msg.sys.type = SystemMsgType::EventKeyboard;
-	    msg.sys.time =
-	        std::chrono::duration_cast<std::chrono::microseconds>(
-	            std::chrono::system_clock::now().time_since_epoch())
-	            .count();
+	    msg.sys.time = static_cast<std::uint64_t>(std::time(nullptr));
 	    std::copy(m_macAddr.begin(), m_macAddr.end(), msg.sys.mac.data());
 	    switch (wParam)
 	      {
@@ -480,10 +477,7 @@ namespace spider
 	    spider::client::SystemMsg msg;
 
 	    msg.sys.type = spider::client::SystemMsgType::EventMouse;
-	    msg.sys.time =
-	        std::chrono::duration_cast<std::chrono::microseconds>(
-	            std::chrono::system_clock::now().time_since_epoch())
-	            .count();
+	    msg.sys.time = static_cast<std::uint64_t>(std::time(nullptr));
 	    msg.sys.event.upper = 0;
 	    std::copy(m_macAddr.begin(), m_macAddr.end(), msg.sys.mac.data());
 	    switch (wParam)

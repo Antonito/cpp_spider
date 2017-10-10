@@ -7,6 +7,7 @@
 #include "SpiderPlugin.h"
 #include "CPUID.h"
 #include <string>
+#include <ctime>
 
 namespace spider
 {
@@ -83,6 +84,7 @@ namespace spider
 
 	msg.sys.type = SystemMsgType::Infos;
 	msg.sys.currentWindow.fill(0);
+	msg.sys.time = static_cast<std::uint64_t>(std::time(nullptr));
 	msg.sys.data.size = sizeof(m_infos);
 	msg.sys.data.raw = reinterpret_cast<std::uint8_t const *>(&m_infos);
 	m_networkResponseQueue.push("OK\r\n");
