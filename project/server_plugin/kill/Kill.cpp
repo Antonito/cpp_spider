@@ -21,13 +21,6 @@ std::string const &Kill::getDescription() const
   return m_description;
 }
 
-std::string const Kill::getJSON(std::string const &res) const
-{
-  std::stringstream ss;
-  ss << "{\"response\" : \"" << res << "\"}";
-  return (ss.str());
-}
-
 void Kill::command(spider::server::IClient *cli, void const *)
 {
   static std::string const cmd = "/kill\r\n";

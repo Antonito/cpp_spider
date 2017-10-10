@@ -21,13 +21,6 @@ std::string const &Replicate::getDescription() const
   return m_description;
 }
 
-std::string const Replicate::getJSON(std::string const &res) const
-{
-  std::stringstream ss;
-  ss << "{\"response\" : \"" << res << "\"}";
-  return (ss.str());
-}
-
 void Replicate::command(spider::server::IClient *cli, void const *)
 {
   static std::string const cmd = "/replicate\r\n";

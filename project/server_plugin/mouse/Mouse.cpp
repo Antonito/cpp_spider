@@ -21,13 +21,6 @@ std::string const &Mouse::getDescription() const
   return m_description;
 }
 
-std::string const Mouse::getJSON(std::string const &res) const
-{
-  std::stringstream ss;
-  ss << "{\"response\" : \"" << res << "\"}";
-  return (ss.str());
-}
-
 void Mouse::command(spider::server::IClient *cli, void const *)
 {
   static std::string const cmd = "/setMouseEmission\r\n";

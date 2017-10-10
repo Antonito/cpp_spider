@@ -10,7 +10,6 @@ public:
 
   virtual std::string const &getName() const;
   virtual std::string const &getDescription() const;
-  virtual std::string const getJSON(std::string const &res) const;
   virtual void command(spider::server::IClient *, void const *);
 
 private:
