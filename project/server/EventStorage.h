@@ -46,6 +46,7 @@ namespace spider
 
     private:
       mt::Queue<EventStorage> m_storage;
+      std::ofstream m_logFile;
 
       std::string timeToString(std::time_t const rawtime) const;
     };
