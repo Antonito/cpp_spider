@@ -224,7 +224,7 @@ namespace spider
 	{
 	case SystemMsgType::EventKeyboard:
 	  {
-	    network::tcp::PacketEvent event;
+	    network::tcp::PacketEvent event{};
 
 	    header.type = network::tcp::PacketType::KeyboardEvent;
 	    event.key = htonl(msg.sys.event.key);

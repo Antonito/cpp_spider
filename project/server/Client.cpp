@@ -51,7 +51,7 @@ namespace spider
 	      Event ev = m_responseQueue.front();
 	      m_responseQueue.pop();
 	      ev.response.setResponse(resp.front());
-	      //ev.commandName = "commandInfo";
+	      // ev.commandName = "commandInfo";
 	      ev.emitter->sendEvent(ev);
 	    }
 	  nope::log::Log(Info) << "Read: [" << m_id << "] " << resp.front();
