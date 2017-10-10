@@ -122,13 +122,13 @@ std::int32_t MacAddress::getAddressMacOS(std::array<std::uint8_t, 6> &result)
   if ((mib[5] = static_cast<int>(if_nametoindex(interfaceName.c_str()))) == 0) {
     return (-1);
   }
-  if (sysctl(mib, 6, NULL, &len, NULL, 0) < 0) {
+  if (sysctl(mib.data(), 6, NULL, &len, NULL, 0) < 0) {
     return (-1);
   }
   if ((buf = new char[len]) == NULL) {
     return (-1);
   }
-  if (sysctl(mib, 6, buf, &len, NULL, 0) < 0) {
+  if (sysctl(mib.data(), 6, buf, &len, NULL, 0) < 0) {
     return (-1);
   }
   ifm = reinterpret_cast<struct if_msghdr *>(buf);
@@ -149,6 +149,7 @@ std::int32_t MacAddress::getAddressLinux(std::array<std::uint8_t, 6> &result)
 {
   std::string interfaceName;
   std::string ip;
+  std::string macAddress;
   struct ifaddrs *ifap, *ifa;
   struct sockaddr_in *sa;
   char *addr;
@@ -183,7 +184,7 @@ std::int32_t MacAddress::getAddressLinux(std::array<std::uint8_t, 6> &result)
   for (int i = 0; i < 6; i++)
   {
     char *t;  
-    result[i] = std::strtol(name.substr(i * 3, 2).c_str(), &t, 16);
+    result[i] = std::strtol(macAddress.substr(i * 3, 2).c_str(), &t, 16);
   }
   return (0);
 }

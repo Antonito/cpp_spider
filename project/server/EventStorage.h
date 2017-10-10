@@ -1,5 +1,6 @@
 #pragma once
 
+#include <fstream>
 #include "Queue.h"
 #include "Packet.h"
 
