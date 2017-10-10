@@ -11,17 +11,48 @@
 
 namespace network
 {
+
 // Make sure you have to init / deinit WSA
-#if defined(_WIN32)
-  std::uint32_t network::ASocket::m_nbSockets = 0;
-  bool          network::ASocket::m_WSAInited = false;
+#if defined _WIN32 || defined LIBNETWORK_HAS_SSL
+  std::uint32_t               network::ASocket::m_nbSockets = 0;
 #endif
 
-  ASocket::ASocket(sock_t const socket)
-      : m_socket(socket), m_port(0), m_host(""), m_ip(false), m_maxClients(0),
+#if defined(_WIN32)
+  bool network::ASocket::m_WSAInited = false;
+#endif
+
+#if defined LIBNETWORK_HAS_SSL
+  ASocket::ASocket(sock_t const socket, SSL_CTX *ctx)
+      : m_socket(socket),
+#if defined LIBNETWORK_HAS_SSL
+        m_socketSSL(SSL_new(ctx)), m_sslctx(ctx),
+#endif
+        m_port(0), m_host(""), m_ip(false), m_maxClients(0),
         m_curClients(0), m_addr{}, m_type()
   {
     nope::log::Log(Debug) << "Loading socket #" << m_socket;
+#if defined LIBNETWORK_HAS_SSL
+    if (!m_socketSSL)
+      {
+	throw std::runtime_error("Cannot create new SSL client");
+      }
+    SSL_set_fd(m_socketSSL, socket);
+
+    if (SSL_accept(m_socketSSL) <= 0)
+      {
+	throw std::runtime_error(
+	    "Cannot accept new SSL client (handshake failed)");
+      }
+
+    if (!m_nbSockets)
+      {
+	// Initialize OpenSSL
+	SSL_load_error_strings();
+	SSL_library_init();
+	OpenSSL_add_all_algorithms();
+      }
+#endif
+
 #if defined(_WIN32)
     // Do we need to load the network DLL ?
     if (!m_nbSockets && !initWSA())
@@ -30,6 +61,45 @@ namespace network
 	throw std::runtime_error("Cannot load network DLL");
       }
     nope::log::Log(Debug) << "Adding socket " << m_nbSockets;
+#endif
+
+#if defined _WIN32 || defined LIBNETWORK_HAS_SSL
+    ++m_nbSockets;
+#endif
+  }
+
+#endif
+
+  ASocket::ASocket(sock_t const socket)
+      : m_socket(socket),
+#if defined LIBNETWORK_HAS_SSL
+        m_socketSSL(nullptr), m_sslctx(nullptr),
+#endif
+        m_port(0), m_host(""), m_ip(false), m_maxClients(0),
+        m_curClients(0), m_addr{}, m_type()
+  {
+    nope::log::Log(Debug) << "Loading socket #" << m_socket;
+#if defined LIBNETWORK_HAS_SSL
+    if (!m_nbSockets)
+      {
+	// Initialize OpenSSL
+	SSL_load_error_strings();
+	SSL_library_init();
+	OpenSSL_add_all_algorithms();
+      }
+#endif
+
+#if defined(_WIN32)
+    // Do we need to load the network DLL ?
+    if (!m_nbSockets && !initWSA())
+      {
+	nope::log::Log(Error) << "Cannot load network DLL";
+	throw std::runtime_error("Cannot load network DLL");
+      }
+    nope::log::Log(Debug) << "Adding socket " << m_nbSockets;
+#endif
+
+#if defined _WIN32 || defined LIBNETWORK_HAS_SSL
     ++m_nbSockets;
 #endif
   }
@@ -37,6 +107,7 @@ namespace network
   ASocket &ASocket::operator=(sock_t const sock)
   {
     m_socket = sock;
+    // TODO: Create SSL connection here ?
     m_port = 0;
     m_host = "";
     m_ip = false;
@@ -48,7 +119,11 @@ namespace network
   }
 
   ASocket::ASocket(SocketType type)
-      : m_socket(-1), m_port(0), m_host(""), m_ip(false), m_maxClients(0),
+      : m_socket(-1),
+#if defined LIBNETWORK_HAS_SSL
+        m_socketSSL(nullptr), m_sslctx(nullptr),
+#endif
+        m_port(0), m_host(""), m_ip(false), m_maxClients(0),
         m_curClients(0), m_addr{}, m_type(type)
   {
 #if defined(__linux__) || (__APPLE__)
@@ -56,6 +131,16 @@ namespace network
     std::signal(SIGPIPE, SIG_IGN);
     nope::log::Log(Debug) << "Ignoring SIGPIPE";
 #endif
+#if defined LIBNETWORK_HAS_SSL
+    if (!m_nbSockets)
+      {
+	// Initialize OpenSSL
+	SSL_load_error_strings();
+	SSL_library_init();
+	OpenSSL_add_all_algorithms();
+      }
+#endif
+
 #if defined(_WIN32)
     // Do we need to load the network DLL ?
     if (!m_nbSockets && !initWSA())
@@ -64,6 +149,9 @@ namespace network
 	throw std::runtime_error("Cannot load network DLL");
       }
     nope::log::Log(Debug) << "Adding socket " << m_nbSockets;
+#endif
+
+#if defined _WIN32 || defined LIBNETWORK_HAS_SSL
     ++m_nbSockets;
 #endif
   }
@@ -99,10 +187,13 @@ namespace network
   }
 
   ASocket::ASocket(ASocket &&other)
-      : m_socket(other.m_socket), m_port(other.m_port), m_host(other.m_host),
-        m_ip(other.m_ip), m_maxClients(other.m_maxClients),
-        m_curClients(other.m_curClients), m_addr(other.m_addr),
-        m_type(other.m_type)
+      : m_socket(other.m_socket),
+#if defined LIBNETWORK_HAS_SSL
+        m_socketSSL(other.m_socketSSL), m_sslctx(other.m_sslctx),
+#endif
+        m_port(other.m_port), m_host(other.m_host), m_ip(other.m_ip),
+        m_maxClients(other.m_maxClients), m_curClients(other.m_curClients),
+        m_addr(other.m_addr), m_type(other.m_type)
   {
     other.m_socket = -1;
   }
@@ -110,10 +201,21 @@ namespace network
   ASocket::~ASocket()
   {
     closeConnection();
-#if defined(_WIN32)
+#if defined _WIN32 || LIBNETWORK_HAS_SSL
     if (m_nbSockets)
       assert(m_nbSockets);
     --m_nbSockets;
+#endif
+
+#if defined LIBNETWORK_HAS_SSL
+    if (!m_nbSockets)
+      {
+	ERR_free_strings();
+	EVP_cleanup();
+      }
+#endif
+
+#if defined(_WIN32)
     if (!m_nbSockets)
       {
 	// It is the last socket
@@ -126,8 +228,15 @@ namespace network
   // Close the socket
   bool ASocket::closeConnection()
   {
+#if defined LIBNETWORK_HAS_SSL
+    if (m_socketSSL)
+      {
+	SSL_shutdown(m_socketSSL);
+	SSL_free(m_socketSSL);
+#else
     if (m_socket > 0 && !closesocket(m_socket))
       {
+#endif
 	nope::log::Log(Debug) << "Closing socket #" << m_socket;
 	m_socket = -1;
       }
@@ -139,6 +248,10 @@ namespace network
     if (this != &other)
       {
 	m_socket = other.m_socket;
+#if defined LIBNETWORK_HAS_SSL
+	m_socketSSL = other.m_socketSSL;
+	m_sslctx = other.m_sslctx;
+#endif
 	m_port = other.m_port;
 	m_host = other.m_host;
 	m_ip = other.m_ip;
@@ -202,6 +315,13 @@ namespace network
   {
     return (m_addr);
   }
+
+#if defined LIBNETWORK_HAS_SSL
+  SSL_CTX * ASocket::getCTX()
+  {
+    return (m_sslctx);
+  }
+#endif
 
   bool ASocket::connectToHost(std::int32_t const socktype,
                               std::int32_t const proto, bool shouldConnect)
@@ -309,6 +429,26 @@ namespace network
 	      }
 	  }
       }
+#if defined LIBNETWORK_HAS_SSL
+    m_sslctx = SSL_CTX_new(TLSv1_2_server_method());
+    if (!m_sslctx)
+      {
+	throw std::runtime_error("Cannot create SSL Context");
+      }
+    SSL_CTX_set_options(m_sslctx, SSL_OP_SINGLE_DH_USE);
+
+// TODO: Load certs
+#if 0
+    int use_cert = SSL_CTX_use_certificate_file(m_sslctx, "/serverCertificate.pem" , SSL_FILETYPE_PEM);    
+    int use_prv = SSL_CTX_use_PrivateKey_file(m_sslctx, "/serverCertificate.pem", SSL_FILETYPE_PEM);
+#endif
+    m_socketSSL = SSL_new(m_sslctx);
+    if (!m_socketSSL)
+      {
+	throw std::runtime_error("Cannot create secure socket");
+      }
+    SSL_set_fd(m_socketSSL, m_socket);
+#endif
     nope::log::Log(Debug) << "Socket created successfuly";
   }
 

@@ -5,6 +5,11 @@
 
 namespace network
 {
+#if defined LIBNETWORK_HAS_SSL
+  TCPSocket::TCPSocket(sock_t const sock, SSL_CTX *ctx) : ASocket(sock, ctx)
+  {
+  }
+#endif
   TCPSocket::TCPSocket(sock_t const sock) : ASocket(sock)
   {
   }
@@ -84,12 +89,18 @@ namespace network
     assert(getType() == ASocket::BLOCKING);
     do
       {
+#if defined LIBNETWORK_HAS_SSL
+	assert(m_socketSSL);
+	ret = SSL_write(m_socketSSL, static_cast<char const *>(data) + off,
+	                static_cast<std::int32_t>(len - off));
+#else
 #if defined(__linux__) || defined(__APPLE__)
 	ret = ::send(m_socket, static_cast<char const *>(data) + off,
 	             len - off, 0);
 #elif defined(_WIN32)
 	ret = ::send(m_socket, static_cast<char const *>(data) + off,
 	             static_cast<std::int32_t>(len - off), 0);
+#endif
 #endif
 	if (ret <= 0)
 	  {
@@ -113,12 +124,18 @@ namespace network
       {
 	ssize_t ret;
 
+#if defined LIBNETWORK_HAS_SSL
+	assert(m_socketSSL);
+	ret = SSL_write(m_socketSSL, reinterpret_cast<char const *>(msg + off),
+	                static_cast<std::int32_t>(len - off));
+#else
 #if defined(__linux__) || defined(__APPLE__)
 	ret = ::send(m_socket, reinterpret_cast<char const *>(msg + off),
 	             len - off, 0);
 #elif defined(_WIN32)
 	ret = ::send(m_socket, reinterpret_cast<char const *>(msg + off),
 	             static_cast<std::int32_t>(len - off), 0);
+#endif
 #endif
 	if (ret == -1 || static_cast<std::size_t>(ret) == len - off)
 	  {
@@ -153,11 +170,17 @@ namespace network
     nope::log::Log(Trace) << "recblocking Rlen -> " << rlen;
     do
       {
+#if defined LIBNETWORK_HAS_SSL
+	assert(m_socketSSL);
+	*buffLen = SSL_read(m_socketSSL, static_cast<char *>(buffer),
+	                    static_cast<std::int32_t>(rlen));
+#else
 #if defined(__linux__) || defined(__APPLE__)
 	*buffLen = ::recv(m_socket, static_cast<char *>(buffer), rlen, 0);
 #elif defined(_WIN32)
 	*buffLen = ::recv(m_socket, static_cast<char *>(buffer),
 	                  static_cast<std::int32_t>(rlen), 0);
+#endif
 #endif
       }
     while (*buffLen == -1 && errno == EINTR);
@@ -184,12 +207,19 @@ namespace network
       {
 	ssize_t ret;
 
+#if defined LIBNETWORK_HAS_SSL
+	assert(m_socketSSL);
+	ret = SSL_read(m_socketSSL, reinterpret_cast<char *>(buf + *buffLen),
+	               static_cast<std::int32_t>(
+	                   rlen - static_cast<std::size_t>(*buffLen)));
+#else
 #if defined(__linux__) || defined(__APPLE__)
 	ret = ::recv(m_socket, reinterpret_cast<char *>(buf + *buffLen),
 	             rlen - static_cast<std::size_t>(*buffLen), 0);
 #elif defined(_WIN32)
 	ret = ::recv(m_socket, reinterpret_cast<char *>(buf + *buffLen),
 	             static_cast<std::int32_t>(rlen - *buffLen), 0);
+#endif
 #endif
 	if (ret == -1)
 	  {

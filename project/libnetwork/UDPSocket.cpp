@@ -2,7 +2,11 @@
 
 namespace network
 {
+#if defined LIBNETWORK_HAS_SSL
+  UDPSocket::UDPSocket(sock_t const sock, SSL_CTX *ctx) : ASocket(sock, ctx)
+#else
   UDPSocket::UDPSocket(sock_t const sock) : ASocket(sock)
+#endif
   {
   }
 
@@ -42,8 +46,9 @@ namespace network
     do
       {
 #if defined(_WIN32)
-	ret = sendto(m_socket, reinterpret_cast<const char *>(data), static_cast<std::int32_t>(len), 0,
-	             dest, static_cast<std::int32_t>(destLen));
+	ret = sendto(m_socket, reinterpret_cast<const char *>(data),
+	             static_cast<std::int32_t>(len), 0, dest,
+	             static_cast<std::int32_t>(destLen));
 #else
 	ret = sendto(m_socket, data, len, 0, dest, destLen);
 #endif // !_WIN32
@@ -67,8 +72,8 @@ namespace network
     do
       {
 #if defined(_WIN32)
-	ret = recvfrom(m_socket, reinterpret_cast<char *>(buffer), static_cast<std::int32_t>(rlen), 0,
-	               addr, addrLen);
+	ret = recvfrom(m_socket, reinterpret_cast<char *>(buffer),
+	               static_cast<std::int32_t>(rlen), 0, addr, addrLen);
 #else
 	ret = recvfrom(m_socket, buffer, rlen, 0, addr, addrLen);
 #endif // !_WIN32

@@ -25,7 +25,7 @@ namespace spider
     {
     public:
       explicit Client(sock_t const sock, CommandCenter const &cmdCenter,
-                      std::size_t const ndx);
+                      std::size_t const ndx, SSL_CTX *ctx);
       virtual ~Client();
 
       bool operator==(network::tcp::MacAddrArray const &arr) const;

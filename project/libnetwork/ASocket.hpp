@@ -4,6 +4,24 @@
 #include <cstring>
 #include <string>
 #include <cstring>
+
+// Note: Define LIBNETWORK_HAS_SSL in order to use SSL
+#if defined LIBNETWORK_HAS_SSL
+
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang            system_header
+#endif
+
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
+
+#endif
+
 #include "ISocket.hpp"
 
 // Disable clang warning for implicit padding
@@ -44,13 +62,20 @@ namespace network
     std::uint32_t getCurClients() const;
     SocketMode    getMode() const;
     SocketType    getType() const;
+#if defined       LIBNETWORK_HAS_SSL
+    SSL_CTX *     getCTX();
+#endif
 
     sockaddr_in_t const &getSockAddr() const;
 
     bool operator==(ASocket const &other) const;
 
   protected:
+#if defined LIBNETWORK_HAS_SSL
+    explicit ASocket(sock_t const socket, SSL_CTX *ctx);
+#endif
     explicit ASocket(sock_t const socket);
+
     ASocket(std::uint16_t port, std::string const &host,
             SocketType type = ASocket::BLOCKING);
     ASocket(std::uint16_t port, std::uint32_t maxClients,
@@ -63,7 +88,11 @@ namespace network
                     std::int32_t protocol);
     bool setSocketType() const;
 
-    sock_t        m_socket;
+    sock_t   m_socket;
+#if defined  LIBNETWORK_HAS_SSL
+    SSL *    m_socketSSL;
+    SSL_CTX *m_sslctx;
+#endif
     std::uint16_t m_port;
     std::string   m_host;
     bool          m_ip;
@@ -75,12 +104,15 @@ namespace network
   private:
     explicit ASocket(SocketType type);
 
+#if defined _WIN32 || defined LIBNETWORK_HAS_SSL
+    static std::uint32_t      m_nbSockets;
+#endif
+
 // Init network DLL
 #if defined(_WIN32)
-    static std::uint32_t m_nbSockets;
-    static bool          m_WSAInited;
-    bool                 initWSA() const;
-    void                 deinitWSA() const;
+    static bool m_WSAInited;
+    bool        initWSA() const;
+    void        deinitWSA() const;
 #endif
   };
 }

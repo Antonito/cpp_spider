@@ -215,7 +215,7 @@ namespace spider
       network::tcp::PacketHeader header;
 
 #if defined __linux__
-      header.time = h64tobe(msg.sys.time);
+      header.time = htobe64(msg.sys.time);
 #else
       header.time = htonll(msg.sys.time);
 #endif

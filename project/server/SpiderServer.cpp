@@ -348,8 +348,8 @@ namespace spider
       // Check if the socket is valid
       if (rc > 0)
 	{
-	  m_clients.push_back(
-	      std::make_unique<Client>(rc, m_cmdCenter, m_clients.size()));
+	  m_clients.push_back(std::make_unique<Client>(
+	      rc, m_cmdCenter, m_clients.size(), m_tcpSocket.getCTX()));
 	  nope::log::Log(Info)
 	      << "Added client FD #" << m_clients.back()->getSocket();
 	  nope::log::Log(Info)
@@ -372,6 +372,7 @@ namespace spider
       do
 	{
 	  socklen_t len = sizeof(in);
+	  // TODO: SSL_accept
 	  rc = ::accept(sock, reinterpret_cast<sockaddr_t *>(&in), &len);
 	}
       while (rc == -1 && errno == EINTR);

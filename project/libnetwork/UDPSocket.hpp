@@ -8,7 +8,11 @@ namespace network
   class UDPSocket : public ASocket
   {
   public:
+#if defined LIBNETWORK_HAS_SSL
+    explicit UDPSocket(sock_t const sock, SSL_CTX *ctx);
+#else
     explicit UDPSocket(sock_t const sock);
+#endif
     UDPSocket(std::uint16_t port, std::string const &host, bool ip,
               SocketType type);
     UDPSocket(std::uint16_t port, std::uint32_t maxClients, SocketType type);

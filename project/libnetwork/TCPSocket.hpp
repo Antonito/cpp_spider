@@ -8,7 +8,11 @@ namespace network
   class TCPSocket : public ASocket
   {
   public:
+#if defined LIBNETWORK_HAS_SSL
+    explicit TCPSocket(sock_t const sock, SSL_CTX *ctx);
+#endif
     explicit TCPSocket(sock_t const sock);
+
     TCPSocket(std::uint16_t port, std::string const &host, bool ip,
               SocketType type);
     TCPSocket(std::uint16_t port, std::uint32_t maxClients, SocketType type);
