@@ -7,6 +7,7 @@
 #include "Client.h"
 #include "CommandCenter.h"
 #include "TCPSocket.hpp"
+#include "EventStorage.h"
 
 #ifndef _WIN32
 #include <sys/select.h>
@@ -62,6 +63,7 @@ namespace spider
       ::network::TCPSocket                               m_tcpDataSocket;
       std::queue<Event>                                  m_commandQueue;
       std::int32_t                                       m_curClients;
+      Storage                                            m_storage;
 
       fd_set m_readfds;
       fd_set m_writefds;

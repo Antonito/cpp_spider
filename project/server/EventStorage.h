@@ -16,12 +16,16 @@ namespace spider
     struct EventStorage
     {
       EventStorage();
+      ~EventStorage();
 
-      PacketHeader header;
+      EventStorage(EventStorage const &) noexcept;
+      EventStorage &operator=(EventStorage const &) noexcept;
+
+      network::tcp::PacketHeader header;
       union
       {
-	PacketEvent ev;
-	PacketMov   mov;
+	network::tcp::PacketEvent ev;
+	network::tcp::PacketMov   mov;
       };
     };
 
@@ -38,9 +42,12 @@ namespace spider
       Storage &operator=(Storage &&) = delete;
 
       void push(EventStorage const &ev);
+      void write();
 
     private:
       mt::Queue<EventStorage> m_storage;
+
+      std::string timeToString(std::time_t const rawtime) const;
     };
 
 #if defined   __clang__

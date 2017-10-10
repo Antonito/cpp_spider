@@ -15,8 +15,8 @@ namespace spider
           m_tcpSocket(port, 64, ::network::ASocket::SocketType::BLOCKING),
           m_tcpDataSocket(port + 1, 64,
                           ::network::ASocket::SocketType::BLOCKING),
-          m_commandQueue(), m_curClients(0), m_readfds(), m_writefds(),
-          m_exceptfds()
+          m_commandQueue(), m_curClients(0), m_storage(), m_readfds(),
+          m_writefds(), m_exceptfds()
     {
       if (!m_tcpSocket.openConnection() || !m_tcpDataSocket.openConnection())
 	{
@@ -69,6 +69,9 @@ namespace spider
 	    {
 	      treatEvents();
 	    }
+
+	  // Write datas
+	  m_storage.write();
 	}
 
       nope::log::Log(Info) << "Stopping Spider server";
@@ -282,7 +285,11 @@ namespace spider
 		else
 		  {
 		    ev.key = ntohl(ev.key);
-		    // TODO: Store events in Storage
+		    EventStorage store;
+
+		    store.header = header;
+		    store.ev = ev;
+		    m_storage.push(store);
 		  }
 	      }
 	      break;
@@ -299,7 +306,12 @@ namespace spider
 		  {
 		    ev.posX = ntohl(ev.posX);
 		    ev.posY = ntohl(ev.posY);
-		    // TODO: Store
+
+		    EventStorage store;
+
+		    store.header = header;
+		    store.mov = ev;
+		    m_storage.push(store);
 		  }
 	      }
 	      break;
