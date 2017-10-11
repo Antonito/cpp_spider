@@ -25,7 +25,7 @@ namespace spider
     {
 
       using PathArray = std::array<std::uint8_t, 64>;
-      using MacAddrArray = std::array<std::uint8_t, 22>;
+      using MacAddrArray = std::array<std::uint8_t, 6>;
 
       // The different types of packets
       enum class PacketType : std::uint8_t

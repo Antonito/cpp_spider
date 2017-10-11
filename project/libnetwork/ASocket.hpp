@@ -30,7 +30,7 @@
 #pragma clang diagnostic ignored "-Wpadded"
 #endif
 
-// TODO: Add IPv4 / IPV6 selection, SSL / TLS
+// TODO: Add IPv4 / IPV6 selection
 namespace network
 {
   class ASocket : public ISocket

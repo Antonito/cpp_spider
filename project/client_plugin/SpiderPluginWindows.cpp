@@ -181,7 +181,6 @@ namespace spider
 	getInfosWindows();
 
 	MacAddress::get(m_macAddr);
-	std::cout << "MacAddress: " << m_macAddr << std::endl;
 
 	return true;
       }

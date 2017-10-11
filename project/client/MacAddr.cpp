@@ -13,7 +13,7 @@
 #include <tchar.h>
 #include <Iphlpapi.h>
 #include <Assert.h>
-#pragma comment(lib, "iphlpapi.lib")
+#pragma comment(lib, "Iphlpapi.lib")
 #pragma comment(lib, "rpcrt4.lib")
 #elif defined __linux__
 #include <sys/ioctl.h>

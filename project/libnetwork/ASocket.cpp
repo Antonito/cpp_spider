@@ -96,7 +96,6 @@ namespace network
   ASocket &ASocket::operator=(sock_t const sock)
   {
     m_socket = sock;
-    // TODO: Create SSL connection here ?
     m_port = 0;
     m_host = "";
     m_ip = false;

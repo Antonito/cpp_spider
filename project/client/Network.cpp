@@ -4,6 +4,7 @@
 #include "Logger.hpp" // TODO: rm
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include "MacAddr.h"
 
 namespace spider
 {
@@ -44,6 +45,14 @@ namespace spider
 	{
 	  throw std::runtime_error("Cannot create SSL Context");
 	}
+
+      spider::network::tcp::MacAddrArray macAddr{};
+      MacAddress::get(macAddr);
+      std::array<char, 64 * 8> macAddrArray = {{}};
+      std::snprintf(macAddrArray.data(), sizeof(macAddrArray),
+                    "%02X:%02X:%02X:%02X:%02X:%02X", macAddr[0], macAddr[1],
+                    macAddr[2], macAddr[3], macAddr[4], macAddr[5]);
+
       while (1)
 	{
 	  // Try to connect
@@ -69,9 +78,8 @@ namespace spider
 		{
 		  m_cmdResponse.pop();
 		}
-	      m_cmdResponse.push(
-	          "/connect 5E:FF:56:A2:AF:15\r\n"); // TODO: Put real
-	                                             // MacAddress
+	      m_cmdResponse.push("/connect " +
+	                         std::string(macAddrArray.data()) + "\r\n");
 	    }
 
 	  while (m_isConnected)

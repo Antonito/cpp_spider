@@ -15,8 +15,8 @@ namespace spider
   {
     namespace library
     {
-		std::string SpiderPlugin::m_macAddr = "";
-      mt::Queue<SystemMsg> *SpiderPlugin::m_sendToNetwork = nullptr;
+      network::tcp::MacAddrArray SpiderPlugin::m_macAddr = {{}};
+      mt::Queue<SystemMsg> *     SpiderPlugin::m_sendToNetwork = nullptr;
 
       SpiderPlugin::SpiderPlugin()
           : m_infos{}, m_keyboardHook(false), m_mouseHook(false),
