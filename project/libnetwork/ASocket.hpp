@@ -5,6 +5,8 @@
 #include <string>
 #include <cstring>
 
+#include "ISocket.hpp"
+
 // Note: Define LIBNETWORK_HAS_SSL in order to use SSL
 #if defined LIBNETWORK_HAS_SSL
 
@@ -21,8 +23,6 @@
 #endif
 
 #endif
-
-#include "ISocket.hpp"
 
 // Disable clang warning for implicit padding
 #if defined(__clang__)

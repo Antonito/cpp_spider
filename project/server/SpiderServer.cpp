@@ -11,8 +11,14 @@ namespace spider
                                volatile bool const &running,
                                std::uint16_t        port)
         : m_controllers(), m_clients(), m_cmdCenter(cmdCenter),
-          m_running(running), m_cmdCtx(SSL_CTX_new(TLS_server_method())),
+          m_running(running),
+#if defined __linux__
+          m_cmdCtx(SSL_CTX_new(TLS_server_method())),
           m_dataCtx(SSL_CTX_new(TLS_server_method())),
+#else
+          m_cmdCtx(SSL_CTX_new(TLSv1_2_server_method())),
+          m_dataCtx(SSL_CTX_new(TLSv1_2_server_method())),
+#endif
           m_tcpSocket(port, 64, ::network::ASocket::SocketType::BLOCKING,
                       m_cmdCtx),
           m_tcpDataSocket(port + 1, 64,

@@ -2,6 +2,8 @@
 #include <thread>
 #include "Network.h"
 #include "Logger.hpp" // TODO: rm
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 namespace spider
 {
@@ -31,8 +33,13 @@ namespace spider
     {
       using namespace std::chrono_literals;
 
+#if defined    __linux__
       SSL_CTX *cmdCtx = SSL_CTX_new(TLS_client_method());
       SSL_CTX *dataCtx = SSL_CTX_new(TLS_client_method());
+#else
+      SSL_CTX *cmdCtx = SSL_CTX_new(TLSv1_2_client_method());
+      SSL_CTX *dataCtx = SSL_CTX_new(TLSv1_2_client_method());
+#endif
       if (!cmdCtx || !dataCtx)
 	{
 	  throw std::runtime_error("Cannot create SSL Context");
