@@ -5,6 +5,7 @@
 #include "Logger.hpp"
 #include "Core.h"
 #include "AntiDbg.h"
+#include "ASocket.hpp"
 
 int main()
 {
@@ -44,10 +45,12 @@ int main()
 	  std::thread networkThread([&]() {
 	    try
 	      {
+		::network::ASocket::initSSL();
 		spider::client::Network net(core.getSendToNetwork(),
 		                            core.getReceivedFromNetwork(),
 		                            core.getResponseQueue());
 		net.run(1337, 1338, "127.0.0.1", true);
+		::network::ASocket::deinitSSL();
 	      }
 	    catch (std::exception const &err)
 	      {
