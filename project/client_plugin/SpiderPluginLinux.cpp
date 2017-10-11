@@ -1,6 +1,7 @@
 #if defined __linux__
 
 #include "SpiderPlugin.h"
+#include "MacAddr.h"
 #include <string>
 #include <fstream>
 #include <limits>
@@ -15,7 +16,7 @@ namespace spider
       {
 	// Get informations
 	getInfosLinux();
-
+	MacAddress::get(m_macAddr);
 	return true;
       }
 

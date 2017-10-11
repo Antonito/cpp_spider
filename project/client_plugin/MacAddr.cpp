@@ -5,7 +5,14 @@
 #include <cstring>
 
 #if defined _WIN32
-#include <windows.h>
+#include <Windows.h>
+#include <SDKDDKVer.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <tchar.h>
+#include <Iphlpapi.h>
+#include <Assert.h>
+#pragma comment(lib, "Iphlpapi.lib")
 #pragma comment(lib, "rpcrt4.lib")
 #elif defined __linux__
 #include <sys/ioctl.h>
@@ -62,14 +69,38 @@ std::int32_t MacAddress::getAddress(std::array<std::uint8_t, 6> &result)
 #if defined  _WIN32
 std::int32_t MacAddress::getAddressWindows(std::array<std::uint8_t, 6> &result)
 {
-  UUID uuid;
+  DWORD dwBufLen = sizeof(PIP_ADAPTER_INFO);
+  IP_ADAPTER_INFO *AdapterInfo = new IP_ADAPTER_INFO();
 
-  if (UuidCreateSequential(&uuid) == RPC_S_UUID_NO_ADDRESS)
+  if (AdapterInfo == NULL)
+  {
+	  return (-1);
+  }
+  if (GetAdaptersInfo(AdapterInfo, &dwBufLen) == ERROR_BUFFER_OVERFLOW)
+  {
+	  AdapterInfo = new IP_ADAPTER_INFO();
+    if (AdapterInfo == NULL)
     {
-      return -1;
+		return (-1);
     }
-  std::memcpy(result.data(), reinterpret_cast<char *>(uuid.Data4 + 2), 6);
-  return 0;
+  }
+  if (GetAdaptersInfo(AdapterInfo, &dwBufLen) == ERROR_SUCCESS)
+  {
+    PIP_ADAPTER_INFO pAdapterInfo = AdapterInfo;
+    while (pAdapterInfo)
+    {
+      if (pAdapterInfo->IpAddressList.IpAddress.String != "127.0.0.1")
+      {
+        for (std::uint32_t count = 0; count < 6; count++)
+        {
+          result[count] = pAdapterInfo->Address[count];;
+        }
+        return (0);
+        break;
+      }
+    }
+  }
+  return (-1);
 }
 
 #elif defined __APPLE__
@@ -101,14 +132,12 @@ std::int32_t MacAddress::getAddressMacOS(std::array<std::uint8_t, 6> &result)
       ip = addr;
       if (ip != "127.0.0.1")
       {
-        std::cout << "Found active interface : " << interfaceName << " -> " << ip << std::endl;
         break;
       }
     }
   }
   if (!ifa)
   {
-    std::cout << "No active interface found :/" << std::endl;
     return (-1);
   }
   freeifaddrs(ifap);
@@ -134,12 +163,10 @@ std::int32_t MacAddress::getAddressMacOS(std::array<std::uint8_t, 6> &result)
   ifm = reinterpret_cast<struct if_msghdr *>(buf);
   sdl = reinterpret_cast<struct sockaddr_dl *>(ifm + 1);
   ptr = reinterpret_cast<unsigned char *>(LLADDR(sdl));
-  result[0] = *ptr;
-  result[1] = *(ptr + 1);
-  result[2] = *(ptr + 2);
-  result[3] = *(ptr + 3);
-  result[4] = *(ptr + 4);
-  result[5] = *(ptr + 5);
+  for (std::uint32_t count = 0; count < 6; count++)
+  {
+    result[count] = *(ptr + count);
+  }
   return (0);
 }
 
@@ -166,14 +193,12 @@ std::int32_t MacAddress::getAddressLinux(std::array<std::uint8_t, 6> &result)
       ip = addr;
       if (ip != "127.0.0.1")
       {
-        std::cout << "Found active interface : " << interfaceName << " -> " << ip << std::endl;
         break;
       }
     }
   }
   if (!ifa)
   {
-    std::cout << "No active interface found :/" << std::endl;
     return (-1);
   }
   freeifaddrs(ifap);

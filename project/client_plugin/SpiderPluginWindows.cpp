@@ -18,8 +18,6 @@ namespace spider
   {
     namespace library
     {
-      std::string SpiderPlugin::m_macAddr = "";
-
       std::map<std::uint32_t, KeyboardKey> SpiderPlugin::m_windowsKeyboardMap =
           {
               {VK_BACK, KeyboardKey::KB_BACKSPACE},
