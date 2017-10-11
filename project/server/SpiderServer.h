@@ -59,6 +59,8 @@ namespace spider
       std::vector<std::unique_ptr<::network::TCPSocket>> m_clientsData;
       CommandCenter &                                    m_cmdCenter;
       volatile bool const &                              m_running;
+      SSL_CTX *                                          m_cmdCtx;
+      SSL_CTX *                                          m_dataCtx;
       ::network::TCPSocket                               m_tcpSocket;
       ::network::TCPSocket                               m_tcpDataSocket;
       std::queue<Event>                                  m_commandQueue;

@@ -11,14 +11,17 @@ namespace spider
                                volatile bool const &running,
                                std::uint16_t        port)
         : m_controllers(), m_clients(), m_cmdCenter(cmdCenter),
-          m_running(running),
-          m_tcpSocket(port, 64, ::network::ASocket::SocketType::BLOCKING),
+          m_running(running), m_cmdCtx(SSL_CTX_new(TLS_server_method())),
+          m_dataCtx(SSL_CTX_new(TLS_server_method())),
+          m_tcpSocket(port, 64, ::network::ASocket::SocketType::BLOCKING,
+                      m_cmdCtx),
           m_tcpDataSocket(port + 1, 64,
-                          ::network::ASocket::SocketType::BLOCKING),
+                          ::network::ASocket::SocketType::BLOCKING, m_dataCtx),
           m_commandQueue(), m_curClients(0), m_storage(), m_readfds(),
           m_writefds(), m_exceptfds()
     {
-      if (!m_tcpSocket.openConnection() || !m_tcpDataSocket.openConnection())
+      if (!m_tcpSocket.openConnection("./spider.key", "./spider.crt") ||
+          !m_tcpDataSocket.openConnection("./spider.key", "./spider.crt"))
 	{
 	  throw std::runtime_error("Cannot initialize connection");
 	}
@@ -372,7 +375,6 @@ namespace spider
       do
 	{
 	  socklen_t len = sizeof(in);
-	  // TODO: SSL_accept
 	  rc = ::accept(sock, reinterpret_cast<sockaddr_t *>(&in), &len);
 	}
       while (rc == -1 && errno == EINTR);
@@ -380,7 +382,9 @@ namespace spider
       // Check if the socket is valid
       if (rc > 0)
 	{
-	  m_clientsData.push_back(std::make_unique<::network::TCPSocket>(rc));
+	  m_clientsData.push_back(std::make_unique<::network::TCPSocket>(
+	      rc, SSL_new(m_tcpDataSocket.getCTX()),
+	      m_tcpDataSocket.getCTX()));
 	  nope::log::Log(Info)
 	      << "Added clientData FD #" << m_clientsData.back()->getSocket();
 	  return (true);

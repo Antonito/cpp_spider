@@ -55,6 +55,11 @@ namespace network
     virtual ~ASocket();
     virtual bool closeConnection();
 
+#if defined     LIBNETWORK_HAS_SSL
+    static void initSSL();
+    static void deinitSSL();
+#endif
+
     bool          isStarted() const;
     sock_t        getSocket() const;
     std::uint16_t getPort() const;
@@ -73,19 +78,34 @@ namespace network
   protected:
 #if defined LIBNETWORK_HAS_SSL
     explicit ASocket(sock_t const socket, SSL_CTX *ctx);
-#endif
-    explicit ASocket(sock_t const socket);
-
+    ASocket(std::uint16_t port, std::string const &host,
+            SocketType type = ASocket::BLOCKING, SSL_CTX *ctx = nullptr);
+    ASocket(std::uint16_t port, std::uint32_t maxClients,
+            SocketType type = ASocket::BLOCKING, SSL_CTX *ctx = nullptr);
+#else
     ASocket(std::uint16_t port, std::string const &host,
             SocketType type = ASocket::BLOCKING);
     ASocket(std::uint16_t port, std::uint32_t maxClients,
             SocketType type = ASocket::BLOCKING);
+#endif
+    explicit ASocket(sock_t const socket);
 
+    virtual void hostConnection();
+
+#if defined      LIBNETWORK_HAS_SSL
+    virtual bool connectToHost(std::int32_t const socktype,
+                               std::int32_t const proto, bool shouldConnect,
+                               std::string const &key,
+                               std::string const &cert);
+    void initSocket(std::int32_t domain, std::int32_t type,
+                    std::int32_t protocol, std::string const &key,
+                    std::string const &cert);
+#else
     virtual bool connectToHost(std::int32_t const socktype,
                                std::int32_t const proto, bool shouldConnect);
-    virtual void hostConnection();
     void initSocket(std::int32_t domain, std::int32_t type,
                     std::int32_t protocol);
+#endif
     bool setSocketType() const;
 
     sock_t   m_socket;
@@ -102,7 +122,11 @@ namespace network
     SocketType    m_type;
 
   private:
+#if defined LIBNETWORK_HAS_SSL
+    explicit ASocket(SocketType type, SSL_CTX *);
+#else
     explicit ASocket(SocketType type);
+#endif
 
 #if defined _WIN32 || defined LIBNETWORK_HAS_SSL
     static std::uint32_t      m_nbSockets;

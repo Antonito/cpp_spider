@@ -9,21 +9,52 @@ namespace network
   TCPSocket::TCPSocket(sock_t const sock, SSL_CTX *ctx) : ASocket(sock, ctx)
   {
   }
+
+  TCPSocket::TCPSocket(sock_t const sock, SSL *sockSSL, SSL_CTX *ctx)
+      : ASocket(sock, ctx)
+  {
+    if (!sockSSL)
+      {
+	throw std::runtime_error("Invalid SSL socket");
+      }
+    m_socketSSL = sockSSL;
+    // Bind SSL socket and BSD socket
+    SSL_set_fd(m_socketSSL, sock);
+
+    // Do the harlem....handshake !
+    if (SSL_accept(m_socketSSL) != 1)
+      {
+	throw std::runtime_error("SSL handshake failed");
+      }
+  }
+
 #endif
   TCPSocket::TCPSocket(sock_t const sock) : ASocket(sock)
   {
   }
 
+#if defined LIBNETWORK_HAS_SSL
+  TCPSocket::TCPSocket(std::uint16_t port, std::string const &host, bool ip,
+                       SocketType type, SSL_CTX *ctx)
+      : ASocket(port, host, type, ctx)
+#else
   TCPSocket::TCPSocket(std::uint16_t port, std::string const &host, bool ip,
                        SocketType type)
       : ASocket(port, host, type)
+#endif
   {
     m_ip = ip;
   }
 
+#if defined LIBNETWORK_HAS_SSL
+  TCPSocket::TCPSocket(std::uint16_t port, std::uint32_t maxClients,
+                       SocketType type, SSL_CTX *ctx)
+      : ASocket(port, maxClients, type, ctx)
+#else
   TCPSocket::TCPSocket(std::uint16_t port, std::uint32_t maxClients,
                        SocketType type)
       : ASocket(port, maxClients, type)
+#endif
   {
   }
 
@@ -41,7 +72,12 @@ namespace network
     return (*this);
   }
 
+#if defined LIBNETWORK_HAS_SSL
+  bool TCPSocket::openConnection(std::string const &key,
+                                 std::string const &cert)
+#else
   bool TCPSocket::openConnection()
+#endif
   {
     bool ret;
 
@@ -52,7 +88,11 @@ namespace network
 	ret = true;
 	try
 	  {
+#if defined LIBNETWORK_HAS_SSL
+	    initSocket(AF_INET, SOCK_STREAM, 0, key, cert);
+#else
 	    initSocket(AF_INET, SOCK_STREAM, 0);
+#endif
 	    m_addr.sin_port = htons(m_port);
 	    m_addr.sin_family = AF_INET;
 	    hostConnection();
@@ -70,7 +110,11 @@ namespace network
       }
     else
       {
+#if defined LIBNETWORK_HAS_SSL
+	ret = connectToHost(SOCK_STREAM, IPPROTO_TCP, true, key, cert);
+#else
 	ret = connectToHost(SOCK_STREAM, IPPROTO_TCP, true);
+#endif
       }
     if (ret == false)
       {

@@ -10,9 +10,10 @@ namespace spider
     Client::Client(sock_t const sock, CommandCenter const &cmdCenter,
                    std::size_t const ndx, SSL_CTX *ctx)
         : m_os(""), m_ip(""), m_geo(""), m_pcName(""), m_commandQueue(),
-          m_responseQueue(), m_cmdCenter(cmdCenter), m_socket(sock, ctx),
-          m_socketData(-1), m_id(static_cast<std::uint16_t>(ndx)),
-          m_canWrite(false), m_outputQueue(), m_receiveBuffer(), m_macAddr{}
+          m_responseQueue(), m_cmdCenter(cmdCenter),
+          m_socket(sock, SSL_new(ctx), ctx), m_socketData(-1),
+          m_id(static_cast<std::uint16_t>(ndx)), m_canWrite(false),
+          m_outputQueue(), m_receiveBuffer(), m_macAddr{}
     {
     }
 

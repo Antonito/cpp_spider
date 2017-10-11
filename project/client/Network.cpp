@@ -31,17 +31,26 @@ namespace spider
     {
       using namespace std::chrono_literals;
 
+      SSL_CTX *cmdCtx = SSL_CTX_new(TLS_client_method());
+      SSL_CTX *dataCtx = SSL_CTX_new(TLS_client_method());
+      if (!cmdCtx || !dataCtx)
+	{
+	  throw std::runtime_error("Cannot create SSL Context");
+	}
       while (1)
 	{
 	  // Try to connect
 	  m_sock = std::make_unique<::network::TCPSocket>(
-	      port, addr, isIP, ::network::ASocket::SocketType::BLOCKING);
+	      port, addr, isIP, ::network::ASocket::SocketType::BLOCKING,
+	      cmdCtx);
 	  m_sockData = std::make_unique<::network::TCPSocket>(
-	      portData, addr, isIP, ::network::ASocket::SocketType::BLOCKING);
+	      portData, addr, isIP, ::network::ASocket::SocketType::BLOCKING,
+	      dataCtx);
 
 	  // Start connections
-	  m_isConnected = m_sock->openConnection();
-	  m_isConnected &= m_sockData->openConnection();
+	  m_isConnected = m_sock->openConnection("", ""); // TODO: key + cert
+	  m_isConnected &=
+	      m_sockData->openConnection("", ""); // TODO: key + cert
 	  nope::log::Log(Info)
 	      << "Trying to connect to server..."; // TOOD: Put in Log(Debug)
 
@@ -94,6 +103,8 @@ namespace spider
 	  // Prevent high cpu usage
 	  std::this_thread::sleep_for(3s);
 	}
+      SSL_CTX_free(cmdCtx);
+      SSL_CTX_free(dataCtx);
     }
 
 #if defined   __clang__

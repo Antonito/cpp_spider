@@ -82,7 +82,12 @@ namespace network
     return (ret != -1);
   }
 
+#if defined LIBNETWORK_HAS_SSL
+  bool UDPSocket::openConnection(std::string const &key,
+                                 std::string const &cert)
+#else
   bool UDPSocket::openConnection()
+#endif
   {
     bool ret;
 
@@ -94,7 +99,11 @@ namespace network
 	ret = true;
 	try
 	  {
+#if defined LIBNETWORK_HAS_SSL
+	    initSocket(AF_INET, SOCK_DGRAM, 0, key, cert);
+#else
 	    initSocket(AF_INET, SOCK_DGRAM, 0);
+#endif
 	    nope::log::Log(Debug) << "Socket init'd.";
 	    m_addr.sin_port = htons(m_port);
 	    m_addr.sin_family = AF_INET;
@@ -108,7 +117,11 @@ namespace network
       }
     else
       {
+#if defined LIBNETWORK_HAS_SSL
+	ret = connectToHost(SOCK_DGRAM, IPPROTO_UDP, false, key, cert);
+#else
 	ret = connectToHost(SOCK_DGRAM, IPPROTO_UDP, false);
+#endif
       }
     if (ret == false)
       {

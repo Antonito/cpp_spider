@@ -12,6 +12,23 @@
 namespace network
 {
 
+#if defined LIBNETWORK_HAS_SSL
+  void      ASocket::initSSL()
+  {
+    SSL_load_error_strings();
+    SSL_library_init();
+    OpenSSL_add_all_algorithms();
+    nope::log::Log(Info) << "OpenSSL initialized.";
+  }
+
+  void ASocket::deinitSSL()
+  {
+    ERR_free_strings();
+    EVP_cleanup();
+    nope::log::Log(Info) << "OpenSSL un-initialized.";
+  }
+#endif
+
 // Make sure you have to init / deinit WSA
 #if defined _WIN32 || defined LIBNETWORK_HAS_SSL
   std::uint32_t               network::ASocket::m_nbSockets = 0;
@@ -23,35 +40,17 @@ namespace network
 
 #if defined LIBNETWORK_HAS_SSL
   ASocket::ASocket(sock_t const socket, SSL_CTX *ctx)
-      : m_socket(socket),
-#if defined LIBNETWORK_HAS_SSL
-        m_socketSSL(SSL_new(ctx)), m_sslctx(ctx),
-#endif
-        m_port(0), m_host(""), m_ip(false), m_maxClients(0),
-        m_curClients(0), m_addr{}, m_type()
+      : m_socket(socket), m_socketSSL(nullptr), m_sslctx(ctx), m_port(0),
+        m_host(""), m_ip(false), m_maxClients(0), m_curClients(0), m_addr{},
+        m_type()
   {
     nope::log::Log(Debug) << "Loading socket #" << m_socket;
-#if defined LIBNETWORK_HAS_SSL
+
+    m_socketSSL = SSL_new(ctx);
     if (!m_socketSSL)
       {
 	throw std::runtime_error("Cannot create new SSL client");
       }
-    SSL_set_fd(m_socketSSL, socket);
-
-    if (SSL_accept(m_socketSSL) <= 0)
-      {
-	throw std::runtime_error(
-	    "Cannot accept new SSL client (handshake failed)");
-      }
-
-    if (!m_nbSockets)
-      {
-	// Initialize OpenSSL
-	SSL_load_error_strings();
-	SSL_library_init();
-	OpenSSL_add_all_algorithms();
-      }
-#endif
 
 #if defined(_WIN32)
     // Do we need to load the network DLL ?
@@ -67,7 +66,6 @@ namespace network
     ++m_nbSockets;
 #endif
   }
-
 #endif
 
   ASocket::ASocket(sock_t const socket)
@@ -79,15 +77,6 @@ namespace network
         m_curClients(0), m_addr{}, m_type()
   {
     nope::log::Log(Debug) << "Loading socket #" << m_socket;
-#if defined LIBNETWORK_HAS_SSL
-    if (!m_nbSockets)
-      {
-	// Initialize OpenSSL
-	SSL_load_error_strings();
-	SSL_library_init();
-	OpenSSL_add_all_algorithms();
-      }
-#endif
 
 #if defined(_WIN32)
     // Do we need to load the network DLL ?
@@ -118,10 +107,14 @@ namespace network
     return (*this);
   }
 
+#if defined LIBNETWORK_HAS_SSL
+  ASocket::ASocket(SocketType type, SSL_CTX *ctx)
+#else
   ASocket::ASocket(SocketType type)
+#endif
       : m_socket(-1),
 #if defined LIBNETWORK_HAS_SSL
-        m_socketSSL(nullptr), m_sslctx(nullptr),
+        m_socketSSL(nullptr), m_sslctx(ctx),
 #endif
         m_port(0), m_host(""), m_ip(false), m_maxClients(0),
         m_curClients(0), m_addr{}, m_type(type)
@@ -130,15 +123,6 @@ namespace network
     // If we can, ignore SIGPIPE
     std::signal(SIGPIPE, SIG_IGN);
     nope::log::Log(Debug) << "Ignoring SIGPIPE";
-#endif
-#if defined LIBNETWORK_HAS_SSL
-    if (!m_nbSockets)
-      {
-	// Initialize OpenSSL
-	SSL_load_error_strings();
-	SSL_library_init();
-	OpenSSL_add_all_algorithms();
-      }
 #endif
 
 #if defined(_WIN32)
@@ -156,18 +140,30 @@ namespace network
 #endif
   }
 
+#if defined LIBNETWORK_HAS_SSL
+  ASocket::ASocket(std::uint16_t port, std::string const &host,
+                   SocketType type, SSL_CTX *ctx)
+      : ASocket(type, ctx)
+#else
   ASocket::ASocket(std::uint16_t port, std::string const &host,
                    SocketType type)
       : ASocket(type)
+#endif
   {
     // cppcheck-suppress useInitializationList
     m_host = host;
     m_port = port;
   }
 
+#if defined LIBNETWORK_HAS_SSL
+  ASocket::ASocket(std::uint16_t port, std::uint32_t maxClients,
+                   SocketType type, SSL_CTX *ctx)
+      : ASocket(type, ctx)
+#else
   ASocket::ASocket(std::uint16_t port, std::uint32_t maxClients,
                    SocketType type)
       : ASocket(type)
+#endif
   {
     assert(maxClients);
     m_port = port;
@@ -233,6 +229,7 @@ namespace network
       {
 	SSL_shutdown(m_socketSSL);
 	SSL_free(m_socketSSL);
+	m_socketSSL = nullptr;
 #else
     if (m_socket > 0 && !closesocket(m_socket))
       {
@@ -323,8 +320,14 @@ namespace network
   }
 #endif
 
+#if defined LIBNETWORK_HAS_SSL
+  bool ASocket::connectToHost(std::int32_t const socktype,
+                              std::int32_t const proto, bool shouldConnect,
+                              std::string const &key, std::string const &cert)
+#else
   bool ASocket::connectToHost(std::int32_t const socktype,
                               std::int32_t const proto, bool shouldConnect)
+#endif
   {
     addrinfo_t  hints = {};
     addrinfo_t *res = nullptr;
@@ -354,7 +357,12 @@ namespace network
 	    m_type = ASocket::BLOCKING;
 	    try
 	      {
+#if defined LIBNETWORK_HAS_SSL
+		initSocket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol,
+		           key, cert);
+#else
 		initSocket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+#endif
 	      }
 	    catch (std::exception &e)
 	      {
@@ -398,8 +406,14 @@ namespace network
     return (connected);
   }
 
+#if defined LIBNETWORK_HAS_SSL
+  void ASocket::initSocket(std::int32_t domain, std::int32_t type,
+                           std::int32_t protocol, std::string const &key,
+                           std::string const &cert)
+#else
   void ASocket::initSocket(std::int32_t domain, std::int32_t type,
                            std::int32_t protocol)
+#endif
   {
     char const enable = 1;
 
@@ -430,18 +444,30 @@ namespace network
 	  }
       }
 #if defined LIBNETWORK_HAS_SSL
-    m_sslctx = SSL_CTX_new(TLSv1_2_server_method());
     if (!m_sslctx)
       {
-	throw std::runtime_error("Cannot create SSL Context");
+	throw std::runtime_error("SSL Context not set");
       }
     SSL_CTX_set_options(m_sslctx, SSL_OP_SINGLE_DH_USE);
 
-// TODO: Load certs
-#if 0
-    int use_cert = SSL_CTX_use_certificate_file(m_sslctx, "/serverCertificate.pem" , SSL_FILETYPE_PEM);    
-    int use_prv = SSL_CTX_use_PrivateKey_file(m_sslctx, "/serverCertificate.pem", SSL_FILETYPE_PEM);
-#endif
+    std::int32_t useCert =
+        SSL_CTX_use_certificate_file(m_sslctx, cert.c_str(), SSL_FILETYPE_PEM);
+    if (useCert != 1)
+      {
+	throw std::runtime_error("Cannot load " + cert);
+      }
+    std::int32_t useKey =
+        SSL_CTX_use_PrivateKey_file(m_sslctx, key.c_str(), SSL_FILETYPE_PEM);
+    if (useKey != 1)
+      {
+	throw std::runtime_error("Cannot load " + key);
+      }
+    if (!SSL_CTX_check_private_key(m_sslctx))
+      {
+	throw std::runtime_error(
+	    "Private key does not match the certificate public key");
+      }
+
     m_socketSSL = SSL_new(m_sslctx);
     if (!m_socketSSL)
       {
