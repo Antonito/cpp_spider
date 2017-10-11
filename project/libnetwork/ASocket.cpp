@@ -397,11 +397,13 @@ namespace network
 		  }
 		nope::log::Log(Debug) << "Found an address, connected !";
 		connected = true;
+#if defined LIBNETWORK_HAS_SSL
 		if (SSL_connect(m_socketSSL) != 1)
 		  {
 		    nope::log::Log(Error) << "SSL handshake failed";
 		    connected = false;
 		  }
+#endif
 		break;
 	      }
 	    closeConnection();
