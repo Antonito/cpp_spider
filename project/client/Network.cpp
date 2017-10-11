@@ -48,9 +48,10 @@ namespace spider
 	      dataCtx);
 
 	  // Start connections
-	  m_isConnected = m_sock->openConnection("", ""); // TODO: key + cert
+	  m_isConnected =
+	      m_sock->openConnection("./spider.key", "./spider.crt");
 	  m_isConnected &=
-	      m_sockData->openConnection("", ""); // TODO: key + cert
+	      m_sockData->openConnection("./spider.key", "./spider.crt");
 	  nope::log::Log(Info)
 	      << "Trying to connect to server..."; // TOOD: Put in Log(Debug)
 

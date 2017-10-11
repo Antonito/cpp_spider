@@ -397,6 +397,11 @@ namespace network
 		  }
 		nope::log::Log(Debug) << "Found an address, connected !";
 		connected = true;
+		if (SSL_connect(m_socketSSL) != 1)
+		  {
+		    nope::log::Log(Error) << "SSL handshake failed";
+		    connected = false;
+		  }
 		break;
 	      }
 	    closeConnection();
