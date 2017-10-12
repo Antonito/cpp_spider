@@ -7,9 +7,22 @@
 #include "AntiDbg.h"
 #include "ASocket.hpp"
 
-int main()
+int main(int ac, char **av)
 {
   int ret = EXIT_FAILURE;
+
+  if (ac != 4)
+    {
+      std::cout << "Usage: " << *av << " ip_address port portData"
+                << std::endl;
+      return ret;
+    }
+
+  std::string const   ip(*(av + 1));
+  std::uint16_t const port =
+      static_cast<std::uint16_t>(std::strtol(*(av + 2), nullptr, 10));
+  std::uint16_t const dataPort =
+      static_cast<std::uint16_t>(std::strtol(*(av + 3), nullptr, 10));
 
   try
     {
@@ -49,7 +62,10 @@ int main()
 		spider::client::Network net(core.getSendToNetwork(),
 		                            core.getReceivedFromNetwork(),
 		                            core.getResponseQueue());
-		net.run(1337, 1338, "127.0.0.1", true);
+		// TODO: rm
+		// net.run(4000, 4400, "10.10.249.211", true);
+		// net.run(1337, 1338, "10.10.253.138", true);
+		net.run(port, dataPort, ip, true);
 		::network::ASocket::deinitSSL();
 	      }
 	    catch (std::exception const &err)
