@@ -6,14 +6,19 @@
 #include <memory>
 
 #if defined _WIN32
-#include <Windows.h>
 #include <SDKDDKVer.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <tchar.h>
-#include <Iphlpapi.h>
+#include <winsock2.h>
+#include <iphlpapi.h>
 #include <Assert.h>
-#pragma comment(lib, "iphlpapi.lib")
+#include <memory>
+#include <iostream>
+#include <new>
+#include <string>
+#include <iostream>
+#include <WS2tcpip.h>
+#pragma comment(lib, "IPHLPAPI.lib")
+#pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "rpcrt4.lib")
 #elif defined __linux__
 #include <sys/ioctl.h>
@@ -66,31 +71,49 @@ std::int32_t MacAddress::getAddress(std::array<std::uint8_t, 6> &result)
 #if defined  _WIN32
 std::int32_t MacAddress::getAddressWindows(std::array<std::uint8_t, 6> &result)
 {
-  DWORD                            dwBufLen = sizeof(PIP_ADAPTER_INFO);
-  std::unique_ptr<IP_ADAPTER_INFO> adapterInfo =
-      std::make_unique<IP_ADAPTER_INFO>();
+	PIP_ADAPTER_ADDRESSES pAddresses = NULL;
+	ULONG outBufLen = 15000;
+	ULONG flags = GAA_FLAG_INCLUDE_PREFIX;
+	ULONG family = AF_INET;
+	PIP_ADAPTER_ADDRESSES pCurrAddresses;
+	PIP_ADAPTER_UNICAST_ADDRESS pUnicast = NULL;
+	std::array<char, 100> buff;
+	DWORD bufflen = 100;
+	pAddresses = (IP_ADAPTER_ADDRESSES *) ::operator new (outBufLen);
 
-  if (GetAdaptersInfo(adapterInfo.get(), &dwBufLen) == ERROR_BUFFER_OVERFLOW)
-    {
-      adapterInfo = std::make_unique<IP_ADAPTER_INFO>();
-    }
-  if (GetAdaptersInfo(adapterInfo.get(), &dwBufLen) == ERROR_SUCCESS)
-    {
-      PIP_ADAPTER_INFO pAdapterInfo = adapterInfo.get();
-      while (pAdapterInfo)
+	if (GetAdaptersAddresses(family, flags, NULL, pAddresses, &outBufLen) == ERROR_BUFFER_OVERFLOW)
 	{
-	  if (pAdapterInfo->IpAddressList.IpAddress.String != "127.0.0.1")
-	    {
-	      for (std::uint32_t count = 0; count < 6; count++)
-		{
-		  result[count] = pAdapterInfo->Address[count];
-		}
-	      return (0);
-	    }
-	  pAdapterInfo = pAdapterInfo->Next;
+		std::cout << "BUFFER OVERFLOW OVER HERE !" << std::endl;
+		return (-1);
 	}
-    }
-  return (-1);
+	pCurrAddresses = pAddresses;
+	while (pCurrAddresses)
+	{
+		pUnicast = pCurrAddresses->FirstUnicastAddress;
+		if (pUnicast != NULL) {
+			for (int i = 0; pUnicast != NULL; i++)
+			{
+				if (pUnicast->Address.lpSockaddr->sa_family == AF_INET)
+				{
+					sockaddr_in *sa_in = (sockaddr_in *)pUnicast->Address.lpSockaddr;
+					std::string ip(inet_ntop(AF_INET, &(sa_in->sin_addr), buff.data(), bufflen));
+					if (ip != "127.0.0.1")
+					{
+						if (pCurrAddresses->PhysicalAddressLength != 0) {
+							for (int j = 0; j < pCurrAddresses->PhysicalAddressLength; j++)
+							{
+								result[j] = pCurrAddresses->PhysicalAddress[j];
+							}
+						}
+					}
+				}
+				pUnicast = pUnicast->Next;
+			}
+		}
+		pCurrAddresses = pCurrAddresses->Next;
+	}
+	delete pAddresses;
+	return (-1);
 }
 
 #elif defined __APPLE__
