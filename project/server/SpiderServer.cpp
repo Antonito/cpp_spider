@@ -10,14 +10,14 @@ namespace spider
     SpiderServer::SpiderServer(CommandCenter &      cmdCenter,
                                volatile bool const &running,
                                std::uint16_t        port)
-        : m_controllers(), m_clients(), m_cmdCenter(cmdCenter),
-          m_running(running),
+        : m_dataPort(port + 1), m_controllers(), m_clients(),
+          m_cmdCenter(cmdCenter), m_running(running),
 #if defined __linux__
           m_cmdCtx(SSL_CTX_new(TLS_server_method())),
           m_dataCtx(SSL_CTX_new(TLS_server_method())),
 #else
-          m_cmdCtx(SSL_CTX_new(TLSv1_2_server_method())),
-          m_dataCtx(SSL_CTX_new(TLSv1_2_server_method())),
+          m_cmdCtx(SSL_CTX_new(TLSv1_server_method())),
+          m_dataCtx(SSL_CTX_new(TLSv1_server_method())),
 #endif
           m_tcpSocket(port, 64, ::network::ASocket::SocketType::BLOCKING,
                       m_cmdCtx),
@@ -336,12 +336,12 @@ namespace spider
 	      break;
 	    }
 	}
-
       return ret;
     }
 
     bool SpiderServer::addClient()
     {
+      bool          ret = false;
       std::int32_t  rc = 0;
       sockaddr_in_t in = {};
       sock_t const  sock = m_tcpSocket.getSocket();
@@ -357,22 +357,32 @@ namespace spider
       // Check if the socket is valid
       if (rc > 0)
 	{
-	  m_clients.push_back(std::make_unique<Client>(
-	      rc, m_cmdCenter, m_clients.size(), m_tcpSocket.getCTX()));
-	  nope::log::Log(Info)
-	      << "Added client FD #" << m_clients.back()->getSocket();
-	  nope::log::Log(Info)
-	      << "New client connected #" << m_clients.back()->getId();
-	  ++m_curClients;
-	  nope::log::Log(Info)
-	      << "There are now " << m_curClients << " clients.";
-	  return (true);
+	  try
+	    {
+	      m_clients.push_back(
+	          std::make_unique<Client>(rc, m_cmdCenter, m_clients.size(),
+	                                   m_tcpSocket.getCTX(), m_dataPort));
+	      nope::log::Log(Info)
+	          << "Added client FD #" << m_clients.back()->getSocket();
+	      nope::log::Log(Info)
+	          << "New client connected #" << m_clients.back()->getId();
+	      ++m_curClients;
+	      nope::log::Log(Info)
+	          << "There are now " << m_curClients << " clients.";
+	      ret = true;
+	    }
+	  catch (std::exception const &e)
+	    {
+	      ret = false;
+	      nope::log::Log(Error) << e.what();
+	    }
 	}
-      return (false);
+      return (ret);
     }
 
     bool SpiderServer::addClientData()
     {
+      bool          ret = false;
       std::int32_t  rc = 0;
       sockaddr_in_t in = {};
       sock_t const  sock = m_tcpDataSocket.getSocket();
@@ -388,14 +398,22 @@ namespace spider
       // Check if the socket is valid
       if (rc > 0)
 	{
-	  m_clientsData.push_back(std::make_unique<::network::TCPSocket>(
-	      rc, SSL_new(m_tcpDataSocket.getCTX()),
-	      m_tcpDataSocket.getCTX()));
-	  nope::log::Log(Info)
-	      << "Added clientData FD #" << m_clientsData.back()->getSocket();
-	  return (true);
+	  try
+	    {
+	      m_clientsData.push_back(std::make_unique<::network::TCPSocket>(
+	          rc, SSL_new(m_tcpDataSocket.getCTX()),
+	          m_tcpDataSocket.getCTX()));
+	      nope::log::Log(Info) << "Added clientData FD #"
+	                           << m_clientsData.back()->getSocket();
+	      ret = true;
+	    }
+	  catch (std::exception const &e)
+	    {
+	      ret = false;
+	      nope::log::Log(Error) << e.what();
+	    }
 	}
-      return (false);
+      return (ret);
     }
 
     void SpiderServer::removeClient(Client &cli)
