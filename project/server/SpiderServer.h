@@ -54,6 +54,7 @@ namespace spider
 
       ::network::IClient::ClientAction readData(::network::TCPSocket &sock);
 
+      std::uint16_t const                                m_dataPort;
       std::vector<AControl *>                            m_controllers;
       std::vector<std::unique_ptr<Client>>               m_clients;
       std::vector<std::unique_ptr<::network::TCPSocket>> m_clientsData;

