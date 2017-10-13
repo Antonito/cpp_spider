@@ -92,7 +92,8 @@ namespace spider
 	void registerProgram();
 	bool registerForStartup(PCWSTR pszAppName, PCWSTR pathToExe,
 	                        PCWSTR args);
-	bool SpiderPlugin::isRegistered(PCWSTR pszAppName) const;
+	bool isRegistered(PCWSTR pszAppName) const;
+	bool protectTask() const;
 
 // SpiderPluginOSX.cpp
 #elif defined __APPLE__
