@@ -265,10 +265,15 @@ namespace spider
 
       if (ret == ::network::IClient::ClientAction::SUCCESS)
 	{
+#if defined SPIDER_SERIALIZE
 #if defined __linux__
 	  header.time = be64toh(header.time);
 #else
 	  header.time = ntohll(header.time);
+#endif
+
+#else
+	  header.time = header.time;
 #endif
 	  switch (header.type)
 	    {
@@ -293,7 +298,11 @@ namespace spider
 		  }
 		else
 		  {
+#if defined SPIDER_SERIALIZE
 		    ev.key = ntohl(ev.key);
+#else
+		    ev.key = ev.key;
+#endif
 		    EventStorage store;
 
 		    store.header = header;
@@ -313,8 +322,13 @@ namespace spider
 		  }
 		else
 		  {
+#if defined SPIDER_SERIALIZE
 		    ev.posX = ntohl(ev.posX);
 		    ev.posY = ntohl(ev.posY);
+#else
+		    ev.posX = ev.posX;
+		    ev.posY = ev.posY;
+#endif
 
 		    EventStorage store;
 
@@ -340,6 +354,7 @@ namespace spider
 		  }
 		else
 		  {
+#if defined SPIDER_SERIALIZE
 		    ev.procArch = ntohs(ev.procArch);
 		    ev.pageSize = ntohl(ev.pageSize);
 		    ev.nbProc = ntohs(ev.nbProc);
@@ -348,6 +363,12 @@ namespace spider
 		    ev.ram = be64toh(ev.ram);
 #else
 		    ev.ram = ntohll(ev.ram);
+#endif
+#else
+		    ev.procArch = ev.procArch;
+		    ev.pageSize = ev.pageSize;
+		    ev.nbProc = ev.nbProc;
+		    ev.ram = ev.ram;
 #endif
 
 		    EventStorage store;

