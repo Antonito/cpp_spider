@@ -331,7 +331,31 @@ namespace spider
 	      break;
 	    case network::tcp::PacketType::Infos:
 	      {
-		// TODO: Not implemented yet
+		network::tcp::PacketInfos ev;
+
+		if (!readSize(sock, reinterpret_cast<std::uint8_t *>(&ev),
+		              sizeof(ev)))
+		  {
+		    ret = ::network::IClient::ClientAction::FAILURE;
+		  }
+		else
+		  {
+		    ev.procArch = ntohs(ev.procArch);
+		    ev.pageSize = ntohl(ev.pageSize);
+		    ev.nbProc = ntohs(ev.nbProc);
+
+#if defined __linux__
+		    ev.ram = be64toh(ev.ram);
+#else
+		    ev.ram = ntohll(ev.ram);
+#endif
+
+		    EventStorage store;
+
+		    store.header = header;
+		    store.infos = ev;
+		    m_storage.push(store);
+		  }
 	      }
 	      break;
 	    }
