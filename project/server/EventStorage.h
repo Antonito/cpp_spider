@@ -27,6 +27,7 @@ namespace spider
       {
 	network::tcp::PacketEvent ev;
 	network::tcp::PacketMov   mov;
+	network::tcp::PacketInfos infos;
       };
     };
 
@@ -47,7 +48,7 @@ namespace spider
 
     private:
       mt::Queue<EventStorage> m_storage;
-      std::ofstream m_logFile;
+      std::ofstream           m_logFile;
 
       std::string timeToString(std::time_t const rawtime) const;
     };

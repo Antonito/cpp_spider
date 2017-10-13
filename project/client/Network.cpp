@@ -5,6 +5,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include "MacAddr.h"
+#include "SystemInfo.h"
 
 namespace spider
 {
@@ -321,7 +322,32 @@ namespace spider
 	  break;
 	case SystemMsgType::Infos:
 	  {
+	    network::tcp::PacketInfos                   info;
+	    spider::client::library::SystemInfos const *infosPtr =
+	        reinterpret_cast<spider::client::library::SystemInfos const *>(
+	            msg.sys.data.raw);
+
 	    header.type = network::tcp::PacketType::Infos;
+	    info.procArch = htons(static_cast<std::uint16_t>(infosPtr->pArch));
+	    info.arch = static_cast<std::uint8_t>(infosPtr->arch);
+	    info.os = static_cast<std::uint8_t>(infosPtr->os);
+	    info.pageSize = htonl(infosPtr->pageSize);
+	    info.nbProc = htons(infosPtr->nbProc);
+#if defined __linux__
+	    info.ram = htobe64(infosPtr->ram);
+#else
+	    info.ram = htonll(infosPtr->ram);
+#endif
+	    if (rc)
+	      {
+		rc &= static_cast<std::int32_t>(
+		    m_sockData->send(&header, sizeof(header)));
+	      }
+	    if (rc)
+	      {
+		rc &= static_cast<std::int32_t>(
+		    m_sockData->send(&info, sizeof(info)));
+	      }
 	  }
 	  break;
 	default:

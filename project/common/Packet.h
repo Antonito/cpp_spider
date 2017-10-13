@@ -85,6 +85,15 @@ namespace spider
       static_assert(sizeof(PacketImgHeader) ==
                         sizeof(std::uint32_t) * 2 + sizeof(std::uint16_t),
                     "Invalid PacketImgHeader size");
+
+      PACK_STRUCT(struct PacketInfos {
+	std::uint16_t procArch; // Processor architecture
+	std::uint8_t  arch;     // 32/64 bits
+	std::uint8_t  os;       // Operating system
+	std::uint32_t pageSize; // Page size
+	std::uint16_t nbProc;   // Number of CPUs
+	std::uint64_t ram;      // Installed memory
+      });
     }
   }
 }
