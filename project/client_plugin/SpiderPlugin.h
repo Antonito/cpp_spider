@@ -143,6 +143,8 @@ namespace spider
 #endif
 #if defined __linux__
 	static std::map<std::uint32_t, KeyboardKey> m_linuxKeyboardMap;
+	bool	m_keyboardHooked;
+	bool	m_mouseHooked;
 #endif
       };
 
