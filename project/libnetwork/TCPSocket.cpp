@@ -209,8 +209,6 @@ namespace network
   {
     assert(getType() == ASocket::BLOCKING);
 
-    // TODO: Remove useless debug log, do while should be one level above (use
-    // header informations)
     nope::log::Log(Trace) << "recblocking Rlen -> " << rlen;
     do
       {

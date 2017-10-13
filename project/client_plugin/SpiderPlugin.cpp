@@ -157,7 +157,6 @@ namespace spider
 	  {
 	    m_cmd[order]();
 	  }
-	// TODO: Check if starts with /setup
       }
 
       bool SpiderPlugin::kill()

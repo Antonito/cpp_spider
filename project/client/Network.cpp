@@ -13,11 +13,12 @@ namespace spider
   {
     Network::Network(mt::Queue<SystemMsg> &               sendToNetwork,
                      mt::Queue<library::IPayload::Order> &receivedFromNetwork,
-                     mt::Queue<std::string> &             responseQueue)
+                     mt::Queue<std::string> &             responseQueue,
+                     std::string const &                  sslPath)
         : m_sendToNetwork(sendToNetwork),
           m_receivedFromNetwork(receivedFromNetwork),
           m_cmdResponse(responseQueue), m_isConnected(false), m_sock(nullptr),
-          m_sockData(nullptr), m_cmdReceived{}
+          m_sockData(nullptr), m_cmdReceived{}, m_sslPath(sslPath)
     {
     }
 
@@ -65,10 +66,10 @@ namespace spider
 	      dataCtx);
 
 	  // Start connections
-	  m_isConnected =
-	      m_sock->openConnection("./spider.key", "./spider.crt");
-	  m_isConnected &=
-	      m_sockData->openConnection("./spider.key", "./spider.crt");
+	  m_isConnected = m_sock->openConnection(m_sslPath + "spider.key",
+	                                         m_sslPath + "spider.crt");
+	  m_isConnected &= m_sockData->openConnection(
+	      m_sslPath + "spider.key", m_sslPath + "spider.crt");
 	  nope::log::Log(Info)
 	      << "Trying to connect to server..."; // TOOD: Put in Log(Debug)
 

