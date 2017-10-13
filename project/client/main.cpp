@@ -62,9 +62,7 @@ int main(int ac, char **av)
 		spider::client::Network net(core.getSendToNetwork(),
 		                            core.getReceivedFromNetwork(),
 		                            core.getResponseQueue());
-		// TODO: rm
-		// net.run(4000, 4400, "10.10.249.211", true);
-		// net.run(1337, 1338, "10.10.253.138", true);
+
 		net.run(port, dataPort, ip, true);
 		::network::ASocket::deinitSSL();
 	      }
