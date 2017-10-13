@@ -13,8 +13,8 @@ namespace spider
         : m_dataPort(port + 1), m_controllers(), m_clients(),
           m_cmdCenter(cmdCenter), m_running(running),
 #if defined __linux__
-          m_cmdCtx(SSL_CTX_new(TLS_server_method())),
-          m_dataCtx(SSL_CTX_new(TLS_server_method())),
+          m_cmdCtx(SSL_CTX_new(TLSv1_server_method())),
+          m_dataCtx(SSL_CTX_new(TLSv1_server_method())),
 #else
           m_cmdCtx(SSL_CTX_new(TLSv1_server_method())),
           m_dataCtx(SSL_CTX_new(TLSv1_server_method())),
@@ -278,7 +278,7 @@ namespace spider
 	      [[fallthrough]];
 #elif defined __clang__
 	      [[clang::fallthrough]];
-#elif defined __GNUC__
+#elif defined __GNUC__ && __GNUC__ >= 7
 	      __attribute__((fallthrough));
 #else
 #endif
