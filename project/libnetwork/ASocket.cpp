@@ -18,6 +18,7 @@ namespace network
     SSL_load_error_strings();
     SSL_library_init();
     OpenSSL_add_all_algorithms();
+    SSLeay_add_ssl_algorithms();
     nope::log::Log(Info) << "OpenSSL initialized.";
   }
 

