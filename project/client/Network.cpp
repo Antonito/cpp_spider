@@ -121,8 +121,6 @@ namespace spider
 	  // Prevent high cpu usage
 	  std::this_thread::sleep_for(3s);
 	}
-      SSL_CTX_free(cmdCtx);
-      SSL_CTX_free(dataCtx);
     }
 
 #if defined   __clang__
