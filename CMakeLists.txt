@@ -157,6 +157,10 @@ add_library(${SPIDER_CLIENT_PLUGIN} SHARED ${CLIENT_PLUGIN_SOURCES})
 target_link_libraries(${SPIDER_CLIENT_PLUGIN} PUBLIC ${LIBMT} ${LIBMACADDR})
 target_include_directories(${SPIDER_CLIENT_PLUGIN} PUBLIC "./project/client_plugin/" "./project/client/" "./project/common/")
 
+if(APPLE)
+  target_link_libraries(${SPIDER_CLIENT_PLUGIN} PUBLIC "-framework ApplicationServices")
+endif()
+
 install(TARGETS ${SPIDER_SERVER} DESTINATION bin)
 install(TARGETS ${PLUGIN_EXAMPLE} DESTINATION bin/plugins)
 install(TARGETS ${PLUGIN_GETINFO} DESTINATION bin/plugins)

