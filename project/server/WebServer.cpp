@@ -17,15 +17,13 @@ namespace spider
           m_io_service(),
           m_acceptor(m_io_service, boost::asio::ip::tcp::endpoint(
                                        boost::asio::ip::tcp::v4(), m_port)),
-          m_cmdCenter(cmdCenter), m_clients{}, m_running(running),
-          m_clientCount(0)
+          m_clients{}, m_running(running), m_clientCount(0)
     {
       nope::log::Log(Info) << "Creating WebServer";
       nope::log::Log(Debug)
           << "creating default and custom routes for WebServer";
 
-      m_routes["/404"] = [&](std::uint32_t askId, std::uint32_t victimId)
-      {
+      m_routes["/404"] = [&](std::uint32_t askId, std::uint32_t victimId) {
 	nope::log::Log(Info) << "Someone is on 404";
 	server::Event ev;
 	ev.destId = victimId;
@@ -36,8 +34,7 @@ namespace spider
 	m_responseQueue.push(ev);
       };
 
-      m_routes["/"] = [&](std::uint32_t askId, std::uint32_t victimId)
-      {
+      m_routes["/"] = [&](std::uint32_t askId, std::uint32_t victimId) {
 	nope::log::Log(Info) << "Someone requested commandsInfo";
 	server::Event ev;
 	ev.destId = victimId;
@@ -48,8 +45,7 @@ namespace spider
 	m_responseQueue.push(ev);
       };
 
-      m_routes["/nb"] = [&](std::uint32_t askId, std::uint32_t victimId)
-      {
+      m_routes["/nb"] = [&](std::uint32_t askId, std::uint32_t victimId) {
 	nope::log::Log(Info) << "Someone requested the number of client";
 	server::Event ev;
 	ev.destId = victimId;
@@ -157,17 +153,17 @@ namespace spider
 	    }
 	  else
 	    {
-              if (ev.response.getResponse().find("OK"))
-              {
-                code = "HTTP/1.1 200 OK";
-              }
-              else
-              {
-                code = "HTTP/1.1 500 Internal Server Error";
-              }
-              res << "{\"command\" : \"" << ev.commandName << "\",";
-              res << " \"response\" : \"" << ev.response.getResponse() << "\"}";
-              
+	      if (ev.response.getResponse().find("OK"))
+		{
+		  code = "HTTP/1.1 200 OK";
+		}
+	      else
+		{
+		  code = "HTTP/1.1 500 Internal Server Error";
+		}
+	      res << "{\"command\" : \"" << ev.commandName << "\",";
+	      res << " \"response\" : \"" << ev.response.getResponse()
+	          << "\"}";
 	    }
 	  std::stringstream ss;
 	  ss << code << std::endl;
@@ -186,13 +182,14 @@ namespace spider
 		      client->getSocket(),
 		      boost::asio::buffer(str->c_str(), str->length()),
 		      [&client, str](boost::system::error_code const &e,
-		                     std::size_t n)
-                      {
-                        if (e)
-                        {
-                          nope::log::Log(Debug) << "erreur writting to AControl's client [" << n << "]";
-                          return ;
-                        }
+		                     std::size_t n) {
+		        if (e)
+		          {
+			    nope::log::Log(Debug)
+			        << "erreur writting to AControl's client ["
+			        << n << "]";
+			    return;
+		          }
 		        nope::log::Log(Debug) << "wrtting on socket...";
 		      });
 		  nope::log::Log(Info)
