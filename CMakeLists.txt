@@ -42,6 +42,7 @@ find_package(Boost REQUIRED COMPONENTS system filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
 endif()
 
+
 ##
 ## Libraries
 ##
@@ -91,7 +92,30 @@ file(GLOB SERVER_SOURCES project/server/*.cpp)
 set(SPIDER_SERVER spider_server)
 add_executable(${SPIDER_SERVER} ${SERVER_SOURCES})
 target_include_directories(${SPIDER_SERVER} PUBLIC "./project/server/" "./project/common/")
+##########
+find_package(libmongocxx QUIET)
+if (libmongocxx_FOUND)
+find_package(libbsoncxx QUIET)
+if (libbsoncxx_FOUND)
+add_definitions(-DMONGOCXX)
+include_directories(${LIBMONGOCXX_INCLUDE_DIR})
+include_directories("/usr/local/include/mongocxx/v_noabi")
+include_directories("/usr/local/include/libmongoc-1.0")
+include_directories("/usr/local/lib")
+include_directories(${LIBBSONCXX_INCLUDE_DIR})
+include_directories("/usr/local/include/bsoncxx/v_noabi")
+include_directories("/usr/local/include/libbson-1.0")
+include_directories("/usr/local/lib")
+target_link_libraries(${SPIDER_SERVER} PUBLIC ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${LIBLOGGER} ${LIBLOADER} ${LIBNETWORK} ${LIBMT} ${LIBMACADDR} ${OPENSSL_LIBRARIES} ${LIBMONGOCXX_LIBRARIES} ${LIBBSONCXX_LIBRARIES})
+else()
 target_link_libraries(${SPIDER_SERVER} PUBLIC ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${LIBLOGGER} ${LIBLOADER} ${LIBNETWORK} ${LIBMT} ${LIBMACADDR} ${OPENSSL_LIBRARIES})
+endif()
+else()
+target_link_libraries(${SPIDER_SERVER} PUBLIC ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${LIBLOGGER} ${LIBLOADER} ${LIBNETWORK} ${LIBMT} ${LIBMACADDR} ${OPENSSL_LIBRARIES})
+endif()
+
+##########
+#target_link_libraries(${SPIDER_SERVER} PUBLIC ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${LIBLOGGER} ${LIBLOADER} ${LIBNETWORK} ${LIBMT} ${LIBMACADDR} ${OPENSSL_LIBRARIES})
 if(UNIX AND NOT APPLE)
 target_link_libraries(${SPIDER_SERVER} PUBLIC -lpthread -ldl)
 endif()
