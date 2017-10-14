@@ -10,8 +10,8 @@
 #if defined _WIN32
 #include <windows.h>
 #elif defined __APPLE__
-#include <thread>
 #include <ApplicationServices/ApplicationServices.h>
+#include <thread>
 #endif
 
 namespace spider
@@ -71,6 +71,7 @@ namespace spider
 
       private:
 	static void extractPath(std::string &path);
+	void setup();
 // SpiderPluginWindows.cpp
 #if defined  _WIN32
 	bool initWindows();
@@ -91,6 +92,11 @@ namespace spider
 	static LRESULT CALLBACK mouseHookWindows(int nCode, WPARAM wParam,
 	                                         LPARAM lParam);
 	void runWindows() const;
+	void registerProgram();
+	bool registerForStartup(PCWSTR pszAppName, PCWSTR pathToExe,
+	                        PCWSTR args);
+	bool SpiderPlugin::isRegistered(PCWSTR pszAppName) const;
+
 // SpiderPluginOSX.cpp
 #elif defined __APPLE__
 	bool          initOSX();
@@ -146,6 +152,10 @@ namespace spider
 	static std::map<std::uint32_t, KeyboardKey> m_osxKeyboardMap;
 	CFRunLoopRef m_osxKeyboardLoop;
 	CFRunLoopRef m_osxMouseLoop;
+	std::thread  m_osxKeyboardThread;
+	std::thread  m_osxMouseThread;
+	bool         m_osxKeyboardThreadReturn;
+	bool         m_osxMouseThreadReturn;
 #endif
       };
 

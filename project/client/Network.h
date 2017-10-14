@@ -28,7 +28,7 @@ namespace spider
       explicit Network(
           mt::Queue<SystemMsg> &               sendToNetwork,
           mt::Queue<library::IPayload::Order> &receivedFromNetwork,
-          mt::Queue<std::string> &             responseQueue);
+          mt::Queue<std::string> &responseQueue, std::string const &sslPath);
       ~Network();
 
       Network(Network const &) = delete;
@@ -57,6 +57,7 @@ namespace spider
       std::unique_ptr<::network::TCPSocket> m_sock;
       std::unique_ptr<::network::TCPSocket> m_sockData;
       RingBuffer<4096>                      m_cmdReceived;
+      std::string const                     m_sslPath;
     };
 
 #if defined   __clang__

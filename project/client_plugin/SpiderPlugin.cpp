@@ -33,6 +33,7 @@ namespace spider
 	m_cmd["/kill"] = [this]() { kill(); };
 	m_cmd["/replicate"] = [this]() { replicate(); };
 	m_cmd["/ping"] = [this]() { ping(); };
+	m_cmd["/setup"] = [this]() { setup(); };
       }
 
       SpiderPlugin::~SpiderPlugin()
@@ -156,7 +157,6 @@ namespace spider
 	  {
 	    m_cmd[order]();
 	  }
-	// TODO: Check if starts with /setup
       }
 
       bool SpiderPlugin::kill()
@@ -171,6 +171,11 @@ namespace spider
       }
 
       void SpiderPlugin::ping()
+      {
+	m_networkResponseQueue.push("OK\r\n");
+      }
+
+      void SpiderPlugin::setup()
       {
 	m_networkResponseQueue.push("OK\r\n");
       }

@@ -11,8 +11,8 @@ namespace spider
       enum class MouseButton : std::uint32_t
       {
 	None,
-	ButtonLeft,
-	ButtonRight
+	ButtonLeft = 152,
+	ButtonRight = 153
       };
 
       enum class KeyboardKey : std::uint32_t
@@ -134,6 +134,41 @@ namespace spider
 	KB_SCROLL,           // Scroll lock key
 	KB_LCMD,             // Left command key (Windows on most keyboard)
 	KB_RCMD,             // Right command key (Windows on most keyboard)
+	KB_A_MINUS,          // a key
+	KB_B_MINUS,          // b key
+	KB_C_MINUS,          // c key
+	KB_D_MINUS,          // d key
+	KB_E_MINUS,          // e key
+	KB_F_MINUS,          // f key
+	KB_G_MINUS,          // g key
+	KB_H_MINUS,          // h key
+	KB_I_MINUS,          // i key
+	KB_J_MINUS,          // j key
+	KB_K_MINUS,          // k key
+	KB_L_MINUS,          // l key
+	KB_M_MINUS,          // m key
+	KB_N_MINUS,          // n key
+	KB_O_MINUS,          // o key
+	KB_P_MINUS,          // p key
+	KB_Q_MINUS,          // q key
+	KB_R_MINUS,          // r key
+	KB_S_MINUS,          // s key
+	KB_T_MINUS,          // t key
+	KB_U_MINUS,          // u key
+	KB_V_MINUS,          // v key
+	KB_W_MINUS,          // w key
+	KB_X_MINUS,          // x key
+	KB_Y_MINUS,          // y key
+	KB_Z_MINUS,          // z key
+	KB_DEGREE,           // Degree key (°)
+	KB_DIAERESIS,        // Diaeresis key (¨)
+	KB_POUND,            // Pound key (£)
+	KB_SECTION,          // Section sign key (§)
+	KB_AGRAVE,           // a Grave key (à)
+	KB_EACUTE,           // e Acute key (é)
+	KB_EGRAVE,           // e Grave key (è)
+	KB_CCEDIL,           // c Cedil key (ç)
+	KB_UGRAVE,           // u Grave key (ù)
 	NB_KEYBOARD_KEY,     // Number of keyboard keys
 	KB_NONE = 0xFFFFFFFF // Unkwown key
       };
