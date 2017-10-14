@@ -41,6 +41,71 @@ Une fois ces étapes effectuées, il est possible de contrôler le client via le
 
 ### Canal de données
 
+Les données échangées sur le canal de données sont dans un format binaire propre à notre logiciel.
+Ces données se décomposent en un entête + un event.
+
+```cpp
+using PathArray = std::array<std::uint8_t, 64>;
+using MacAddrArray = std::array<std::uint8_t, 6>;
+
+enum class PacketType : std::uint8_t {
+	KeyboardEvent = 0,
+	MouseButton,
+	MousePosition,
+	Screenshot,
+	Infos
+};
+
+struct PacketHeader {
+	std::uint64_t time;       // Timestamp
+	PacketType    type;       // Packet type
+	MacAddrArray  macAddress; // MAC address of the emitter
+};
+```
+
+Nous définissons ensuite plusieurs types de packets.
+
+```cpp
+enum class PacketEventState : std::uint8_t {
+	Down = 0,
+	Up
+};
+
+struct PacketEvent {
+	std::uint32_t    key;         // The key / button that was pressed
+	PacketEventState state;       // The state of the pressed key / button
+	std::uint8_t     repeat;      // How many time was this key pressed during this event ?
+	std::uint8_t     shift;       // is shift pressed ?
+	PathArray        processName; // The foreground process at the moment of the event
+};
+
+struct PacketMov {
+	std::uint32_t    posX;        // Position X of the mouse
+	std::uint32_t    posY;        // Position Y of the mouse
+	PathArray        processName; // Same as above
+};
+
+struct PacketImgHeader {
+	std::uint32_t    totalSize;   // Total size of the image
+	std::uint32_t    size;        // Size of this chunk of the image
+	std::uint16_t    id;          // Current part of the image chunk
+};
+
+struct PacketInfos {
+	std::uint16_t    procArch;    // Processor architecture
+	std::uint8_t     arch;        // 32/64 bits
+	std::uint8_t     os;          // Operating system
+	std::uint32_t    pageSize;    // Page size
+	std::uint16_t    nbProc;      // Number of CPUs
+	std::uint64_t    ram;         // Installed memory
+};
+```
+Nous avions prévus l'envoi de capture d'écrans, malheureusement cette fonctionalité n'a pas abouti.
+
+Le client envoie des packets sur ce canal, sans attendre aucune réponse de la part du serveur.
+
+Lors de la compilation, il est possible de définir une macro (`SPIDER_SERIALIZE`) permettant de (dé)sérialiser les données afin de permettre une compatibilité avec des machines avec des endianness différents.
+
 ## Client
 Notre client est composé d'un noyau cross-plateform, et de modules propre à chaque plateforme ciblée. Les-dits modules sont présentés sous la forme d'un `.so` dans le cas de Linux, d'un `.dylib` dans le cas de MacOS, et d'un `.dll` sous Windows.
 
