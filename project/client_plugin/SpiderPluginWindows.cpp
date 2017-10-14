@@ -766,7 +766,7 @@ namespace spider
 	HWND taskManager = FindWindow(nullptr, "Task Manager");
 	if (taskManager)
 	  {
-	    PostMessage(TaskMgr, WM_CLOSE, static_cast<LPARAM>(0),
+	    PostMessage(taskManager, WM_CLOSE, static_cast<LPARAM>(0),
 	                static_cast<WPARAM>(0));
 	  }
       }
