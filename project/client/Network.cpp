@@ -1,11 +1,14 @@
 #include <chrono>
 #include <thread>
 #include "Network.h"
-#include "Logger.hpp" // TODO: rm
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include "MacAddr.h"
 #include "SystemInfo.h"
+
+#if defined DEBUG
+#include "Logger.hpp"
+#endif
 
 namespace spider
 {
@@ -70,8 +73,9 @@ namespace spider
 	                                         m_sslPath + "spider.crt");
 	  m_isConnected &= m_sockData->openConnection(
 	      m_sslPath + "spider.key", m_sslPath + "spider.crt");
-	  nope::log::Log(Info)
-	      << "Trying to connect to server..."; // TOOD: Put in Log(Debug)
+#if defined DEBUG
+	  nope::log::Log(Info) << "Trying to connect to server...";
+#endif
 
 	  if (m_isConnected)
 	    {
@@ -107,8 +111,9 @@ namespace spider
 		}
 	      if (disconnect)
 		{
-		  nope::log::Log(Info)
-		      << "Disconnected from server"; // TOOD: Put in Log(Debug)
+#if defined DEBUG
+		  nope::log::Log(Info) << "Disconnected from server";
+#endif
 		  break;
 		}
 	    }
@@ -199,9 +204,9 @@ namespace spider
 		      reinterpret_cast<std::uint8_t *>(data.data()), cmdLen);
 		  data[cmdLen - 1] = '\0';
 		  data[cmdLen - 2] = '\0';
-		  nope::log::Log(Info)
-		      << "Received: "
-		      << data.data(); // TOOD: Put in Log(Debug)
+#if defined DEBUG
+		  nope::log::Log(Info) << "Received: " << data.data();
+#endif
 		  library::IPayload::Order order(data.data());
 
 		  if (order.find_first_of("/setup") != std::string::npos)
@@ -226,7 +231,9 @@ namespace spider
       if (!m_cmdResponse.empty())
 	{
 	  std::string const &cur = m_cmdResponse.front();
+#if defined                  DEBUG
 	  nope::log::Log(Info) << "Sending: " << cur;
+#endif
 	  if (!m_sock->send(cur.c_str(), cur.length()))
 	    {
 	      rc = -1;

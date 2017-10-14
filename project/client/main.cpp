@@ -24,6 +24,7 @@ int main(int ac, char **av)
   std::uint16_t const dataPort =
       static_cast<std::uint16_t>(std::strtol(*(av + 3), nullptr, 10));
 
+#if defined DEBUG
   try
     {
 #ifndef _WIN32
@@ -41,6 +42,7 @@ int main(int ac, char **av)
                 << std::endl;
       return ret;
     }
+#endif
 
   try
     {
@@ -71,7 +73,9 @@ int main(int ac, char **av)
 	      }
 	    catch (std::exception const &err)
 	      {
+#if defined DEBUG
 		nope::log::Log(Error) << "Network: " << err.what();
+#endif
 	      }
 	  });
 
@@ -88,14 +92,18 @@ int main(int ac, char **av)
     }
   catch (std::exception const &e)
     {
+#if defined DEBUG
       nope::log::Log(Error) << "Error: " << e.what();
       system("pause");
+#endif
       ret = EXIT_FAILURE;
     }
 
+#if defined DEBUG
   if (ret == EXIT_FAILURE)
     {
       std::cout << "Not today..." << std::endl;
     }
+#endif
   return ret;
 }

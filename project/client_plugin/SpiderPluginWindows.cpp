@@ -691,9 +691,6 @@ namespace spider
 
 	if (args)
 	  {
-	    // caller should make sure "args" is quoted if any single argument
-	    // has a space
-	    // e.g. (L"-name \"Mark Voidale\"");
 	    wcscat_s(szValue, count, args);
 	  }
 
