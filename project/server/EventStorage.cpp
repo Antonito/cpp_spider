@@ -352,7 +352,7 @@ namespace spider
 	    }
 
 	  nope::log::Log(Info) << msg;
-	  m_logFile << msg;
+	  m_logFile << msg << '\n';
 	  m_storage.pop();
 	}
     }

