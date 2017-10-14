@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 14)
 ADD_DEFINITIONS(-DLIBNETWORK_HAS_SSL -DSPIDER_SERIALIZE)
 
 if(UNIX AND NOT APPLE)
-SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Weffc++ -DLIBNETWORK_HAS_SSL")
+SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Weffc++ -Wno-deprecated-declarations -DLIBNETWORK_HAS_SSL")
 elseif(APPLE)
 SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-global-constructors -Wno-exit-time-destructors -Wno-c++1z-extensions -DLIBNETWORK_HAS_SSL")
 endif()

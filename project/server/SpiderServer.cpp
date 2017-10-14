@@ -10,7 +10,7 @@ namespace spider
     SpiderServer::SpiderServer(CommandCenter &      cmdCenter,
                                volatile bool const &running,
                                std::uint16_t        port)
-        : m_dataPort(port + 1), m_controllers(), m_clients(),
+        : m_dataPort(port + 1), m_controllers(), m_clients(), m_clientsData(),
           m_cmdCenter(cmdCenter), m_running(running),
 #if defined __linux__
           m_cmdCtx(SSL_CTX_new(TLSv1_server_method())),
