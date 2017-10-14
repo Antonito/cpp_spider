@@ -1,5 +1,20 @@
 #pragma once
 
+#if defined __clang__
+#pragma clang diagnostic push
+#pragma clang system_header
+#endif
+#if defined MONGOCXX
+#include <bsoncxx/json.hpp>
+#include <mongocxx/client.hpp>
+#include <mongocxx/stdx.hpp>
+#include <mongocxx/uri.hpp>
+#include <mongocxx/instance.hpp>
+#include <vector>
+#endif
+#if defined __clang__
+#pragma clang diagnostic pop
+#endif
 #include <fstream>
 #include "Queue.h"
 #include "Packet.h"
@@ -49,6 +64,11 @@ namespace spider
     private:
       mt::Queue<EventStorage> m_storage;
       std::ofstream           m_logFile;
+#if defined MONGOCXX
+      mongocxx::instance      m_mongoInstance;
+      mongocxx::client        m_mongoClient;
+      mongocxx::database      m_mongoDb;
+#endif
 
       std::string timeToString(std::time_t const rawtime) const;
     };
