@@ -4,6 +4,8 @@
 #include "MacAddr.h"
 #include <sys/types.h>
 #include <sys/sysctl.h>
+#import <Foundation/Foundation.h>
+#import <AppKit/AppKit.h>
 
 namespace spider
 {
