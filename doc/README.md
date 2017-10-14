@@ -4,7 +4,7 @@ Ce document détaille le fonctionnement du projet _cpp\_spider_.
 ## Client
 Notre client est composé d'un noyau cross-plateform, et de modules propre à chaque plateforme ciblée. Les-dits modules sont présentés sous la forme d'un `.so` dans le cas de Linux, d'un `.dylib` dans le cas de MacOS, et d'un `.dll` sous Windows.
 
-Lors du démarrage du client, le noyau (dit _core_) charge le module spécifique à la plateforme. Une fois ce chargement effectué, le core vérifie la présence de deboggeur, et vérifie que le processus n'est pas analysé par un anti-virus. Si le core n'est pas analysé, il procède ensuite à l'initialisation du module, puis à l'initialisation d'un thread de communication réseau.
+Lors du démarrage du client, le noyau (dit _core_) charge le module spécifique à la plateforme. Une fois ce chargement effectué, le core vérifie la présence de deboggeur, et vérifie que le processus n'est pas analysé par un anti-virus. Si le core n'est pas analysé, il procède ensuite à l'initialisation du module, puis à l'initialisation d'un thread de communication réseau. En cas d'erreur, le processus est arrêté.
 
 Le thread de réseau essaie continuellement de se connecter au serveur, en espaçant chaque tentative échouée de 3 secondes. Une fois connecté, celui-ci est responsable de la transmission des ordres du serveur au core, et de l'envoi des informations envoyés par ce dernier. La communication inter-thread est effectuée au moyen de `queues` thread-safe.
 Ainsi, si pour une raison la connexion réseau est interrompue, l'ensemble des évènements détectés reste sauvegardé dans une `queue`, et ces évènements seront par la suite envoyés au serveur dès que la connexion sera rétablie.
@@ -19,8 +19,8 @@ En cas de détection d'un deboggeur, le core s'arrête.
 
 #### Module
 
-Un module est une bibliothèque dynamique réalisé pour un système d'exploitation particulier.
-Afin d'homogénéiser leur conception, les modules implémenter la fonction suivante:
+Un module est une bibliothèque dynamique réalisée pour un système d'exploitation particulier.
+Afin d'homogénéiser leur conception, les modules doivent implémenter le code suivant:
 
 ```cpp
 static spider::client::library::SpiderPlugin payload;
@@ -31,6 +31,8 @@ SPIDER_API spider::client::library::IPayload *getPayload()
   return static_cast<spider::client::library::IPayload *>(&payload);
 }
 ```
+
+Ils doivent également se conformer à l'interface `IPayload`.
 
 #### Speficités Windows
 
