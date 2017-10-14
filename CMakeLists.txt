@@ -163,6 +163,10 @@ if (UNIX AND NOT APPLE)
 endif()
 target_include_directories(${SPIDER_CLIENT_PLUGIN} PUBLIC "./project/client_plugin/" "./project/client/" "./project/common/")
 
+if(APPLE)
+  target_link_libraries(${SPIDER_CLIENT_PLUGIN} PUBLIC "-framework ApplicationServices")
+endif()
+
 ##
 ## Installation
 ##
