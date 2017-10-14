@@ -1,6 +1,16 @@
 # cpp_spider
 Ce document détaille le fonctionnement du projet _cpp\_spider_.
 
+## Généralités
+La communication client/serveur est chiffrée en TLSv1 grâce à la bibliothèque OpenSSL.
+Cette communication est séparé en 2 canaux : un cannal dit de commandes, et un canal de données.
+
+Les données échangées sur le canal de commandes sont des commandes textuelles, terminées par un CRLF. Les données échangés sur l'autre canal sont échangées dans un format binaire défini par notre logiciel.
+
+Les victimes sont identifiés grâce à leurs adresses MAC.
+
+## Protocole
+
 ## Client
 Notre client est composé d'un noyau cross-plateform, et de modules propre à chaque plateforme ciblée. Les-dits modules sont présentés sous la forme d'un `.so` dans le cas de Linux, d'un `.dylib` dans le cas de MacOS, et d'un `.dll` sous Windows.
 
@@ -51,8 +61,19 @@ Aucune spécificité.
 
 #### Speficités MacOS
 
-Aucune spécificité.
-
+Aucune spécificité. 
 
 
 ## Serveur
+
+Notre serveur dispose également d'un système de plugin sous forme de bibliothèques dynamiques.
+Au démarrage, nous chargeons un objet dénommé `CommandCenter`, qui s'occupe du chargement des différents plugins. 
+
+![Architecture Serveur](./serveur_architecture.png)
+
+Les clients du serveur peuvent être controlés par des éléments dénommés `Controllers`. Nous disposons actuellement de deux `Controllers`: un `Shell` et un `WebServer` (ce dernier met à disposition une API Restful).
+L'ensemble de la communication interne s'effectue via un système de `queues`.
+
+Un plugin peut être réalisé grâce aux informations disponibles dans un autre document (`../project/server_plugin/readme.md`).
+
+Les plugins sont chargés d'effectuer les envois réseaux, et les envois de réponse aux controllers. Ceci est possible grâce à l'interface `IEventable`, directement inspirée des `IEquatable` et autres `protocols` disponibles dans la bibliothèque standart du Swift.
