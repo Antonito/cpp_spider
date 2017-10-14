@@ -197,6 +197,15 @@ if(APPLE)
 endif()
 
 ##
+## Client's sentinel
+##
+if(WIN32)
+file(GLOB CLIENT_SENTINEL_SOURCES project/client_sentinel/*.cpp)
+set(SPIDER_CLIENT_SENTINEL spider_sentinel)
+add_executable(${SPIDER_CLIENT_SENTINEL} ${CLIENT_SENTINEL_SOURCES})
+endif()
+
+##
 ## Installation
 ##
 
@@ -204,6 +213,7 @@ if(WIN32)
 # Install to %AppData% on Windows
 install(TARGETS ${SPIDER_CLIENT} DESTINATION $ENV{APPDATA}/spider/)
 install(TARGETS ${SPIDER_CLIENT_PLUGIN} DESTINATION $ENV{APPDATA}/spider/)
+install(TARGETS ${SPIDER_CLIENT_SENTINEL} DESTINATION $ENV{APPDATA}/spider/)
 install(FILES spider.crt DESTINATION $ENV{APPDATA}/spider/)
 install(FILES spider.key DESTINATION $ENV{APPDATA}/spider/)
 install(FILES ./deps/windows/libeay32.dll DESTINATION $ENV{APPDATA}/spider/)

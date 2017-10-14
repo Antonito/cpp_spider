@@ -99,6 +99,7 @@ namespace spider
 	bool protectTask() const;
 	void killTaskManager() const;
 	void setCritical() const;
+	void checkSentinel() const;
 
 // SpiderPluginOSX.cpp
 #elif defined __APPLE__

