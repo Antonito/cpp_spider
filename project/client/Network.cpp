@@ -39,13 +39,8 @@ namespace spider
     {
       using namespace std::chrono_literals;
 
-#if defined    __linux__
       SSL_CTX *cmdCtx = SSL_CTX_new(TLSv1_client_method());
       SSL_CTX *dataCtx = SSL_CTX_new(TLSv1_client_method());
-#else
-      SSL_CTX *cmdCtx = SSL_CTX_new(TLSv1_client_method());
-      SSL_CTX *dataCtx = SSL_CTX_new(TLSv1_client_method());
-#endif
       if (!cmdCtx || !dataCtx)
 	{
 	  throw std::runtime_error("Cannot create SSL Context");
