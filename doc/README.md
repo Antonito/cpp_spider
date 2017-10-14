@@ -10,6 +10,36 @@ Les données échangées sur le canal de commandes sont des commandes textuelles
 Les victimes sont identifiés grâce à leurs adresses MAC.
 
 ## Protocole
+### Canal de commandes
+Lors de sa connexion, un client doit envoyer 
+
+```
+/connect MAC_ADDRESS\r\n
+```
+où MAC_ADDRESS est l'adresse MAC du client.
+
+Le serveur répond à ceci 
+
+```
+/setup PORT_DATA\r\n
+```
+où PORT_DATA est le port auquel le client peut se connecter pour échanger des données.
+
+Une fois ces étapes effectuées, il est possible de contrôler le client via les différentes commandes de notre protocole.
+
+> Par défaut, le client n'enregistre aucune information sur le client.
+
+
+| Commande                 	| Action                                                                                         	|
+|--------------------------	|------------------------------------------------------------------------------------------------	|
+| /getInfos\r\n            	| Récupère les informations de la victime (OS, architecture, page size, nombre de CPUs, RAM ...) 	|
+| /setMouseEmission\r\n    	| Active/désactive la capture de la souris                                                       	|
+| /setKeyboardEmission\r\n 	| Active/désactive la capture du clavier                                                         	|
+| /replicate\r\n           	| Demande au client d'infecter un fichier                                                        	|
+| /kill\r\n                	| Stoppe le processus du client                                                                  	|
+| /ping\r\n                	| Vérifie que le client est toujours connecté                                                                 	|
+
+### Canal de données
 
 ## Client
 Notre client est composé d'un noyau cross-plateform, et de modules propre à chaque plateforme ciblée. Les-dits modules sont présentés sous la forme d'un `.so` dans le cas de Linux, d'un `.dylib` dans le cas de MacOS, et d'un `.dll` sous Windows.
