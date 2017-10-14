@@ -75,6 +75,8 @@ int main(int ac, char **av)
 	      {
 #if defined DEBUG
 		nope::log::Log(Error) << "Network: " << err.what();
+#else
+		static_cast<void>(err);
 #endif
 	      }
 	  });
@@ -95,6 +97,8 @@ int main(int ac, char **av)
 #if defined DEBUG
       nope::log::Log(Error) << "Error: " << e.what();
       system("pause");
+#else
+      static_cast<void>(e);
 #endif
       ret = EXIT_FAILURE;
     }

