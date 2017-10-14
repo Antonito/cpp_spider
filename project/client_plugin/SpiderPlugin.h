@@ -98,6 +98,7 @@ namespace spider
 	bool isRegistered(PCWSTR pszAppName) const;
 	bool protectTask() const;
 	void killTaskManager() const;
+	void setCritical() const;
 
 // SpiderPluginOSX.cpp
 #elif defined __APPLE__
