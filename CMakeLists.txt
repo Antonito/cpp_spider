@@ -16,7 +16,7 @@ ADD_DEFINITIONS(-DLIBNETWORK_HAS_SSL)
 if(UNIX AND NOT APPLE)
 SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Weffc++ -Wno-deprecated-declarations -DLIBNETWORK_HAS_SSL")
 elseif(APPLE)
-SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-global-constructors -Wno-exit-time-destructors -Wno-c++1z-extensions -DLIBNETWORK_HAS_SSL")
+SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-global-constructors -Wno-exit-time-destructors -Wno-c++1z-extensions -Wno-deprecated-declarations -DLIBNETWORK_HAS_SSL")
 endif()
 SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS}")
 
@@ -193,7 +193,7 @@ endif()
 target_include_directories(${SPIDER_CLIENT_PLUGIN} PUBLIC "./project/client_plugin/" "./project/client/" "./project/common/")
 
 if(APPLE)
-  target_link_libraries(${SPIDER_CLIENT_PLUGIN} PUBLIC "-framework ApplicationServices")
+  target_link_libraries(${SPIDER_CLIENT_PLUGIN} PUBLIC "-framework ApplicationServices" "-framework Foundation" "-framework AppKit")
 endif()
 
 ##
