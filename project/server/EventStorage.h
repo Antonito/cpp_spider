@@ -4,7 +4,7 @@
 #pragma clang diagnostic push
 #pragma clang system_header
 #elif defined __GNUC__
-#pragma gcc system_header
+#pragma GCC system_header
 #endif
 #if defined MONGOCXX
 #include <bsoncxx/json.hpp>
