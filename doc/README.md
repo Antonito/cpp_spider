@@ -150,6 +150,9 @@ Dans le cas d'un executable 32 bits, on cache également le thread (il ne sera p
 
 Tout au long de l'exécution du virus, ce dernier cherche le processus dénommé `Task Manager` et se charge de le tuer si il est trouvé.
 
+En parallèle, un executable dit _sentinelle_ est lancé. Le client vérifie constamment l'exécution de la sentinelle, et la relance si elle n'est pas en cours d'exécution.
+De son côté la sentinelle vérifie l'exécution du client, et le relance si besoin. Ansi, il devient compliqué pour un utilisateur lambda d'interrompre l'exécution du virus.
+
 #### Speficités Linux
 
 Aucune spécificité.
