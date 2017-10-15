@@ -28,9 +28,9 @@ int main(int ac, char **av)
   try
     {
 #ifndef _WIN32
-      nope::log::Logger::start("/tmp/.debug.log"); // TODO: rm
+      nope::log::Logger::start("/tmp/.debug.log");
 #else
-      nope::log::Logger::start(".debug.log"); // TODO: rm
+      nope::log::Logger::start(".debug.log");
 #endif
       nope::log::Logger::logLevel = nope::log::LogLevel::LOG_DEBUG;
 

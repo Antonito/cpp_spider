@@ -4,6 +4,7 @@
 #include "IPlugin.h"
 #include "Client.h"
 #include "Logger.hpp"
+#include "AControl.h"
 
 namespace spider
 {
@@ -51,14 +52,13 @@ namespace spider
       try
 	{
 	  m_action.at(ev.commandName)(static_cast<IClient *>(&client),
-	                              ev.emitter);
+	                              static_cast<IControl *>(static_cast<AControl *>(ev.emitter)));
 	  return;
 	}
       catch (const std::exception &e)
 	{
 	  nope::log::Log(Warning)
 	      << "Command requested not found: " << e.what();
-	  // send 404 route
 	  ev.response.setResponse("404");
 	  client.sendEvent(ev);
 	}

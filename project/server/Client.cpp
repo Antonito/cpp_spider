@@ -44,18 +44,15 @@ namespace spider
     {
       auto ret = ::network::IClient::ClientAction::FAILURE;
 
-      // TODO: treat values
       std::queue<std::string> resp;
       ret = readFromNetwork(resp);
       while (!resp.empty())
 	{
-	  // TODO: this is is for the Data socket
 	  if (!m_responseQueue.empty())
 	    {
 	      Event ev = m_responseQueue.front();
 	      m_responseQueue.pop();
 	      ev.response.setResponse(resp.front());
-	      // ev.commandName = "commandInfo";
 	      ev.emitter->sendEvent(ev);
 	    }
 	  nope::log::Log(Info) << "Read: [" << m_id << "] " << resp.front();
