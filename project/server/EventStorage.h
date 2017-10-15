@@ -3,6 +3,8 @@
 #if defined __clang__
 #pragma clang diagnostic push
 #pragma clang system_header
+#elif defined __GNUC__
+#pragma gcc system_header
 #endif
 #if defined MONGOCXX
 #include <bsoncxx/json.hpp>
