@@ -175,6 +175,7 @@ namespace spider
         }
         std::stringstream ss;
         ss << code << std::endl;
+        ss << "Access-Control-Allow-Origin: *" << std::endl;
         ss << "content-type: text/html" << std::endl;
         ss << "content-length: " << res.str().length() << std::endl;
         ss << std::endl;
