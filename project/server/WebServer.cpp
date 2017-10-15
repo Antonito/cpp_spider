@@ -19,9 +19,7 @@ namespace spider
                                        boost::asio::ip::tcp::v4(), m_port)),
           m_clients{}, m_running(running), m_clientCount(0)
     {
-      nope::log::Log(Info) << "Creating WebServer";
-      nope::log::Log(Debug)
-          << "creating default and custom routes for WebServer";
+      nope::log::Log(Info) << "init WebServer";
 
       m_routes["/404"] = [&](std::uint32_t askId, std::uint32_t victimId) {
 	nope::log::Log(Info) << "Someone is on 404";
@@ -58,7 +56,6 @@ namespace spider
 
       for (auto const &cur : m_commands)
 	{
-	  nope::log::Log(Info) << "route: " << cur.name;
 	  m_routes["/" + cur.name] = [&](std::uint32_t askId,
 	                                 std::uint32_t victimId) {
             if (victimId >= getNbClient())
@@ -71,6 +68,7 @@ namespace spider
               ev.commandName = "404";
               ev.response.setResponse("404");
               m_responseQueue.push(ev);
+              return ;
             }
             std::string url("/" + cur.name);
             nope::log::Log(Info)
@@ -130,7 +128,6 @@ namespace spider
     {
       while (!m_responseQueue.empty())
       {
-        nope::log::Log(Info) << "Event response found";
         server::Event ev = m_responseQueue.front();
         m_responseQueue.pop();
         std::stringstream res;
@@ -201,10 +198,7 @@ namespace spider
                 << n << "]";
                 return;
                 }
-                nope::log::Log(Debug) << "wrtting on socket...";
                 });
-            nope::log::Log(Info)
-              << "sending response to AControl's client";
             break;
           }
         }

@@ -27,7 +27,6 @@ namespace spider
       auto        search = m_routes.find(realURL);
       if (search != m_routes.end())
 	{
-	  nope::log::Log(Info) << "response is: " << search->first;
 	  return (search->second(id, victimId));
 	}
       else
@@ -51,8 +50,6 @@ namespace spider
 
     void HTTPHeader::onReadHeader(std::string line)
     {
-      nope::log::Log(Debug) << "[HTTPHeader] header: " << line;
-
       std::stringstream ss(line);
       std::string       headerName;
       std::getline(ss, headerName, ':');
