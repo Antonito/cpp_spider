@@ -161,7 +161,7 @@ namespace spider
         }
         else
         {
-          if (ev.response.getResponse().find("OK"))
+          if (ev.response.getResponse().find("OK") != std::string::npos)
           {
             code = "HTTP/1.1 200 OK";
           }
