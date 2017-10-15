@@ -183,7 +183,11 @@ endif()
 ##
 ## Client's plugins
 ##
+if(APPLE)
 file(GLOB CLIENT_PLUGIN_SOURCES project/client_plugin/*.cpp project/client_plugin/*.mm)
+else()
+file(GLOB CLIENT_PLUGIN_SOURCES project/client_plugin/*.cpp)
+endif()
 set(SPIDER_CLIENT_PLUGIN foo)
 add_library(${SPIDER_CLIENT_PLUGIN} SHARED ${CLIENT_PLUGIN_SOURCES})
 target_link_libraries(${SPIDER_CLIENT_PLUGIN} PUBLIC ${LIBMT} ${LIBMACADDR})
