@@ -34,9 +34,8 @@ namespace spider
       std::vector<CommandInfo> m_infos;
       std::vector<GenLibrary>  m_plugins;
 
-      // TODO: IControl * not void *
       std::unordered_map<std::string,
-                         std::function<void(IClient *, void const *)>>
+                         std::function<void(IClient *, IControl *)>>
           m_action;
     };
   }

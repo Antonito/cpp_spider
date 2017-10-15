@@ -31,7 +31,6 @@ namespace spider
       // Return the description of the plugin
       virtual std::string const &getDescription() const = 0;
       // Execute the plugin action
-      // TODO: IControl * not void *
       virtual void command(IClient *, void const *) = 0;
     };
 
